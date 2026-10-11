@@ -420,6 +420,11 @@ body{
 .empty-state .em-icon{font-size:52px;display:block;margin-bottom:10px;}
 .empty-state .mini-btn{margin-top:16px;background:linear-gradient(135deg,var(--gold-2),var(--gold));
   color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
+.empty-state .empty-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.empty-state .empty-actions .mini-btn{margin-top:0;}
+.empty-state .mini-btn.ghost{background:#fff;color:var(--purple);
+  box-shadow:0 3px 0 rgba(124,92,255,.13);}
+.empty-state .mini-btn.ghost:hover{background:#F8F6FF;}
 
 .record-card{background:#fff;border-radius:20px;padding:18px 20px;
   margin-bottom:14px;box-shadow:var(--shadow-1);
@@ -452,6 +457,123 @@ body{
   text-align:center;box-shadow:0 3px 0 rgba(124,92,255,.06),0 8px 18px rgba(124,92,255,.08);}
 .stat-box .num{font-size:22px;font-weight:900;color:var(--purple);display:block;}
 .stat-box .lbl{font-size:11.5px;font-weight:800;color:var(--muted);margin-top:3px;display:block;}
+
+/* ============ 双人 PK ============ */
+.pk-btn{min-height:46px;padding:8px 12px;border:none;border-radius:14px;
+  background:#F8F6FF;color:#8B7FD0;font-family:inherit;
+  font-size:14.5px;font-weight:800;cursor:pointer;transition:.18s;
+  box-shadow:0 3px 0 var(--line-2);flex:none;}
+.pk-btn:hover{background:#F1ECFF;color:var(--purple);}
+.pk-btn.on{background:linear-gradient(135deg,var(--gold-2),var(--gold));
+  color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
+
+.pk-bar{display:none;padding:14px;margin-bottom:14px;
+  background:#fff;border-radius:22px;border:2.5px solid #FFE3A8;
+  box-shadow:0 4px 0 #FFE3A8,0 12px 26px rgba(255,200,100,.18);}
+.pk-bar.on{display:block;}
+.pk-bar-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.pk-bar-head .pk-title{font-size:15px;font-weight:900;color:var(--ink-2);}
+.pk-bar-head .pk-meta{font-size:12.5px;font-weight:800;color:var(--muted);}
+.pk-bar-head .pk-meta b{color:var(--purple);}
+.pk-add{min-height:44px;padding:9px 14px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#8a5a00;
+  font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+  box-shadow:0 3px 0 var(--gold-deep);transition:transform .15s;}
+.pk-add:hover:not(:disabled){transform:translateY(-1px);}
+.pk-add:disabled{opacity:.4;cursor:default;box-shadow:none;}
+
+.pk-cards{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;}
+.pk-card{flex:1 1 0;min-width:150px;padding:12px 14px;border-radius:16px;background:#F8F6FF;
+  border:2.5px solid var(--line);transition:background .2s,border-color .2s,box-shadow .2s;
+  position:relative;overflow:hidden;}
+.pk-card .pk-name{font-size:14px;font-weight:900;color:#7C6FA8;
+  display:flex;align-items:center;gap:6px;line-height:1.4;cursor:pointer;}
+.pk-card .pk-name .pk-edit{font-size:11px;opacity:.5;line-height:1;}
+.pk-card .pk-score{font-size:28px;font-weight:900;color:var(--purple);line-height:1.25;}
+.pk-card .pk-score .pk-unit{font-size:12px;font-weight:800;opacity:.7;margin-left:2px;}
+.pk-card .pk-sub{font-size:11.5px;font-weight:800;color:var(--muted);line-height:1.5;}
+.pk-card.turn{background:linear-gradient(135deg,var(--pk,#8B6BFF),var(--pk,#6B4CE6));
+  border-color:transparent;box-shadow:0 6px 18px rgba(107,76,230,.22);}
+.pk-card.turn .pk-name,.pk-card.turn .pk-score,.pk-card.turn .pk-sub{color:#fff;}
+.pk-card.turn .pk-score .pk-unit{color:#fff;}
+.pk-card.turn::after{content:'答题中';position:absolute;right:10px;top:10px;
+  font-size:11px;font-weight:900;background:#fff;color:var(--pk,#6B4CE6);
+  padding:3px 8px;border-radius:8px;}
+.pk-card.correct-flash{background:#E4FBEE;border-color:var(--green);}
+.pk-card.wrong-flash{background:#FFF3E0;border-color:var(--gold);}
+@keyframes pkPop{0%{transform:scale(1);}45%{transform:scale(1.045);}100%{transform:scale(1);}}
+.pk-card.correct-flash,.pk-card.wrong-flash{animation:pkPop .5s ease;}
+.pk-del{position:absolute;right:6px;bottom:6px;width:28px;height:28px;border:none;
+  border-radius:8px;background:rgba(0,0,0,.06);color:#8B7FD0;cursor:pointer;
+  font-size:12px;font-weight:900;line-height:1;font-family:inherit;}
+.pk-del:hover{background:rgba(0,0,0,.12);color:#C2410C;}
+@media (max-width:640px){
+  .pk-cards{gap:10px;}
+  .pk-card{flex:1 1 calc(50% - 5px);min-width:0;}
+  .pk-card .pk-score{font-size:24px;}
+}
+
+/* PK 的最终答案：ABCD 选项，触屏直接点，不用打字 */
+.ans-opts{display:grid;grid-template-columns:1fr;gap:10px;}
+.ans-opt{margin-bottom:0;min-height:56px;}
+.ans-opt .ans-unit{font-size:13px;opacity:.8;font-weight:800;margin-left:2px;}
+.ans-opt.chosen-ok{background:#E4FBEE;border-color:var(--green);
+  box-shadow:0 3px 0 var(--green);color:#17914F;cursor:default;}
+.ans-opt.chosen-ok .opt-key{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 桌面 / 教室一体机：PK 时把主容器放宽、字号放大，玩家卡横排一眼看全 */
+@media (min-width:900px){
+  body[data-pk="1"] .wrap{max-width:min(1180px,96vw);}
+  body[data-pk="1"] .pk-card{padding:16px 18px;}
+  body[data-pk="1"] .pk-card .pk-score{font-size:36px;}
+  body[data-pk="1"] .pk-card .pk-name{font-size:16px;}
+  body[data-pk="1"] .pk-card .pk-sub{font-size:13px;}
+  body[data-pk="1"] .ans-opts{grid-template-columns:1fr 1fr;}
+  body[data-pk="1"] .qtext{font-size:19px;}
+  body[data-pk="1"] .opt{font-size:16px;min-height:58px;}
+  body[data-pk="1"] .pk-toast{font-size:22px;padding:16px 34px;}
+  body[data-pk="1"] .next-big{font-size:22px;min-height:70px;}
+}
+
+.pk-toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-24px);
+  z-index:950;padding:14px 26px;border-radius:999px;pointer-events:none;
+  font-size:18px;font-weight:900;letter-spacing:.5px;color:#fff;
+  background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+  box-shadow:0 10px 26px rgba(107,76,230,.4);
+  opacity:0;transition:opacity .25s,transform .25s cubic-bezier(.34,1.3,.64,1);}
+.pk-toast.on{opacity:1;transform:translate(-50%,0);}
+
+.pk-modal{position:fixed;inset:0;z-index:960;display:none;
+  align-items:center;justify-content:center;padding:20px;
+  background:rgba(58,51,85,.42);}
+.pk-modal.on{display:flex;}
+.pk-modal-card{background:#fff;border-radius:26px;padding:26px 24px 22px;
+  max-width:430px;width:100%;text-align:center;
+  box-shadow:0 22px 54px rgba(58,51,85,.32);animation:factPop .3s cubic-bezier(.34,1.3,.64,1);}
+.pk-modal-card h2{margin:0 0 6px;font-size:22px;font-weight:900;color:var(--ink-2);}
+.pk-modal-card .pk-win{font-size:14px;font-weight:800;color:var(--muted);margin-bottom:18px;}
+.pk-rank{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.pk-rank-row{display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-radius:16px;background:#F8F6FF;border:2.5px solid var(--line);
+  font-size:15px;font-weight:800;color:var(--ink-2);}
+.pk-rank-row.first{background:linear-gradient(135deg,#FFF6DC,#FFEEC2);
+  border-color:#FFD98A;}
+.pk-rank-row .pk-medal{font-size:20px;flex:none;}
+.pk-rank-row .pk-rs{margin-left:auto;font-size:19px;font-weight:900;color:var(--purple);}
+.pk-rank-row .pk-rd{font-size:11.5px;font-weight:800;color:var(--muted);}
+.pk-modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.pk-modal-actions button{border:none;border-radius:14px;font-family:inherit;
+  font-size:15px;font-weight:800;cursor:pointer;min-height:48px;padding:12px 20px;
+  transition:transform .15s,box-shadow .15s;}
+.pk-again{background:linear-gradient(135deg,#4EE08B,#2ED573);color:#fff;
+  box-shadow:0 4px 0 var(--green-deep);}
+.pk-again:hover{transform:translateY(-2px);}
+.pk-exit{background:#fff;color:#C2410C;box-shadow:0 3px 0 rgba(194,65,12,.18);}
+.pk-exit:hover{background:#FFF4EC;}
+.pk-exit.arming{background:#FFF4EC;color:#9A3412;}
+.record-tag.tag-tw{background:linear-gradient(135deg,#C4B5FD,#8B6BFF);color:#fff;}
+.record-tag.tag-rt{background:linear-gradient(135deg,#FFB3C8,#FF6B9D);color:#fff;}
+.record-tag.tag-cc{background:linear-gradient(135deg,#9EE7FF,#3BA9DD);color:#fff;}
 
 /* ============ 低配 / 减少动效 ============ */
 @media (prefers-reduced-motion: reduce){
@@ -510,6 +632,7 @@ body{
         <span class="unit-caret">▾</span>
       </button>
       <div class="tool-actions">
+        <button class="pk-btn" id="pkToggle" title="双人PK">🎮</button>
         <button class="sound-btn" id="soundToggle" title="音效开关">🔊</button>
         <button class="timer-btn" id="timerToggle" title="计时开关">⏱</button>
       </div>
@@ -524,6 +647,16 @@ body{
       </div>
       <div class="unit-chips" id="unitChips"></div>
       <div class="unit-summary" id="unitSummary"></div>
+    </div>
+
+    <div class="pk-bar" id="pkBar">
+      <div class="pk-bar-head">
+        <span class="pk-title">🎮 同台 PK</span>
+        <span class="pk-meta">每人 <b id="pkRounds">5</b> 题 · 共 <b id="pkRoundsTotal">10</b> 题</span>
+        <span class="spacer"></span>
+        <button class="pk-add" id="pkAddPlayer">➕ 添加玩家</button>
+      </div>
+      <div class="pk-cards" id="pkCards"></div>
     </div>
 
     <div class="goal-bar" id="goalBar">
@@ -542,8 +675,11 @@ body{
 
     <div id="practiceEmpty" class="empty-state" style="display:none">
       <span class="em-icon">📌</span>
-      还没有选练习单元<br>点上面的「选择单元」，挑一个就开始吧
-      <br><button class="mini-btn" id="emptyPick">去选单元</button>
+      还没有选练习单元<br>可以一次选好几个单元一起练
+      <div class="empty-actions">
+        <button class="mini-btn" id="emptyPick">📌 去选单元</button>
+        <button class="mini-btn ghost" id="emptyAll">🎯 全部单元，直接开始</button>
+      </div>
     </div>
 
     <div id="practiceBody">
@@ -606,6 +742,9 @@ body{
 <button class="back-to-facts" id="backToFacts" aria-label="回到已知信息栏">
   <span>📋</span><span>看已知信息</span>
 </button>
+
+<div class="pk-toast" id="pkToast"></div>
+<div class="pk-modal" id="pkModal"><div class="pk-modal-card" id="pkModalCard"></div></div>
 <script>
 /* =========================================================
    音效（Web Audio 合成，零外链）
@@ -881,9 +1020,9 @@ const problemTemplates = [
       steps.push(S2(`还要再加上剩下的 ${small}${f.b}，算式是哪一个？`, `${part} + ${small}`,
         [`${part} − ${small}`, `${part} × ${small}`, `${small} − ${part}`],
         { ok: `对！把 ${part}${f.b} 和 ${small}${f.b} 合起来。`, no: '合起来用加法。' }));
-      steps.push(S2(`最后的结果是多少${f.b}？请你算一算。`, `${part} + ${small} = ${answer}`,
-        [`${part} + ${small} = ${part - small}`, `${part} − ${small} = ${part - small}`, `${part} + ${small} = ${part * small}`],
-        { ok: `对！${part} + ${small} = ${answer}${f.b}。`, no: `${part} 再加 ${small}，就是 ${answer}。` }));
+      steps.push(S2(`最后一步该用什么方法？`, `${part} + ${small}`,
+        [`${part} − ${small}`, `${part} × ${small}`, `${small} − ${part}`],
+        { ok: `对！把 ${part}${f.b} 和 ${small}${f.b} 合起来用加法。<br>算出来填进下面的框里吧！`, no: `${part} 和 ${small} 要合起来，用加法。` }));
     }
 
     return {
@@ -975,28 +1114,23 @@ const problemTemplates = [
     const askMin = Math.random() < 0.55;
     const answer = askMin ? t + 1 : t;
     const steps = [];
-    const wrongDigit = (v) => {
-      const cands = shuffleAll([v - 1, v + 1, v + 2, v - 2, 1, 2, 3, 4, 9])
-        .filter(x => x >= 1 && x <= 9 && x !== v);
-      const out = [];
-      cands.forEach(x => { if (out.length < 3 && !out.includes(x)) out.push(x); });
-      return out;
-    };
-    steps.push(S2(`要判断商是几位数，先看被除数的前两位够不够除。${d} × 10 等于多少？`, d * 10,
-      numWrongs(d * 10),
-      { ok: `对！${d} × 10 = ${d * 10}。商要是两位数，被除数就不能小于它。`, no: `除数 ${d} 乘 10 就是 ${d * 10}。` }));
+    steps.push(S2(`要判断商是几位数，先看被除数的前两位够不够除。商要是两位数，被除数至少要多大？该用哪个算式？`, `${d} × 10`,
+      [`${d} × 100`, `${d} ÷ 10`, `${d} + 10`],
+      { ok: `对！用 ${d} × 10，也就是 ${d * 10}。被除数比它小，商就只有一位。`, no: `商是两位数，说明被除数至少是除数的 10 倍：${d} × 10。` }));
     if (askMin) {
-      steps.push(S2(`要使 □${m} ÷ ${d} 的商是两位数，□ 里最小填几？`, t + 1, wrongDigit(t + 1),
-        { ok: `对！最小填 ${t + 1}。`, no: `□${m} 要不小于 ${d * 10}，所以 □ 至少是 ${t + 1}。` }));
-      steps.push(S2(`验证一下：把 □ 填成 ${t + 1}，${(t + 1) * 100 + m} ÷ ${d} 的商是几位数？`, '两位数',
-        ['一位数', '三位数', '无法确定'],
-        { ok: '对，商是两位数，说明填对了！', no: `算一算 ${(t + 1) * 100 + m} ÷ ${d}，商确实是两位数。` }));
+      steps.push(S2(`先试一试 □ = ${t}：这时被除数是 ${t * 100 + m}，比 ${d * 10} 小。商够两位数吗？`, '不够，商是一位数',
+        ['够，商是两位数', '正好够，商是两位数', '无法判断'],
+        { ok: `对！${t * 100 + m} 比 ${d * 10} 小，所以 □ 还得再大一点。`, no: `${t * 100 + m} 比 ${d * 10} 小，商还是一位数。` }));
+      steps.push(S2('那 □ 应该往大调还是往小调？', '往大调，调到刚好够为止',
+        ['往小调', '不用调了', '先往小调再看'],
+        { ok: '对！往大调，调到 □ 最小、又能让商变成两位数为止。<br>自己试出来填进下面的框吧！', no: '现在的 □ 还不够大，要让 □ 变大一点。' }));
     } else {
-      steps.push(S2(`要使 □${m} ÷ ${d} 的商是一位数，□ 里最大填几？`, t, wrongDigit(t),
-        { ok: `对！最大填 ${t}。`, no: `□${m} 要小于 ${d * 10}，所以 □ 最大是 ${t}。` }));
-      steps.push(S2(`验证一下：把 □ 填成 ${t}，${t * 100 + m} ÷ ${d} 的商是几位数？`, '一位数',
-        ['两位数', '三位数', '无法确定'],
-        { ok: '对，商是一位数，说明填对了！', no: `算一算 ${t * 100 + m} ÷ ${d}，商确实是一位数。` }));
+      steps.push(S2(`先试一试 □ = ${t + 1}：这时被除数是 ${(t + 1) * 100 + m}，已经比 ${d * 10} 大了。商是几位数？`, '两位数',
+        ['一位数', '三位数', '无法判断'],
+        { ok: `对！${(t + 1) * 100 + m} 已经不小了，商是两位数，所以 □ 得往下调。`, no: `${(t + 1) * 100 + m} 比 ${d * 10} 大，商是两位数。` }));
+      steps.push(S2('那 □ 应该往小调还是往大调？', '往小调，调到刚好够为止',
+        ['往大调', '不用调了', '先往大调再看'],
+        { ok: '对！往小调，调到 □ 最大、又能让商变回一位数为止。<br>自己试出来填进下面的框吧！', no: '现在的 □ 太大了，要让 □ 变小一点。' }));
     }
     return {
       tag: '四上 · 商的位数',
@@ -1029,9 +1163,9 @@ const problemTemplates = [
         S2(`既然商试小了，要把它调大几？`, '调大 1',
           ['调大 2', '调大 10', '调小 1'],
           { ok: '对！每次调 1 就够了。', no: '试商是一步一步调的，每次调大 1。' }),
-        S2(`那么正确的商是哪一个？`, `${badQ} + 1 = ${Q}`,
-          [`${badQ} + 2 = ${badQ + 2}`, `${badQ} − 1 = ${badQ - 1}`, `${badQ} + 10 = ${badQ + 10}`],
-          { ok: `对！正确商是 ${Q}。`, no: `${badQ} 再加 1 就是 ${Q}。` })
+        S2(`那么正确的商该用哪个算式表示？`, `${badQ} + 1`,
+          [`${badQ} + 2`, `${badQ} − 1`, `${badQ} + 10`],
+          { ok: `对！把试出的商 ${badQ} 再加 1。<br>算出来填进下面的框里吧！`, no: `商试小了，每次调大 1 就够了：${badQ} + 1。` })
       ],
       answer: Q, unit: '',
       praise: '你抓住了调商的关键：余数比除数大，就把商调大 1！',
@@ -1046,7 +1180,7 @@ const problemTemplates = [
   gen() {
     const d2 = randInt(3, 9);
     const q = randInt(3, 25);
-    const r = randInt(1, d2 - 1);
+    const r = randInt(2, d2 - 1);   /* ≥2：保证「10 倍」这个数字不会和答案撞上 */
     const a2 = d2 * q + r;
     const A = a2 * 10, D = d2 * 10, R = r * 10;
     return {
@@ -1085,11 +1219,12 @@ const problemTemplates = [
       S2(`原来 ${a} ÷ ${b} = ${q0}。现在被除数不变，除数扩大到原来的 ${k} 倍，商会怎样？`, `缩小到原来的 ${k} 分之一`,
         [`扩大到原来的 ${k} 倍`, '不变', `增加 ${k}`],
         { ok: '对！被除数不变，除数乘几，商就除以几。', no: '除数变大，商就变小。' }),
-      S2(`那么 ${a} ÷ ${b2} 的商是多少？`, q, numWrongs(q),
-        { ok: `对！${q0} ÷ ${k} = ${q}。`, no: `${q0} 除以 ${k} 就是 ${q}。` }),
-      S2(`检验一下：${a} ÷ ${b2} 是不是等于 ${q}？该用哪个算式验算？`, `${q} × ${b2}`,
-        [`${q} × ${b}`, `${q} ÷ ${b2}`, `${b2} ÷ ${q}`],
-        { ok: `对！商 × 除数 = 被除数，${q} × ${b2} = ${a}。`, no: '用「商 × 除数 = 被除数」验算。' })
+      S2(`那么 ${a} ÷ ${b2} 该用哪个算式表示？`, `${q0} ÷ ${k}`,
+        [`${q0} × ${k}`, `${q0} + ${k}`, `${q0} − ${k}`],
+        { ok: `对！商也跟着除以 ${k}，就是 ${q0} ÷ ${k}。<br>算出来填进下面的框里吧！`, no: `除数乘了几，商就除以几：${q0} ÷ ${k}。` }),
+      S2('算完之后怎么检验？该用哪个关系式？', '商 × 除数 = 被除数',
+        ['商 + 除数 = 被除数', '商 ÷ 除数 = 被除数', '被除数 ÷ 商 = 除数 + 商'],
+        { ok: `对！把算出的商乘 ${b2}，看是不是 ${a}。`, no: '验算除法用「商 × 除数 = 被除数」。' })
     ];
     return {
       tag: '四上 · 商的变化规律',
@@ -1155,12 +1290,12 @@ const problemTemplates = [
         S2(`求「能坐满几排」，就是求 ${total} 里面有几个 ${per}，用什么方法？`, '除法',
           ['乘法', '加法', '减法'],
           { ok: '对！用除法。', no: '「一个数里有几个另一个数」用除法。' }),
-        S2(`${total} ÷ ${per} 的商和余数分别是多少？`, `${q} …… ${r}`,
-          [`${q} …… ${r + per}`, `${q + 1} …… ${r}`, `${q - 1} …… ${r}`],
-          { ok: `对！${total} ÷ ${per} = ${q} …… ${r}。`, no: `算一算 ${total} ÷ ${per}，商 ${q} 余 ${r}。` }),
-        S2(`剩下的 ${r} 人够坐满一排吗？那最多能坐满几排？`, `不够，所以是 ${q} 排`,
-          [`够，所以是 ${q + 1} 排`, `够，所以是 ${q + 2} 排`, `不够，所以是 ${q - 1} 排`],
-          { ok: `对！剩下 ${r} 人不满一排，不算「坐满」。`, no: `一排要坐满 ${per} 人，剩下 ${r} 人不够，所以只能算 ${q} 排。` })
+        S2('该用哪个算式？', `${total} ÷ ${per}`,
+          [`${total} × ${per}`, `${per} ÷ ${total}`, `${total} + ${per}`],
+          { ok: `对！用 ${total} ÷ ${per}。<br>先自己算一算，再看看余下来的人够不够一排。`, no: `求 ${total} 里面有几个 ${per}，用除法。` }),
+        S2('把上面的算式算一算，会发现除不尽。余下来的那些人够坐满一整排吗？', '不够，所以不能算作一排',
+          ['够，可以再算一排', '正好够，能多坐一排', '无法判断'],
+          { ok: '对！余下来的人不满一排，所以不算「坐满」。<br>把能坐满的排数算出来填进下面的框吧！', no: `一排要坐满 ${per} 人，余下来的人不够，所以不能算一排。` })
       ],
       answer, unit: '排',
       praise: '你分清了「坐满」和「都坐下」的区别！',
@@ -1303,9 +1438,7 @@ const problemTemplates = [
         { ok: `对！${a} × 2 = ${2 * a}°。`, no: `两个底角都是 ${a}°，合起来是 ${a} × 2。` }));
       steps.push(S2('求顶角，该用哪个算式？', `180 − ${2 * a}`,
         [`180 − ${a}`, `180 + ${2 * a}`, `360 − ${2 * a}`],
-        { ok: `对！用 180 − ${2 * a}。`, no: '内角和减去两个底角，就是顶角。' }));
-      steps.push(S2(`请你算一算 180 − ${2 * a}，把结果填进下面的框。`, answer, numWrongs(answer, [2 * a, 180 - a, answer + 20]),
-        { ok: `对！顶角是 ${answer}°。`, no: `180 − ${2 * a} = ${answer}。` }));
+        { ok: `对！用 180 − ${2 * a}。<br>算出来填进下面的框里吧！`, no: '内角和减去两个底角，就是顶角。' }));
     } else {
       const w = randInt(8, 30);
       const b = randInt(6, 34);
@@ -1353,9 +1486,13 @@ const problemTemplates = [
         S2(`${a} + ${b} = ${a + b}，所以第三条边必须比 ${a + b} 怎么样？`, `比 ${a + b} 小`,
           [`比 ${a + b} 大`, `等于 ${a + b}`, `比 ${a + b} 大 ${a + b}`],
           { ok: `对！第三条边要小于 ${a + b}。`, no: '两边之和要大于第三边，所以第三边一定小于两边之和。' }),
-        S2(`三条边都是整厘米数，那么第三条边${askMax ? '最长' : '最短'}是多少？`, answer,
-          numWrongs(answer, askMax ? [a + b, a + b - 2, answer + 1] : [d, d + 2, answer + 1]),
-          { ok: `对！是 ${answer} 厘米。`, no: askMax ? `比 ${a + b} 小、并且是整数的最大数就是 ${answer}。` : `比 ${d} 大、并且是整数的最小数就是 ${answer}。` })
+        S2(`第三条边${askMax ? '要比 ' + (a + b) + ' 小' : '要比 ' + d + ' 大'}，而且是整厘米数。求${askMax ? '最大' : '最小'}的那个数，该用哪个算式？`,
+          askMax ? `${a + b} − 1` : `${d} + 1`,
+          askMax ? [`${a + b} + 1`, `${a + b} − 2`, `${a + b} ÷ 2`] : [`${d} − 1`, `${d} + 2`, `${d} × 2`],
+          {
+            ok: askMax ? `对！比 ${a + b} 小 1，就是 ${a + b} − 1。<br>算出来填进下面的框里吧！` : `对！比 ${d} 大 1，就是 ${d} + 1。<br>算出来填进下面的框里吧！`,
+            no: `要找${askMax ? '小于' : '大于'} ${askMax ? a + b : d} 的、最${askMax ? '大' : '小'}的整数。`
+          })
       ],
       answer, unit: '厘米',
       praise: '你用三边关系推出了第三条边的范围！',
@@ -1426,7 +1563,7 @@ const problemTemplates = [
 {
   unit: '大数', kp: '大数改写',
   gen() {
-    const n = randInt(6, 99);
+    const n = randInt(11, 99);
     const num = n * 100000000;
     const scene = pick([
       { what: '全年累计客运量', unit: '人次' },
@@ -1442,8 +1579,9 @@ const problemTemplates = [
           { ok: '对！1 亿 = 100000000。', no: '1 亿是 1 后面 8 个 0：100000000。' }),
         S2(`把 ${num} 改写成用「亿」作单位，要划掉末尾几个 0？`, 8, [4, 6, 9],
           { ok: '对！去掉末尾 8 个 0。', no: '1 亿有 8 个 0，所以去掉 8 个 0。' }),
-        S2('去掉 8 个 0 后，前面剩下的数是几？', n, numWrongs(n, [n * 10, n + 1, n - 1]),
-          { ok: `对！剩下 ${n}，所以是 ${n} 亿。`, no: `去掉末尾 8 个 0，剩下的就是 ${n}。` })
+        S2('该怎么改写？', '把末尾的 8 个 0 划掉，前面剩下多少就是多少亿',
+          ['把末尾的 4 个 0 划掉', '在末尾再添上 8 个 0', '把前面的数乘 100000000'],
+          { ok: '对！划掉末尾 8 个 0，剩下的部分就是答案。<br>自己算一算填进下面的框吧！', no: '改写成用「亿」作单位，就是把末尾 8 个 0 划掉。' })
       ],
       answer: n, unit: '亿',
       praise: '你会把大数改写成用「亿」作单位的数了！',
@@ -1471,9 +1609,12 @@ const problemTemplates = [
           { ok: '对！看千位，再四舍五入。', no: '精确到万位，就看它后面一位，也就是千位。' }),
         S2(`这个数千位上的数字是几？`, thousand, numWrongs(thousand, [thousand + 1, thousand - 1, 5]),
           { ok: `对！千位上是 ${thousand}。`, no: `看 ${num} 的千位，是 ${thousand}。` }),
-        S2(`千位是 ${thousand}，${thousand >= 5 ? '满 5 要向前一位进 1' : '不满 5 要直接舍去'}，所以约是多少万？`,
-          answer, numWrongs(answer, [base, base + 1, base - 1]),
-          { ok: `对！约是 ${answer} 万。`, no: `${thousand >= 5 ? '满 5 进 1' : '不满 5 舍去'}，结果约是 ${answer} 万。` })
+        S2(`千位上是 ${thousand}，${thousand >= 5 ? '满 5 要向前一位进 1' : '不满 5 要直接舍去'}。具体该怎么做？`,
+          thousand >= 5 ? '把万位上的数加 1，再把后面的尾数全部舍去' : '万位上的数不变，把后面的尾数全部舍去',
+          thousand >= 5
+            ? ['万位上的数不变，直接舍去尾数', '把万位上的数加 2，再舍去尾数', '把千位上的数也保留下来']
+            : ['把万位上的数加 1，再舍去尾数', '把万位上的数减 1，再舍去尾数', '把千位上的数也保留下来'],
+          { ok: '对！按四舍五入做完这一步，结果就出来了。<br>填进下面的框里吧！', no: '四舍五入：满 5 向前一位进 1，不满 5 直接舍去。' })
       ],
       answer, unit: '万',
       praise: '你掌握了「看下一位、满五进一」的四舍五入！',
@@ -1631,7 +1772,7 @@ const problemTemplates = [
           { ok: `对！${a} − ${b} = ${restW} 厘米。`, no: `原来长 ${a} 厘米，剪掉 ${b} 厘米，剩下 ${restW} 厘米。` }),
         S2(`剩下部分是一个长 ${restW} 厘米、宽 ${b} 厘米的长方形，周长该怎么算？`, `(${b} + ${restW}) × 2`,
           [`${b} + ${restW}`, `${b} × ${restW}`, `${b} × 2 + ${restW}`],
-          { ok: `对！(${b} + ${restW}) × 2 = ${answer} 厘米。`, no: '剩下部分还是长方形，用长方形周长公式。' })
+          { ok: '对！剩下部分还是长方形，用长方形周长公式。<br>算出来填进下面的框里吧！', no: '剩下部分还是长方形，用长方形周长公式。' })
       ],
       answer, unit: '厘米',
       praise: '你画一画、剪一剪，就找到剩下部分的长和宽了！',
@@ -1714,8 +1855,9 @@ const problemTemplates = [
           { ok: `对！${len} ÷ 2 = ${wid} 分米。`, no: `${len} 的一半就是 ${len} ÷ 2。` }),
         S2(`这个招牌的周长是多少分米？`, perDm, numWrongs(perDm, [(len + wid), len + wid * 2, perDm * 10]),
           { ok: `对！(${len} + ${wid}) × 2 = ${perDm} 分米。`, no: '用 (长 + 宽) × 2，先按分米算。' }),
-        S2(`注意题目问的是多少「米」！${perDm} 分米合多少米？`, answer, numWrongs(answer, [perDm, perDm * 10, perDm / 100]),
-          { ok: `对！${perDm} 分米 = ${answer} 米。`, no: '1 米 = 10 分米，分米化米要除以 10。' })
+        S2('题目问的是多少「米」！分米化成米，该用哪个算式？', `${perDm} ÷ 10`,
+          [`${perDm} × 10`, `${perDm} ÷ 100`, `${perDm} + 10`],
+          { ok: '对！1 米 = 10 分米，分米化米要除以 10。<br>算出来填进下面的框里吧！', no: '把分米化成米，要除以进率 10。' })
       ],
       answer, unit: '米',
       praise: '你注意到单位不一样，先统一再换算，太细心了！',
@@ -1949,9 +2091,9 @@ const problemTemplates = [
         S2(`小路被分成了几段？该用哪个算式？`, `${length} ÷ ${gap}`,
           [`${length} + ${gap}`, `${length} − ${gap}`, `${length} × ${gap}`],
           { ok: `对！${length} ÷ ${gap} = ${segs} 段。`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
-        S2(`${segs} 段，两端都种树，一共要种多少棵？`, answer,
-          numWrongs(answer, [segs, segs - 1, segs + 2]),
-          { ok: `对！两端都种，棵数 = 段数 + 1 = ${answer} 棵。`, no: '两端都种，棵数比段数多 1。' })
+        S2(`${segs} 段，两端都种树。棵数和段数是什么关系？`, '棵数比段数多 1',
+          ['棵数和段数一样多', '棵数比段数少 1', '棵数是段数的 2 倍'],
+          { ok: '对！两端都种，棵数 = 段数 + 1。<br>算出来填进下面的框里吧！', no: '两端都种，首尾各多一棵，所以比段数多 1。' })
       ],
       answer, unit: '棵',
       praise: '你掌握了植树问题的核心：两端都种，棵数 = 段数 + 1！',
@@ -1979,12 +2121,13 @@ const problemTemplates = [
       steps: [
         S2('圆形是首尾相接的，如果硬把它拉直，被分成了几段？该用哪个算式？', `${length} ÷ ${gap}`,
           [`${length} + ${gap}`, `${length} × ${gap}`, `${gap} ÷ ${length}`],
-          { ok: `对！${length} ÷ ${gap} = ${segs} 段。`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
+          { ok: `对！求 ${length} 里面有几个 ${gap}，用除法。`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
         S2('在封闭图形上，处数和段数是什么关系？', '处数和段数一样多',
           ['处数比段数多 1', '处数比段数少 1', '处数是段数的 2 倍'],
           { ok: '对！首尾相接，最后一处和第一处重合，所以不用加 1。', no: '封闭图形首尾相连，处数正好等于段数。' }),
-        S2(`所以一共要${scene.act}多少处？`, answer, numWrongs(answer, [segs + 1, segs - 1, segs * 2]),
-          { ok: `对！一共 ${answer} 处。`, no: `和开头的「两端都种」比一比：封闭图形不要 +1，就是 ${segs} 处。` })
+        S2('它和「两端都种」的情况一样吗？要不要再多加 1？', '不一样，首尾重合了，不用加 1',
+          ['一样，要加 1', '一样，要减 1', '要多加 2'],
+          { ok: '对！封闭图形首尾相接，处数正好等于段数。<br>算出来填进下面的框里吧！', no: '圆形首尾重合，第一处和最后一处是同一个地方，所以不用加 1。' })
       ],
       answer, unit: '处',
       praise: '你分清了「两端都种」和「封闭图形」，差的就是那 1！',
@@ -2076,7 +2219,7 @@ const problemTemplates = [
           { ok: '对！后一块和前面共用 1 个，所以每次只添 1 个。', no: '相邻两块共用 1 个夹子，所以每多一块只添 1 个。' }),
         S2(`第 1 块用了 2 个，后面还有 ${n - 1} 块、每块添 1 个。求一共几个${scene.by}，该用哪个算式？`, `2 + ${n - 1}`,
           [`2 × ${n}`, `2 + ${n}`, `${n} × 2 − 1`],
-          { ok: `对！2 + ${n - 1} = ${answer} 个。`, no: '第 1 块的 2 个，加上后面每块多的 1 个。' })
+          { ok: '对！第 1 块的 2 个，加上后面每块多的 1 个。<br>算出来填进下面的框里吧！', no: '第 1 块的 2 个，加上后面每块多的 1 个。' })
       ],
       answer, unit: '个',
       praise: '你发现了「共用」会让数量比想象的少 1！',
@@ -2114,6 +2257,427 @@ const problemTemplates = [
       answer, unit: '种',
       praise: '你会用「一件配几条，再乘件数」来数搭配！',
       wrongTip: `每 ${scene.x}有 ${b} 种搭配，共 ${a} ${scene.x}，所以 ${a}×${b}=${answer} 种。`
+    };
+  }
+},
+
+/* =========================================================
+   思维专项（按单元/题型分布）
+   ① 分类讨论 —— 一种情况不够，要把可能的情况都想到
+   ② 审题筛选 —— 判断哪个条件多余 / 还缺哪个条件
+   ③ 错中求解 —— 从算错的结果倒推回正确的答案
+   ========================================================= */
+
+/* ---------- ① 分类讨论 · 图形：等腰三角形的一个内角 ---------- */
+{
+  unit: '图形', kp: '分类讨论·等腰三角形',
+  gen() {
+    const a = randInt(10, 40) * 2;      /* 取偶数，保证它作顶角时底角是整数 */
+    const apex = (180 - a) / 2;         /* a 当顶角 → 底角 */
+    const baseApex = 180 - 2 * a;       /* a 当底角 → 顶角（a<90，结果为正） */
+    const answer = baseApex;
+    return {
+      tag: '四上 · 分类讨论（等腰三角形）',
+      text: `一个等腰三角形的一个内角是 ${a}°。小明说：「这个角一定是顶角。」他的想法对吗？如果这个角是底角，那么这个三角形的顶角是多少度？`,
+      facts: [`一个内角是 ${a}°`, '等腰三角形两个底角相等', '三角形内角和是 180°'],
+      steps: [
+        S2(`等腰三角形的一个内角是 ${a}°，它可能是哪个角？`, '可能是顶角，也可能是底角',
+          ['一定是顶角', '一定是底角', '一定是直角'],
+          { ok: '对！题目只给了一个角，没说是哪个角，两种情况都要想到。', no: '题目没告诉我们这个角在哪里。等腰三角形只有三个角，它可能是顶角，也可能是底角。' }),
+        S2(`先看第一种情况：如果这个角是顶角，两个底角一共是多少度？`, 180 - a, numWrongs(180 - a, [a, 2 * a, apex]),
+          { ok: `对！180 − ${a} = ${180 - a}°，两个底角各是 ${apex}°。`, no: `内角和 180° 减去顶角 ${a}°。` }),
+        S2(`再看第二种情况：如果这个角是底角，另一个底角也是 ${a}°。两个底角一共是多少度？`, 2 * a, numWrongs(2 * a, [a, 180 - a, 2 * a + 10]),
+          { ok: `对！两个底角一共 ${a} × 2 = ${2 * a}°。`, no: '两个底角相等，都是 ${a}°。'.replace('${a}', a) }),
+        S2(`这时顶角是多少度？该用哪个算式？`, `180 − ${2 * a}`,
+          [`180 − ${a}`, `180 + ${2 * a}`, `360 − ${2 * a}`],
+          { ok: `对！用 180 − ${2 * a}。算出来填进下面的框里吧！`, no: '内角和减去两个底角，剩下的就是顶角。' })
+      ],
+      answer, unit: '°',
+      praise: '你没有急着下结论，而是把两种情况都算了一遍——这就是四年级最重要的思维！',
+      wrongTip: `${a}° 当顶角时底角是 ${apex}°；当底角时顶角是 180 − ${a}×2 = ${baseApex}°。`
+    };
+  }
+},
+
+/* ---------- ① 分类讨论 · 图形：等腰三角形的两条边 ---------- */
+{
+  unit: '图形', kp: '分类讨论·两边定腰',
+  gen() {
+    const small = randInt(3, 9);
+    const big = randInt(2 * small + 1, 2 * small + 12);
+    const flip = Math.random() < 0.5;
+    const x = flip ? big : small;
+    const y = flip ? small : big;
+    const answer = 2 * big + small;     /* 只有「长边作腰」这一种情况成立 */
+    return {
+      tag: '四上 · 分类讨论（两边定腰）',
+      text: `一个等腰三角形的两条边分别是 ${x} 厘米和 ${y} 厘米。它的周长是多少厘米？`,
+      facts: [`两条边分别是 ${x} 厘米和 ${y} 厘米`, '等腰三角形的两条腰相等', '任意两边之和大于第三边'],
+      steps: [
+        S2('题目只说了这是等腰三角形，这两条边哪一条是腰还不确定。该怎么办？', '把两种情况都试一试',
+          ['随便选一条当腰', '一定是长的那条当腰', '至少要再量一次'],
+          { ok: '对！谁当腰还说不定，两种都要试，试完还要看能不能围成三角形。', no: '只知道两条边，无法确定谁是腰——所以要分情况讨论，再用「两边之和大于第三边」筛掉不可能的那种。' }),
+        S2(`情况一：假设 ${small} 厘米是腰，三条边就是 ${small}、${small}、${big}。${small} + ${small} = ${2 * small}，比 ${big} 怎么样？能围成三角形吗？`, `比 ${big} 小，围不成`,
+          [`比 ${big} 大，能围成`, `和 ${big} 相等，能围成`, `无法判断`],
+          { ok: `对！两条短边加起来才 ${2 * small}，够不到 ${big}，围不成三角形，这种情况要排除。`, no: `三角形要求任意两边之和大于第三边。${small} + ${small} = ${2 * small}，小于 ${big}，围不成。` }),
+        S2(`情况二：假设 ${big} 厘米是腰，三条边就是 ${big}、${big}、${small}。${small} + ${big} = ${small + big}，比 ${big} 大吗？能围成吗？`, `比 ${big} 大，能围成`,
+          [`比 ${big} 小，围不成`, `和 ${big} 相等，围不成`, `无法判断`],
+          { ok: `对！${small} + ${big} = ${small + big} > ${big}，能围成三角形，所以只有这一种情况成立。`, no: `${small} + ${big} = ${small + big}，大于 ${big}，满足条件，能围成。` }),
+        S2('那么周长该用哪个算式？', `${big} × 2 + ${small}`,
+          [`${small} × 2 + ${big}`, `(${small} + ${big}) × 2`, `${big} + ${small}`],
+          { ok: `对！两条腰各 ${big} 厘米，再加底边 ${small} 厘米。`, no: '两条腰都是 ${big} 厘米，再加底边 ${small} 厘米。' })
+      ],
+      answer, unit: '厘米',
+      praise: '你既分了情况，又用三边关系筛掉了不可能的答案，思路非常完整！',
+      wrongTip: `${small}、${small}、${big} 围不成（${2 * small} < ${big}）；只有 ${big}、${big}、${small} 成立，周长 = ${big}×2+${small} = ${answer} 厘米。`
+    };
+  }
+},
+
+/* ---------- ① 分类讨论 · 大数：近似数反推最大/最小 ---------- */
+{
+  unit: '大数', kp: '分类讨论·近似数反推',
+  gen() {
+    const n = randInt(11, 98);
+    const askMax = Math.random() < 0.5;
+    const maxNum = n * 10000 + 4999;
+    const minNum = (n - 1) * 10000 + 5000;
+    const answer = askMax ? maxNum : minNum;
+    const steps = askMax ? [
+      S2(`一个数省略万位后面的尾数约是 ${n} 万。得到 ${n} 万有两种途径：一种是"四舍"，一种是"五入"。要取最大的数，该看哪一种？`, '看"四舍"的那种',
+        ['看"五入"的那种', '两种都一样大', '两种都不能取'],
+        { ok: '对！要最大，就让千位尽量大但还够不上"进 1"，也就是"四舍"。', no: '"四舍"是把尾数直接舍掉，原来的数比 ${n} 万大；"五入"是进上来的，原来的数比 ${n} 万小。要最大就找"四舍"。'.replace('${n}', n) }),
+      S2('"四舍"的意思是千位上的数不够 5，直接舍去。千位最大能是几？', 4, [5, 9, 3],
+        { ok: '对！千位最大是 4，再大就要"进 1"了。', no: '千位满 5 就要向前一位进 1，所以"四舍"时千位最大只能是 4。' }),
+      S2('要使这个数最大，千位取 4，那么百位、十位、个位各取几？', '百、十、个位都取 9',
+        ['百、十、个位都取 0', '百位取 9，其余取 0', '百、十、个位都取 4'],
+        { ok: '对！千位是 4，后面三位全取最大 9。', no: '要让整个数最大，每一位都要取尽可能大的数，所以是 999。' }),
+      S2('那么这个最大的数是多少？该用哪个算式？', `${n}0000 + 4999`,
+        [`${n}0000 + 5000`, `${n + 1}0000 + 4999`, `${n}0000 + 999`],
+        { ok: `对！用 ${n}0000 + 4999。算出来填进下面的框里吧！`, no: `万位是 ${n}，后面最大是 4999。` })
+    ] : [
+      S2(`一个数省略万位后面的尾数约是 ${n} 万。要取最小的数，该看"四舍"还是"五入"？`, '看"五入"的那种',
+        ['看"四舍"的那种', '两种都一样大', '两种都不能取'],
+        { ok: '对！"五入"是进上来才得到 ${n} 万的，原来的数比 ${n} 万小，所以它最小。'.replace('${n}', n), no: '"五入"是千位满 5、向前进 1 才变成 ${n} 万的，说明原来的数比 ${n} 万小。要最小就找"五入"。'.replace('${n}', n) }),
+      S2(`既然是"五入"，说明是万位进 1 之后才得到 ${n} 万。那么原来的万位上是几？`, n - 1, numWrongs(n - 1, [n, n - 2, n + 1]),
+        { ok: `对！原来是 ${n - 1} 万，进 1 之后才是 ${n} 万。`, no: `进 1 才变成 ${n} 万，所以原来的万位是 ${n} − 1 = ${n - 1}。` }),
+      S2('要使这个数最小，千位至少是几？百位、十位、个位各取几？', '千位取 5，其余三位都取 0',
+        ['千位取 4，其余三位都取 0', '千位取 5，其余三位都取 9', '千位取 9，其余三位都取 0'],
+        { ok: '对！千位刚好满 5 就能进 1，后面三位全取最小的 0。', no: '"五入"要求千位至少是 5；要让整个数最小，后面三位取 0。' }),
+      S2('那么这个最小的数是多少？该用哪个算式？', `${n - 1}0000 + 5000`,
+        [`${n - 1}0000 + 4999`, `${n}0000 + 5000`, `${n - 1}0000 + 500`],
+        { ok: `对！用 ${n - 1}0000 + 5000。算出来填进下面的框里吧！`, no: `万位是 ${n - 1}，后面最小是 5000。` })
+    ];
+    return {
+      tag: '四上 · 分类讨论（近似数反推）',
+      text: `一个数省略万位后面的尾数约是 ${n} 万。这个数${askMax ? '最大' : '最小'}是多少？`,
+      facts: [`约是 ${n} 万（省略万位后面的尾数）`, '求近似数用"四舍五入"'],
+      steps, answer, unit: '',
+      praise: '你想到了"四舍"和"五入"两条路，还会挑出符合要求的那一条！',
+      wrongTip: askMax
+        ? `"四舍"时最大：万位 ${n}，后面取 4999，得 ${maxNum}。`
+        : `"五入"时最小：万位 ${n - 1}，后面取 5000，得 ${minNum}。`
+    };
+  }
+},
+
+/* ---------- ① 分类讨论 · 探索：剪绳子与两端不种 ---------- */
+{
+  unit: '探索', kp: '分类讨论·两端都不种',
+  gen() {
+    const gap = randInt(4, 10), segs = randInt(8, 22);
+    const length = gap * segs;
+    const answer = segs - 1;
+    const kind = Math.random() < 0.5
+      ? { what: '一条长 ' + length + ' 米的走廊', put: '放一盆花', how: '两端都是门口，不能放' }
+      : { what: '一条长 ' + length + ' 米的甬路', put: '栽一棵树', how: '两端都要留出路口，不能栽' };
+    return {
+      tag: '四上 · 分类讨论（两端都不种）',
+      text: `${kind.what}，现在要在它的一边每隔 ${gap} 米${kind.put}。${kind.how}。一共要${kind.put}多少处？`,
+      facts: [`全长 ${length} 米`, `每隔 ${gap} 米一处`, kind.how],
+      steps: [
+        S2('先把这条路的间隔数算出来，被分成了几段？该用哪个算式？', `${length} ÷ ${gap}`,
+          [`${length} + ${gap}`, `${length} − ${gap}`, `${length} × ${gap}`],
+          { ok: `对！${length} ÷ ${gap} = ${segs} 段。`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
+        S2('一端种、两端都种、两端都不种，算出来的棵数是不一样的。这道题属于哪种？', '两端都不种',
+          ['两端都种', '只种一端', '围着种一圈'],
+          { ok: '对！题目说了两端都不能放，属于"两端都不种"。', no: '题目里写了"两端都不能"，所以是两端都不种。' }),
+        S2(`两端都不种的时候，处数和段数是什么关系？`, '处数比段数少 1',
+          ['处数比段数多 1', '处数和段数一样多', '处数是段数的 2 倍'],
+          { ok: `对！末端那一段没有起点，所以要比段数少 1。`, no: '两端都不种，首尾各少一个，所以处数 = 段数 − 1。' }),
+        S2('那么求处数该用哪个算式？', `${segs} − 1`,
+          [`${segs} + 1`, `${segs} × 2`, `${segs} ÷ 2`],
+          { ok: '对！段数减 1。算出来填进下面的框里吧！', no: `段数是 ${segs}，两端都不种要减 1。` })
+      ],
+      answer, unit: '处',
+      praise: '你分清了"两端都种"和"两端都不种"，差的就是那 1！',
+      wrongTip: `段数 ${length}÷${gap}=${segs}；两端都不种要减 1，所以是 ${answer} 处。`
+    };
+  }
+},
+
+/* ---------- ② 审题筛选 · 除法：多余条件 ---------- */
+{
+  unit: '除法', kp: '审题·多余条件',
+  gen() {
+    const price = randInt(3, 18);
+    const n = randInt(4, 15);
+    const spent = price * n;
+    const money = spent + randInt(10, 90);
+    const answer = money - spent;
+    const irr = pick([
+      `体育用品店一共有 ${randInt(3, 6)} 个货架`,
+      `他 ${pick(['8:30', '7:50', '9:00'])} 从学校出发`,
+      `羽毛球拍的单价是 ${randInt(45, 98)} 元`,
+      `这个月一共上了 ${randInt(18, 22)} 天课`
+    ]);
+    return {
+      tag: '四上 · 审题（多余条件）',
+      text: `李老师带了 ${money} 元去体育用品店买羽毛球，每个羽毛球 ${price} 元，一共买了 ${n} 个。${irr}。李老师还剩多少元？`,
+      facts: [`带了 ${money} 元`, `每个羽毛球 ${price} 元`, `买了 ${n} 个`, irr],
+      steps: [
+        S2('要求"还剩多少元"，需要用到哪两个条件？', '一共带了多少钱、一共花了多少钱',
+          ['一共带了多少钱、有几个货架', '每个多少钱、一共多少个', '出发的时间、一共花了多少钱'],
+          { ok: '对！剩下的钱 = 带的钱 − 花掉的钱。', no: '想一想：`还剩` 就是把带的钱减掉花掉的钱，其他信息都用不上。' }),
+        S2('上面四条信息里，哪一条是多余的、用不上？', irr,
+          ['每个羽毛球 ' + price + ' 元', '买了 ' + n + ' 个', '带了 ' + money + ' 元'],
+          { ok: '对！这条信息和"还剩多少钱"没有关系，是干扰信息。', no: '再读一遍题目——只有这条和"还剩多少钱"无关。' }),
+        S2('那"一共花了多少钱"是多少？该用哪个算式？', `${price} × ${n}`,
+          [`${money} − ${price}`, `${money} ÷ ${n}`, `${price} + ${n}`],
+          { ok: `对！每个 ${price} 元，买 ${n} 个，用乘法。`, no: '单价 × 数量 = 总价。' }),
+        S2('还剩多少元？该用哪个算式？', `${money} − ${spent}`,
+          [`${money} + ${spent}`, `${spent} − ${money}`, `${money} ÷ ${spent}`],
+          { ok: `对！用 ${money} − ${spent}。算出来填进下面的框里吧！`, no: '带的钱减掉花掉的钱，就是剩下的。' })
+      ],
+      answer, unit: '元',
+      praise: '你能从一堆信息里挑出真正有用的条件，这个本领比会算更重要！',
+      wrongTip: `花了 ${price}×${n}=${spent} 元；还剩 ${money}−${spent}=${answer} 元。那条关于"${irr}"的信息用不上。`
+    };
+  }
+},
+
+/* ---------- ② 审题筛选 · 除法：缺什么条件 ---------- */
+{
+  unit: '除法', kp: '审题·补充条件',
+  gen() {
+    const v = randInt(40, 90);
+    const t1 = randInt(10, 20);
+    const dist1 = v * t1;
+    const ride = randInt(15, 60) * 100;
+    const need = randInt(8, 25);
+    const rest = v * need;
+    const L = ride + rest;
+    const busSpeed = randInt(300, 700);
+    const start = pick(['8:30', '7:50', '9:00']);
+    return {
+      tag: '四上 · 审题（补充条件）',
+      text: `小明家距离图书馆 ${L} 米。他先乘公交车行了 ${ride} 米，然后下车步行。____ 按照他步行的速度，他从下车到家还需要多少分钟？先想：横线上该补充哪条信息？`,
+      facts: [`全程 ${L} 米`, `乘车行了 ${ride} 米`, '剩下的路步行'],
+      steps: [
+        S2('要求"还需要多少分钟"，必须知道哪两件事？', '还要走多少米、他步行的速度',
+          ['乘了多久的车、他几点出发', '图书馆有几个楼层、他走了多远', '一共花了多少钱、他步行的速度'],
+          { ok: '对！时间 = 路程 ÷ 速度，所以这两个量缺一不可。', no: '要求"时间"，就要知道"还要走的路程"和"步行的速度"。' }),
+        S2('下面三条待补充的信息里，哪一条能告诉我们他步行的速度？', `③ 他 ${t1} 分钟走了 ${dist1} 米`,
+          [`① 公交车平均每分钟行 ${busSpeed} 米`, `② 他 ${start} 从家里出发`, '三条都用不上，条件已经够了'],
+          { ok: `对！知道"${t1} 分钟走了 ${dist1} 米"才能算出步行的速度；①是公交车的速度，②和速度无关。`, no: '要算步行的速度，得知道"步行的时间和步行的路程"。①说的是公交车，②是出发时间。' }),
+        S2('那么他步行的速度是多少米/分？该用哪个算式？', `${dist1} ÷ ${t1}`,
+          [`${busSpeed} ÷ ${t1}`, `${dist1} × ${t1}`, `${t1} ÷ ${dist1}`],
+          { ok: `对！${dist1} ÷ ${t1} = ${v} 米/分。`, no: '速度 = 路程 ÷ 时间，用步行的那组数据。' }),
+        S2('下车之后，他还要走多少米？该用哪个算式？', `${L} − ${ride}`,
+          [`${L} + ${ride}`, `${ride} − ${L}`, `${L} ÷ ${ride}`],
+          { ok: `对！全程 ${L} 米减掉乘车走的 ${ride} 米。`, no: '全程减掉已经坐车走过的部分。' }),
+        S2('还需要多少分钟？该用哪个算式？', `${rest} ÷ ${v}`,
+          [`${rest} × ${v}`, `${v} ÷ ${rest}`, `${L} ÷ ${v}`],
+          { ok: `对！用剩下的路程除以步行速度。算出来填进下面的框里吧！`, no: '时间 = 剩下的路程 ÷ 步行的速度。' })
+      ],
+      answer: need, unit: '分钟',
+      praise: '你会先想"缺什么"，再去题目里找——这是解决难题最有用的一步！',
+      wrongTip: `步行速度 ${dist1}÷${t1}=${v} 米/分；还要走 ${L}−${ride}=${rest} 米；需要 ${rest}÷${v}=${need} 分钟。`
+    };
+  }
+},
+
+/* ---------- ② 审题筛选 · 探索：多余条件 ---------- */
+{
+  unit: '探索', kp: '审题·多余条件',
+  gen() {
+    const gap = randInt(4, 10), segs = randInt(6, 20);
+    const length = gap * segs;
+    const answer = segs;
+    const irr = pick([
+      `这根绳子粗 ${randInt(1, 3)} 厘米`,
+      `他剪完一共用了 ${randInt(3, 9)} 分钟`,
+      `${pick(['小红', '小刚', '丽丽'])}比他早开始 ${randInt(2, 6)} 分钟`,
+      `绳子是 ${pick(['红色', '蓝色', '黄色'])}的`
+    ]);
+    return {
+      tag: '四上 · 审题（多余条件）',
+      text: `一根 ${length} 米长的绳子，每 ${gap} 米剪成一段。${irr}。一共可以剪成多少段？`,
+      facts: [`绳子长 ${length} 米`, `每 ${gap} 米剪一段`, irr],
+      steps: [
+        S2('要求"能剪成多少段"，需要用到哪两个条件？', '绳子的总长度、每段多长',
+          ['绳子的粗细、每段多长', '剪了几次、用了多久', '总长度、一共用了多少分钟'],
+          { ok: '对！段数 = 总长度 ÷ 每段长度。', no: '段数 = 总长度 ÷ 每段的长度，其他信息都用不上。' }),
+        S2('上面三条信息里，哪一条是多余的？', irr,
+          [`每 ${gap} 米剪一段`, `绳子长 ${length} 米`, '三条都有用'],
+          { ok: '对！这条和"剪成多少段"没有关系。', no: '再读一遍——只有这条和"段数"无关。' }),
+        S2('一共可以剪成多少段？该用哪个算式？', `${length} ÷ ${gap}`,
+          [`${length} × ${gap}`, `${length} − ${gap}`, `${gap} ÷ ${length}`],
+          { ok: `对！用 ${length} ÷ ${gap}。算出来填进下面的框里吧！`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
+        S2('提醒一下：剪的次数和段数是不一样的。剪的次数比段数怎么样？', '比段数少 1',
+          ['比段数多 1', '和段数一样多', '是段数的 2 倍'],
+          { ok: '对！剪的次数比段数少 1。不过这道题问的是「段数」，别答成次数哦。<br>把段数算出来填进下面的框吧！', no: '剪的次数比段数少 1。但题目问的是段数。' })
+      ],
+      answer, unit: '段',
+      praise: '你抓住了"段数 = 总长 ÷ 每段长"，没有被无关信息带跑！',
+      wrongTip: `段数 = ${length} ÷ ${gap} = ${answer} 段（剪的次数是 ${segs - 1} 次，别混）。`
+    };
+  }
+},
+
+/* ---------- ③ 错中求解 · 除法：除数看错 ---------- */
+{
+  unit: '除法', kp: '错中求解·除数看错',
+  gen() {
+    const dRight = randInt(12, 42);
+    const Q = randInt(5, 30);
+    const R = randInt(1, dRight - 1);
+    const A = dRight * Q + R;
+    let dWrong;
+    do { dWrong = dRight + randInt(-7, 7); }
+    while (dWrong === dRight || dWrong < 11 || dWrong > 49);
+    const q = Math.floor(A / dWrong);
+    const r = A % dWrong;
+    const name = pick(['小明', '小华', '琪琪', '小刚']);
+    return {
+      tag: '四上 · 错中求解（除数看错）',
+      text: `${name}在计算一个除法算式时，把除数 ${dRight} 看成了 ${dWrong}，算出的商是 ${q}，余数是 ${r}。这个除法算式正确的商是多少？`,
+      facts: [`看错的除数是 ${dWrong}`, `算出的商是 ${q}，余数是 ${r}`, '真正的除数是 ' + dRight],
+      steps: [
+        S2('要求正确的商，先要知道什么？', '被除数是多少',
+          ['他一共算了几道题', '余数是多少', '正确的商是多少'],
+          { ok: '对！被除数从头到尾没有变过，先把它求出来。', no: '先把"被除数"求出来——被除数一直没变，是唯一能把错误和正确连起来的东西。' }),
+        S2(`虽然除数看错了，但被除数没变。怎么用看错的结果把被除数求出来？`, `${dWrong} × ${q} + ${r}`,
+          [`${dWrong} × ${q} − ${r}`, `${dRight} × ${q} + ${r}`, `${dWrong} ÷ ${q} + ${r}`],
+          { ok: `对！"商 × 除数 + 余数 = 被除数"，要用他看错的那个除数。`, no: '被除数 = 商 × 除数 + 余数。这里要代他实际用的除数 ${dWrong}。'.replace('${dWrong}', dWrong) }),
+        S2(`那么被除数是多少？`, A, numWrongs(A, [dWrong * q, dRight * Q, A + r]),
+          { ok: `对！被除数是 ${A}。`, no: `${dWrong} × ${q} + ${r} = ${A}。` }),
+        S2(`现在用真正的除数 ${dRight} 去除 ${A}，商该用哪个算式？`, `${A} ÷ ${dRight}`,
+          [`${A} ÷ ${dWrong}`, `${A} × ${dRight}`, `${dRight} ÷ ${A}`],
+          { ok: `对！用 ${A} ÷ ${dRight}。算出来填进下面的框里吧！`, no: `既然知道被除数是 ${A}、除数是 ${dRight}，就再除一次。` })
+      ],
+      answer: Q, unit: '',
+      praise: '你想到用"错的结果"先把被除数救回来，再重新算一遍——很聪明！',
+      wrongTip: `被除数 = ${dWrong}×${q}+${r} = ${A}；正确的商 = ${A}÷${dRight} = ${Q}。`
+    };
+  }
+},
+
+/* ---------- ③ 错中求解 · 周长：漏括号 ---------- */
+{
+  unit: '周长', kp: '错中求解·漏括号',
+  gen() {
+    const len = randInt(8, 30), wid = randInt(3, 15);
+    const right = (len + wid) * 2;
+    const wrong = len + wid * 2;
+    const name = pick(['小马虎', '小粗心', '小糊涂', '小大意']);
+    return {
+      tag: '四上 · 错中求解（漏括号）',
+      text: `${name}在算一个长方形的周长时，把「(长 + 宽) × 2」算成了「长 + 宽 × 2」。这个长方形的长是 ${len} 米、宽是 ${wid} 米。他算出的结果是多少米？`,
+      facts: [`长 ${len} 米`, `宽 ${wid} 米`, `他算成了「长 + 宽 × 2」`],
+      steps: [
+        S2('正确的周长算式是哪一个？', '(长 + 宽) × 2',
+          ['长 + 宽 × 2', '长 × 宽', '长 + 宽'],
+          { ok: '对！长方形周长 = (长 + 宽) × 2，要先把长和宽加起来。', no: '长方形有两条长、两条宽，所以先把长和宽加起来，再乘 2。' }),
+        S2(`他写的「长 + 宽 × 2」会先算哪一步？`, `先算 ${wid} × 2`,
+          [`先算 ${len} + ${wid}`, `先算 ${len} × 2`, '从左往右按顺序算'],
+          { ok: `对！没有括号时先算乘法，所以他会先算 ${wid} × 2。`, no: `没有括号的时候先算乘除，所以先算 ${wid} × 2。` }),
+        S2('那他算出的结果该用哪个算式表示？', `${len} + ${wid} × 2`,
+          [`${len} + ${wid}`, `(${len} + ${wid}) × 2`, `${len} × 2 + ${wid}`],
+          { ok: '对！用「长 + 宽 × 2」。算出来填进下面的框里吧！', no: '他漏掉了括号，先算了宽乘 2，再加长。' })
+      ],
+      answer: wrong, unit: '米',
+      praise: `你发现了吗——正确的周长是 ${right} 米，他算成 ${wrong} 米，少算的正好是一条长（${len} 米）！括号会改变运算顺序，一定要看清楚。`,
+      wrongTip: `正确周长 (${len} + ${wid}) × 2 = ${right} 米；他算成 ${len} + ${wid} × 2 = ${wrong} 米。`
+    };
+  }
+},
+
+/* ---------- ③ 错中求解 · 平均数：看错一个数 ---------- */
+{
+  unit: '平均数', kp: '错中求解·看错数',
+  gen() {
+    let n, k, d, rightVal, wrongVal, wrongAvg, rightAvg;
+    do {
+      n = randInt(4, 8);
+      k = randInt(1, 4);
+      d = n * k;
+      rightVal = randInt(25, 70);
+      wrongVal = rightVal + d;
+      wrongAvg = randInt(30, 70);
+      rightAvg = wrongAvg - k;
+    } while (wrongVal > 100 || rightAvg < 10);
+    const name = pick(['小红', '小明', '兵兵', '小丽']);
+    return {
+      tag: '四上 · 错中求解（看错数）',
+      text: `${name}在计算 ${n} 个数的平均数时，把其中的 ${rightVal} 看成了 ${wrongVal}，算出的平均数是 ${wrongAvg}。正确的平均数是多少？`,
+      facts: [`一共 ${n} 个数`, `把 ${rightVal} 看成了 ${wrongVal}`, `算出的平均数是 ${wrongAvg}`],
+      steps: [
+        S2('看错之后，这 ' + n + ' 个数的总和比原来多了多少？', d, numWrongs(d, [k, wrongVal - rightVal + n, n]),
+          { ok: `对！${wrongVal} − ${rightVal} = ${d}，总和多了 ${d}。`, no: `${wrongVal} − ${rightVal} = ${d}，那个数变大了 ${d}，总和就多了 ${d}。` }),
+        S2(`总和多了 ${d}，那么平均数会多多少？该用哪个算式？`, `${d} ÷ ${n}`,
+          [`${d} × ${n}`, `${d} + ${n}`, `${n} ÷ ${d}`],
+          { ok: `对！多出来的总量要平均分给 ${n} 个数，${d} ÷ ${n} = ${k}。`, no: `多出来的总量平均分到 ${n} 个数上，用除法。` }),
+        S2('正确的平均数该用哪个算式？', `${wrongAvg} − ${k}`,
+          [`${wrongAvg} + ${k}`, `${wrongAvg} × ${k}`, `${wrongAvg} ÷ ${k}`],
+          { ok: `对！多算了 ${k}，就要减回去。算出来填进下面的框里吧！`, no: '算出的是比正确答案"多"的平均数，所以要减掉多出来的部分。' })
+      ],
+      answer: rightAvg, unit: '',
+      praise: '你抓住了关键：看得数错了多少，先算"总和差了多少"！',
+      wrongTip: `总和多了 ${d}，平均数多了 ${d}÷${n}=${k}；正确平均数 = ${wrongAvg}−${k} = ${rightAvg}。`
+    };
+  }
+},
+
+/* ---------- 大数 · 数的组成（补强） ---------- */
+{
+  unit: '大数', kp: '数的组成',
+  gen() {
+    const twoLevel = Math.random() < 0.6;
+    const steps = [];
+    let text = '', answer = 0, factList = [], tip = '';
+    if (twoLevel) {
+      const n = randInt(5, 99), m = randInt(1, 9999);
+      answer = n * 10000 + m;
+      text = `一个数由 ${n} 个万和 ${m} 个一组成。这个数是多少？`;
+      factList = [`${n} 个万`, `${m} 个一`];
+      tip = `${n} 个万是 ${n * 10000}，再加 ${m}，得 ${answer}。`;
+      steps.push(S2(`${n} 个万是多少？`, n * 10000, numWrongs(n * 10000, [n * 1000, n * 100000, n]),
+        { ok: `对！${n} × 10000 = ${n * 10000}。`, no: `1 个万是 10000，${n} 个万就是 ${n} × 10000。` }));
+      steps.push(S2(`${m} 个一是多少？`, m, numWrongs(m, [m * 10, m * 100, m + 1]),
+        { ok: `对！${m} 个一就是 ${m}。`, no: '几个一就是几本身。' }));
+      steps.push(S2('把两部分合起来，该用哪个算式？', `${n * 10000} + ${m}`,
+        [`${n * 10000} × ${m}`, `${n * 10000} − ${m}`, `${n * 1000} + ${m}`],
+        { ok: `对！用 ${n * 10000} + ${m}。算出来填进下面的框里吧！`, no: '万的部分加上一的部分。' }));
+    } else {
+      const n = randInt(2, 99), m = randInt(1, 9999);
+      answer = n * 100000000 + m * 10000;
+      text = `一个数由 ${n} 个亿和 ${m} 个万组成。这个数是多少？`;
+      factList = [`${n} 个亿`, `${m} 个万`];
+      tip = `${n} 个亿是 ${n * 100000000}，${m} 个万是 ${m * 10000}，合起来是 ${answer}。`;
+      steps.push(S2(`${n} 个亿是多少？`, n * 100000000, numWrongs(n * 100000000, [n * 10000000, n * 1000000, n * 10000]),
+        { ok: `对！1 个亿是 100000000，${n} 个亿就是 ${n} × 100000000。`, no: '1 亿 = 100000000，${n} 个亿乘上去。'.replace('${n}', n) }));
+      steps.push(S2(`${m} 个万是多少？`, m * 10000, numWrongs(m * 10000, [m * 1000, m * 100000, m]),
+        { ok: `对！${m} × 10000 = ${m * 10000}。`, no: '1 个万是 10000。' }));
+      steps.push(S2('把两部分合起来，该用哪个算式？', `${n * 100000000} + ${m * 10000}`,
+        [`${n * 100000000} + ${m}`, `${n * 100000000} × ${m * 10000}`, `${n * 1000000} + ${m * 10000}`],
+        { ok: `对！亿的部分加上万的部分。算出来填进下面的框里吧！`, no: '两个部分相加。注意万的部分是 ${m} × 10000。'.replace('${m}', m) }));
+    }
+    return {
+      tag: '四上 · 数的组成',
+      text, facts: factList, steps, answer, unit: '',
+      praise: '你分清了每个数位上的数各表示多少！',
+      wrongTip: tip
     };
   }
 }
@@ -2214,14 +2778,17 @@ function buildSession() {
    分单元选择
    ========================================================= */
 function loadUnits() {
+  const VCUR = 2;
+  const v = LS.get('unitsV', 0);
   const saved = LS.get('units', null);
-  if (saved === null) {
-    /* 只在首次打开给一次默认值：全部选中。之后一律听用户自己的 */
-    selectedUnits = UNITS.map(u => u.key);
+  if (v < VCUR) {
+    /* v2：不再默认「全部单元」，改成一进来就是「选择单元」，由用户自己挑（可多选） */
+    selectedUnits = [];
     LS.set('units', selectedUnits);
-  } else {
-    selectedUnits = UNITS.map(u => u.key).filter(k => saved.indexOf(k) >= 0);
+    LS.set('unitsV', VCUR);
+    return;
   }
+  selectedUnits = UNITS.map(u => u.key).filter(k => (saved || []).indexOf(k) >= 0);
 }
 function saveUnits() { LS.set('units', selectedUnits); }
 function countByUnit(key) { return problemTemplates.filter(t => t.unit === key).length; }
@@ -2327,6 +2894,7 @@ function floatScore(text, bonus) {
 }
 
 function renderGoal() {
+  if (pkMode) return;                   /* PK 时用比分条代替本轮目标 */
   const pct = Math.min(100, Math.round(doneCount / SESSION_GOAL * 100));
   $('goalFill').style.width = pct + '%';
   $('goalNum').textContent = doneCount >= SESSION_GOAL ? `已完成 ${doneCount} 题 🎉` : `${doneCount} / ${SESSION_GOAL} 题`;
@@ -2380,7 +2948,13 @@ function handleTimeout() {
   if (!q || q.state.solved) return;
   const st = q.state;
   st.timedOut = true; st.solved = true; st.timeUsed = TIME_LIMIT;
-  doneCount++;
+  if (pkMode && pkActive) {
+    pkPlayers[pkTurn].done += 1;      /* 超时不得分，但这一题算答过了 */
+    renderPkBar();
+    flashPkCard(pkTurn, false);
+  } else {
+    doneCount++;
+  }
   SFX.timeout();
   addWrongRecord(q, {
     stepIdx: st.stepIdx + 1,
@@ -2450,6 +3024,7 @@ function render() {
   renderSteps();
   renderAnswer();
   renderNav();
+  renderPkBar();
   renderGoal();
   updateBackBtn();
   startTimer();
@@ -2556,6 +3131,12 @@ function renderSteps() {
 
 /* 底部导航：题目可以一直往下出，所以用「第 N 题 + 已完成」代替固定圆点 */
 function renderNav() {
+  if (pkMode && pkActive) {
+    $('navInfo').innerHTML = `第 <b>${current + 1}</b> 题 · 当前 <b>${pkPlayers[pkTurn].name}</b> · 各答 ${PK_ROUNDS} 题`;
+    $('prevBtn').disabled = true;          /* PK 是每题换人，不回头翻 */
+    $('nextBtn').disabled = false;
+    return;
+  }
   $('navInfo').innerHTML = `第 <b>${current + 1}</b> / ${questions.length} 题 · 本轮已完成 <b>${doneCount}</b> 题`;
   $('prevBtn').disabled = current === 0;
   $('nextBtn').disabled = false;
@@ -2566,11 +3147,23 @@ function renderNav() {
    ========================================================= */
 function nextBtnHtml() {
   const isLast = current >= questions.length - 1;
+  let label = '下一题 →', hint;
+  if (pkMode && pkActive) {
+    if (pkGameOver()) {
+      label = '看结果 🏆';
+      hint = '两位玩家都答完啦，看看谁赢了';
+    } else {
+      label = '换 ' + pkPlayers[(pkTurn + 1) % pkPlayers.length].name + ' 来 →';
+      hint = pkPlayers.map(p => `${p.name} ${Math.min(p.done, PK_ROUNDS)}/${PK_ROUNDS}`).join('　·　');
+    }
+  } else if (isLast) {
+    hint = '这是本批最后一题，点一下会自动出新题';
+  } else {
+    hint = '后面还有 ' + (questions.length - 1 - current) + ' 题';
+  }
   return {
-    html: `<button class="next-big" id="nextBig">
-             <span>下一题</span><span class="nb-arrow">→</span>
-           </button>
-           <div class="next-hint">${isLast ? '这是本批最后一题，点一下会自动出新题' : '后面还有 ' + (questions.length - 1 - current) + ' 题'}</div>`,
+    html: `<button class="next-big" id="nextBig"><span>${label}</span></button>
+           <div class="next-hint">${hint}</div>`,
     isLast
   };
 }
@@ -2588,6 +3181,16 @@ function mountNext() {
 
 function goNext() {
   SFX.click();
+  if (pkMode && pkActive) {
+    if (pkGameOver()) { openPkResult(); return; }
+    pkTurn = (pkTurn + 1) % pkPlayers.length;
+    appendQuestion();
+    current = questions.length - 1;
+    render();
+    showTurnToast();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   if (current < questions.length - 1) {
     current++;
   } else {
@@ -2622,6 +3225,35 @@ function renderAnswer() {
   }
 
   card.classList.remove('locked');
+
+  /* PK 模式：给 ABCD 四个候选答案，触屏直接点，不用打字（适合教室一体机） */
+  if (pkMode) {
+    const ao = getAnswerOptions(q);
+    const unitTag = p.unit ? `<span class="ans-unit">${p.unit}</span>` : '';
+    inner.innerHTML = `
+      <div class="answer-hint">✍ 算好了就选一个答案吧，点一下就行</div>
+      <div class="ans-opts" id="ansOpts">
+        ${ao.options.map((t, i) => `<button class="opt ans-opt" data-ao="${i}">
+            <span class="opt-key">${LETTER[i]}</span>
+            <span class="opt-text">${t}${unitTag}</span>
+          </button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>`;
+    $('ansOpts').addEventListener('click', e => {
+      const b = e.target.closest('.ans-opt');
+      if (!b || b.disabled) return;
+      checkMc(+b.dataset.ao);
+    });
+    if (st.solved) {
+      const btns = $('ansOpts').querySelectorAll('.ans-opt');
+      btns.forEach(b => { b.disabled = true; });
+      if (btns[ao.answer]) btns[ao.answer].classList.add('chosen-ok');
+      showFb('ok', `✔ 完全正确！答案是 <b>${p.answer}${p.unit ? ' ' + p.unit : ''}</b>。<br><span class="fb-sub">${p.praise}</span>`);
+      mountNext();
+    }
+    return;
+  }
+
   inner.innerHTML = `
     <div class="answer-hint">✍ 自己算出最后一步的结果，填进来看看！</div>
     <div class="answer-row">
@@ -2715,6 +3347,72 @@ function handleChoose(stepIdx, optIdx) {
 /* =========================================================
    检查最终答案
    ========================================================= */
+/* PK 用的是 ABCD 选项：为每道题生成一份稳定的 4 个候选答案 */
+function getAnswerOptions(q) {
+  if (q._ansOpts) return q._ansOpts;
+  const correct = String(q.problem.answer);
+  const wrongs = numWrongs(q.problem.answer, []).map(String);
+  const pool = shuffleAll([correct, ...wrongs.slice(0, 3)]);
+  q._ansOpts = { options: pool, answer: pool.indexOf(correct) };
+  return q._ansOpts;
+}
+
+/* 答对 / 答错：文字输入和 ABCD 选答共用同一套结算逻辑 */
+function finalizeCorrect(q) {
+  const p = q.problem, st = q.state;
+  const shown = `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
+  st.solved = true;
+  st.timeUsed = timerEnabled ? (TIME_LIMIT - timerRemaining) : 0;
+  stopTimer();
+  $('timerBar').style.display = 'none';
+  showFb('ok', `✔ 完全正确！答案是 <b>${shown}</b>。<br><span class="fb-sub">${p.praise}</span>`);
+  addScore(30, false);
+  incCombo();
+  if (pkMode && pkActive) {
+    pkAwardCurrent();
+  } else {
+    doneCount++;
+    renderGoal();
+  }
+  if (!st.hadWrong) {
+    incPerfect();
+    addScore(20, true);
+    SFX.perfect();
+    floatScore('完美通关', true);
+  } else {
+    SFX.success();
+  }
+  if (!st.recorded) {
+    st.recorded = true;
+    addHistoryRecord(q, scoreVisible ? (st.hadWrong ? 30 : 50) : 0, !st.hadWrong, st.timeUsed);
+  }
+  mountNext();
+  renderNav();
+  requestAnimationFrame(() => {
+    const b = $('nextBig');
+    if (!b) return;
+    const y = b.getBoundingClientRect().top + window.scrollY - 280;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  });
+}
+
+function finalizeWrong(q, raw) {
+  const p = q.problem, st = q.state;
+  st.hadWrong = true;
+  resetCombo();
+  SFX.wrong();
+  showFb('no', `✘ 还差一点，再想一想。<br><span class="fb-sub">${p.wrongTip}</span>`);
+  if (!st.wrongAnswerRecorded) {
+    st.wrongAnswerRecorded = true;
+    addWrongRecord(q, {
+      stepIdx: 'answer',
+      stepQ: '最终答案',
+      wrongChoice: raw,
+      correctChoice: `${p.answer}${p.unit ? ' ' + p.unit : ''}`
+    });
+  }
+}
+
 function check() {
   const q = questions[current];
   if (!q) return;
@@ -2726,54 +3424,30 @@ function check() {
   const num = Number(raw);
   if (isNaN(num)) { showFb('warn', '请输入一个数字哦。'); return; }
 
-  const shown = `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
-
   if (Math.abs(num - p.answer) < 1e-6) {
-    st.solved = true;
-    st.timeUsed = timerEnabled ? (TIME_LIMIT - timerRemaining) : 0;
-    stopTimer();
-    $('timerBar').style.display = 'none';
     $('ansInput').disabled = true;
-    showFb('ok', `✔ 完全正确！答案是 <b>${shown}</b>。<br><span class="fb-sub">${p.praise}</span>`);
-    addScore(30, false);
-    incCombo();
-    doneCount++;
-    renderGoal();
-
-    if (!st.hadWrong) {
-      incPerfect();
-      addScore(20, true);
-      SFX.perfect();
-      floatScore('完美通关', true);
-    } else {
-      SFX.success();
-    }
-    if (!st.recorded) {
-      st.recorded = true;
-      addHistoryRecord(q, scoreVisible ? (st.hadWrong ? 30 : 50) : 0, !st.hadWrong, st.timeUsed);
-    }
-    mountNext();
-    renderNav();
-    requestAnimationFrame(() => {
-      const b = $('nextBig');
-      if (!b) return;
-      const y = b.getBoundingClientRect().top + window.scrollY - 280;
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-    });
+    finalizeCorrect(q);
   } else {
-    st.hadWrong = true;
-    resetCombo();
-    SFX.wrong();
-    showFb('no', `✘ 还差一点，再想一想。<br><span class="fb-sub">${p.wrongTip}</span>`);
-    if (!st.wrongAnswerRecorded) {
-      st.wrongAnswerRecorded = true;
-      addWrongRecord(q, {
-        stepIdx: 'answer',
-        stepQ: '最终答案',
-        wrongChoice: raw,
-        correctChoice: shown
-      });
-    }
+    finalizeWrong(q, raw);
+  }
+}
+
+/* PK 模式：点 ABCD 直接判定，不用打字 */
+function checkMc(idx) {
+  const q = questions[current];
+  if (!q) return;
+  const st = q.state;
+  if (st.solved) return;
+  const ao = getAnswerOptions(q);
+  const wrap = $('ansOpts');
+  const btns = wrap ? wrap.querySelectorAll('.ans-opt') : [];
+  if (idx === ao.answer) {
+    btns.forEach(b => { b.disabled = true; });
+    if (btns[idx]) btns[idx].classList.add('chosen-ok');
+    finalizeCorrect(q);
+  } else {
+    if (btns[idx]) { btns[idx].disabled = true; btns[idx].classList.add('wrong'); }
+    finalizeWrong(q, `${LETTER[idx]}. ${ao.options[idx]}`);
   }
 }
 
@@ -2862,6 +3536,10 @@ $('emptyPick').addEventListener('click', () => {
   SFX.click();
   toggleUnitPanel(true);
   unitPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+$('emptyAll').addEventListener('click', () => {
+  selectedUnits = UNITS.map(u => u.key);
+  saveUnits(); SFX.click(); buildSession(); renderAll();
 });
 
 /* ---- 上一题 / 下一题 ---- */
@@ -3022,6 +3700,181 @@ $('clearHistory').addEventListener('click', () => {
     SFX.click();
   }
 });
+
+/* =========================================================
+   双人 PK（同机轮流答题）
+   ========================================================= */
+let PK_ROUNDS = 5;                   /* 每人答几题；人多时自动调小，别让一局太长 */
+let pkMode = false, pkActive = false, pkTurn = 0;
+const PK_MAX = 4;
+const PK_COLORS = ['#6B4CE6', '#FF6B9D', '#2ED573', '#FFA751'];
+let pkPlayers = [
+  { name: '玩家1', score: 0, done: 0, perfect: 0 },
+  { name: '玩家2', score: 0, done: 0, perfect: 0 }
+];
+let pkRenderedCount = -1;
+function syncPkRounds() { PK_ROUNDS = pkPlayers.length <= 2 ? 5 : 3; }
+function pkNewPlayer() {
+  return { name: '玩家' + (pkPlayers.length + 1), score: 0, done: 0, perfect: 0 };
+}
+
+/* 同一个元素要重放同一个动画，必须先摘类、强制重排一次，否则不会重播 */
+function replayAnim(el, cls) {
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
+function flashPkCard(idx, good) {
+  const card = $('pkCard' + idx);
+  if (!card) return;
+  const cls = good ? 'correct-flash' : 'wrong-flash';
+  replayAnim(card, cls);
+  setTimeout(() => card.classList.remove(cls), 620);
+}
+
+/* 玩家卡：人数变化时才整体重建，平时原地更新文字（否则闪一下就被丢掉了） */
+function buildPkCards() {
+  const wrap = $('pkCards');
+  if (!wrap) return;
+  wrap.innerHTML = pkPlayers.map((p, i) => `
+    <div class="pk-card" id="pkCard${i}" data-idx="${i}" style="--pk:${PK_COLORS[i % PK_COLORS.length]}">
+      <div class="pk-name" data-rename="${i}" title="点一下可以改名"><span id="pkName${i}">${p.name}</span><span class="pk-edit">✏️</span></div>
+      <div class="pk-score"><span id="pkScore${i}">${p.score}</span><span class="pk-unit">分</span></div>
+      <div class="pk-sub" id="pkSub${i}">0/${PK_ROUNDS} 题 · 完美 0</div>
+      ${pkPlayers.length > 2 ? `<button class="pk-del" data-del="${i}" title="移除这位玩家" aria-label="移除这位玩家">✕</button>` : ''}
+    </div>`).join('');
+  pkRenderedCount = pkPlayers.length;
+  wrap.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => removePkPlayer(+b.dataset.del));
+  });
+  wrap.querySelectorAll('[data-rename]').forEach(el => {
+    el.addEventListener('click', () => renamePkPlayer(+el.dataset.rename));
+  });
+}
+function renamePkPlayer(i) {
+  if (!pkPlayers[i]) return;
+  const v = window.prompt('给这位玩家改个名字（最多 6 个字）：', pkPlayers[i].name);
+  if (v === null) return;
+  const s = v.trim().slice(0, 6);
+  if (!s) return;
+  pkPlayers[i].name = s;
+  renderPkBar();
+  SFX.click();
+}
+function addPkPlayer() {
+  if (pkPlayers.length >= PK_MAX) return;
+  pkPlayers.push(pkNewPlayer());
+  syncPkRounds();
+  buildPkCards();
+  renderPkBar();
+  SFX.click();
+}
+function removePkPlayer(i) {
+  if (pkPlayers.length <= 2) return;
+  pkPlayers.splice(i, 1);
+  pkPlayers.forEach((p, k) => { if (/^玩家\d+$/.test(p.name)) p.name = '玩家' + (k + 1); });
+  if (pkTurn >= pkPlayers.length) pkTurn = 0;
+  syncPkRounds();
+  buildPkCards();
+  renderPkBar();
+  SFX.click();
+}
+function pkGameOver() {
+  return pkMode && pkActive && pkPlayers.every(p => p.done >= PK_ROUNDS);
+}
+function renderPkBar() {
+  if (!pkMode) return;
+  if (pkRenderedCount !== pkPlayers.length) buildPkCards();
+  pkPlayers.forEach((p, i) => {
+    const nm = $('pkName' + i), sc = $('pkScore' + i), sb = $('pkSub' + i), cd = $('pkCard' + i);
+    if (!nm || !sc || !sb || !cd) return;
+    if (nm.textContent !== p.name) nm.textContent = p.name;
+    if (sc.textContent !== String(p.score)) sc.textContent = p.score;
+    sb.textContent = `${Math.min(p.done, PK_ROUNDS)}/${PK_ROUNDS} 题 · 完美 ${p.perfect}`;
+    cd.classList.toggle('turn', pkActive && pkTurn === i);
+  });
+  const addBtn = $('pkAddPlayer');
+  if (addBtn) {
+    const started = pkActive && pkPlayers.some(p => p.done > 0);
+    addBtn.disabled = pkPlayers.length >= PK_MAX || started;
+    addBtn.textContent = pkPlayers.length >= PK_MAX ? '已满 4 人'
+      : started ? '开局后不能加人' : '➕ 添加玩家';
+  }
+  const r = $('pkRounds'), rt = $('pkRoundsTotal');
+  if (r) r.textContent = PK_ROUNDS;
+  if (rt) rt.textContent = pkPlayers.length * PK_ROUNDS;
+}
+function showTurnToast() {
+  const t = $('pkToast');
+  if (!t) return;
+  t.textContent = `轮到 ${pkPlayers[pkTurn].name} 啦！`;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('on'), 1500);
+}
+function closePkResult() {
+  const m = $('pkModal');
+  if (m) m.classList.remove('on');
+}
+function setPkMode(on) {
+  pkMode = on;
+  pkActive = on;
+  pkTurn = 0;
+  document.body.dataset.pk = on ? '1' : '0';   /* 桌面/一体机据此切成宽屏布局 */
+  $('pkToggle').classList.toggle('on', on);
+  $('pkToggle').textContent = on ? '🎮 PK' : '🎮';
+  $('pkBar').classList.toggle('on', on);
+  $('goalBar').style.display = on ? 'none' : (selectedUnits.length ? 'block' : 'none');
+  closePkResult();
+  syncPkRounds();
+  if (on) {
+    pkPlayers.forEach(p => { p.score = 0; p.done = 0; p.perfect = 0; });
+    buildPkCards();
+    SFX.levelup();
+  }
+  buildSession();
+  renderAll();
+  if (on) showTurnToast();
+}
+/* 当前这一题算给谁：答对 30 分，整题零失误再加 20 分 */
+function pkAwardCurrent() {
+  const p = pkPlayers[pkTurn];
+  const st = questions[current] && questions[current].state;
+  const clean = !(st && st.hadWrong);
+  p.score += clean ? 50 : 30;
+  p.done += 1;
+  if (clean) p.perfect += 1;
+  renderPkBar();
+  flashPkCard(pkTurn, clean);
+}
+function openPkResult() {
+  pkActive = false;
+  renderPkBar();
+  const MEDALS = ['🥇', '🥈', '🥉', '4️⃣'];
+  const sorted = pkPlayers.slice().sort((a, b) => b.score - a.score);
+  const tie = sorted.length > 1 && sorted[0].score === sorted[1].score;
+  const rows = sorted.map((p, i) => `<div class="pk-rank-row${(!tie && i === 0) ? ' first' : ''}">
+      <span class="pk-medal">${tie && i < 2 ? '🤝' : (MEDALS[i] || (i + 1))}</span>
+      <span>第 ${i + 1} 名 · ${p.name}<span class="pk-rd"> · 答 ${p.done} 题 · 完美 ${p.perfect}</span></span>
+      <span class="pk-rs">${p.score}<span style="font-size:12px;">分</span></span>
+    </div>`).join('');
+  $('pkModalCard').innerHTML = `
+    <h2>🏆 对局结束</h2>
+    <div class="pk-win">${tie ? '分数打平，并列第一！' : sorted[0].name + ' 获胜！'}</div>
+    <div class="pk-rank">${rows}</div>
+    <div class="pk-modal-actions">
+      <button class="pk-again" id="pkAgain">🔁 再来一局</button>
+      <button class="pk-exit" id="pkExit">退出 PK</button>
+    </div>`;
+  $('pkModal').classList.add('on');
+  SFX.perfect();
+  $('pkAgain').addEventListener('click', () => { SFX.click(); setPkMode(true); });
+  $('pkExit').addEventListener('click', () => { SFX.click(); setPkMode(false); });
+}
+
+$('pkToggle').addEventListener('click', () => { SFX.click(); setPkMode(!pkMode); });
+$('pkAddPlayer').addEventListener('click', addPkPlayer);
 
 /* =========================================================
    启动
