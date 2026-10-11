@@ -1148,8 +1148,10 @@ const problemTemplates = [
   unit: '除法', kp: '调商',
   gen() {
     const b = randInt(12, 45);
-    const Q = randInt(4, 30);
-    const R = randInt(1, b - 1);
+    let Q;
+    do { Q = randInt(4, 30); } while (Q === b);
+    let R;
+    do { R = randInt(1, b - 1); } while (R + b === Q);
     const badQ = Q - 1;
     const badR = R + b;
     return {
@@ -1210,8 +1212,10 @@ const problemTemplates = [
   unit: '除法', kp: '商的变化规律',
   gen() {
     const b = randInt(3, 20);
-    const q = randInt(2, 20);
     const k = randInt(2, 5);
+    /* 答案就是新商 q，别让 b、k、b×k 里任何一个恰好等于它 */
+    let q;
+    do { q = randInt(2, 20); } while (q === b || q === k || q === b * k);
     const q0 = q * k;
     const a = b * q0;
     const b2 = b * k;
@@ -1243,7 +1247,8 @@ const problemTemplates = [
   gen() {
     const per = randInt(20, 60);
     const q = randInt(12, 30);
-    const r = randInt(1, per - 1);
+    let r;
+    do { r = randInt(1, per - 1); } while (r === q + 1);
     const total = per * q + r;
     const answer = q + 1;
     const scene = pick([
@@ -1384,7 +1389,9 @@ const problemTemplates = [
   unit: '图形', kp: '三角形内角和',
   gen() {
     let a, b;
-    do { a = randInt(30, 80); b = randInt(25, 70); } while (a + b > 170 || a + b < 100);
+    do { a = randInt(30, 80); b = randInt(25, 70); }
+    while (a + b > 170 || a + b < 100 ||
+           a + b === 180 - a - b || a === 180 - a - b || b === 180 - a - b);
     const answer = 180 - a - b;
     return {
       tag: '四上 · 三角形内角和',
@@ -1469,12 +1476,15 @@ const problemTemplates = [
 {
   unit: '图形', kp: '三边关系',
   gen() {
-    const a = randInt(4, 20);
-    let b = randInt(4, 20);
-    if (b === a) b = a + randInt(1, 5);
     const askMax = Math.random() < 0.5;
-    const d = Math.abs(a - b);
-    const answer = askMax ? a + b - 1 : d + 1;
+    let a, b, d, answer;
+    do {
+      a = randInt(4, 20);
+      b = randInt(4, 20);
+      if (b === a) b = a + randInt(1, 5);
+      d = Math.abs(a - b);
+      answer = askMax ? a + b - 1 : d + 1;
+    } while (answer === a || answer === b);
     return {
       tag: '四上 · 三角形三边关系',
       text: `一个三角形的三条边都是整厘米数，其中两条边分别是 ${a} 厘米和 ${b} 厘米。第三条边${askMax ? '最长' : '最短'}是多少厘米？`,
@@ -1661,7 +1671,8 @@ const problemTemplates = [
   unit: '大数', kp: '倒推还原',
   gen() {
     const d = randInt(3, 15);
-    const C = randInt(3, 20);
+    let C;
+    do { C = randInt(3, 20); } while (C === d);
     const orig = C * d;
     const R = orig * d;
     return {
@@ -1871,7 +1882,8 @@ const problemTemplates = [
   unit: '周长', kp: '等腰三角形周长',
   gen() {
     const w = randInt(8, 35);
-    const b = randInt(6, 40);
+    let b;
+    do { b = randInt(6, 40); } while (b === w || b === 2 * w);
     const P = 2 * w + b;
     return {
       tag: '四上 · 等腰三角形周长',
@@ -1902,13 +1914,17 @@ const problemTemplates = [
   gen() {
     const n = 5, A = randInt(128, 146);
     const total = A * n;
-    const hs = []; let rem = total;
-    for (let i = 0; i < n - 1; i++) {
-      const lo = A - 10, hi = A + 10;
-      const v = randInt(lo, hi);
-      hs.push(v); rem -= v;
+    /* 生成身高：如果某个同学的身高恰好等于平均数，答案就会从加数里露出来，必须重取 */
+    let hs = [];
+    for (let t = 0; t < 60; t++) {
+      hs = []; let rem = total;
+      for (let i = 0; i < n - 1; i++) {
+        const v = randInt(A - 10, A + 10);
+        hs.push(v); rem -= v;
+      }
+      hs.push(rem);
+      if (hs.every(v => v !== A && v >= A - 18 && v <= A + 18)) break;
     }
-    hs.push(rem);
     return {
       tag: '四上 · 求平均数',
       text: `四（1）班第一小组 ${n} 位同学的身高分别是 ${hs.join(' 厘米、')} 厘米。这个小组同学的平均身高是多少厘米？`,
@@ -1981,7 +1997,7 @@ const problemTemplates = [
       x = A + randInt(-4, 6);
       y = A + randInt(-4, 6);
       answer = total - x - y;
-    } while (answer <= 0 || answer > 70);
+    } while (answer <= 0 || answer > 70 || answer === x || answer === y || answer === A);
     const names = pick([
       { p: ['甲', '乙', '丙'], thing: '张画片' },
       { p: ['小红', '小刚', '小丽'], thing: '张贴纸' },
@@ -2042,13 +2058,17 @@ const problemTemplates = [
 {
   unit: '平均数', kp: '平均数的变化',
   gen() {
-    const n = randInt(5, 9);
-    const A1 = randInt(14, 32);
-    const diff = randInt(1, 4);
-    const A2 = A1 - diff;
-    const newVal = randInt(1, 6);
-    const drop = n * diff;
-    const orig = newVal + drop;
+    /* 答案就是"被改动前的那个数"，别让它和题面里出现的其它数字撞上 */
+    let n, A1, diff, A2, newVal, drop, orig;
+    do {
+      n = randInt(5, 9);
+      A1 = randInt(14, 32);
+      diff = randInt(1, 4);
+      A2 = A1 - diff;
+      newVal = randInt(1, 6);
+      drop = n * diff;
+      orig = newVal + drop;
+    } while (orig === A1 || orig === A2 || orig === n || orig === diff || orig === newVal || orig === drop);
     return {
       tag: '四上 · 平均数的变化',
       text: `${n} 个数的平均数是 ${A1}。如果把其中一个数改成 ${newVal}，这时这 ${n} 个数的平均数就变成了 ${A2}。这个被改动的数原来是多少？`,
@@ -2106,7 +2126,9 @@ const problemTemplates = [
 {
   unit: '探索', kp: '封闭图形植树',
   gen() {
-    const gap = randInt(4, 10), segs = randInt(8, 24);
+    const gap = randInt(4, 10);
+    let segs;
+    do { segs = randInt(8, 24); } while (segs === gap);
     const length = gap * segs;
     const answer = segs;
     const scene = pick([
@@ -2272,7 +2294,9 @@ const problemTemplates = [
 {
   unit: '图形', kp: '分类讨论·等腰三角形',
   gen() {
-    const a = randInt(10, 40) * 2;      /* 取偶数，保证它作顶角时底角是整数 */
+    let a;
+    /* a=60 时答案 180−2a 也等于 60，会和题面给的 60° 撞上 */
+    do { a = randInt(10, 40) * 2; } while (a === 60);
     const apex = (180 - a) / 2;         /* a 当顶角 → 底角 */
     const baseApex = 180 - 2 * a;       /* a 当底角 → 顶角（a<90，结果为正） */
     const answer = baseApex;
@@ -2385,7 +2409,9 @@ const problemTemplates = [
 {
   unit: '探索', kp: '分类讨论·两端都不种',
   gen() {
-    const gap = randInt(4, 10), segs = randInt(8, 22);
+    const gap = randInt(4, 10);
+    let segs;
+    do { segs = randInt(8, 22); } while (segs - 1 === gap);
     const length = gap * segs;
     const answer = segs - 1;
     const kind = Math.random() < 0.5
@@ -2461,10 +2487,10 @@ const problemTemplates = [
   unit: '除法', kp: '审题·补充条件',
   gen() {
     const v = randInt(40, 90);
-    const t1 = randInt(10, 20);
+    let t1, need;
+    do { t1 = randInt(10, 20); need = randInt(8, 25); } while (need === t1);
     const dist1 = v * t1;
     const ride = randInt(15, 60) * 100;
-    const need = randInt(8, 25);
     const rest = v * need;
     const L = ride + rest;
     const busSpeed = randInt(300, 700);
@@ -2501,7 +2527,9 @@ const problemTemplates = [
 {
   unit: '探索', kp: '审题·多余条件',
   gen() {
-    const gap = randInt(4, 10), segs = randInt(6, 20);
+    const gap = randInt(4, 10);
+    let segs;
+    do { segs = randInt(6, 20); } while (segs === gap);
     const length = gap * segs;
     const answer = segs;
     const irr = pick([
@@ -2540,14 +2568,21 @@ const problemTemplates = [
   unit: '除法', kp: '错中求解·除数看错',
   gen() {
     const dRight = randInt(12, 42);
-    const Q = randInt(5, 30);
+    let Q;
+    do { Q = randInt(5, 30); } while (Q === dRight);
     const R = randInt(1, dRight - 1);
     const A = dRight * Q + R;
-    let dWrong;
-    do { dWrong = dRight + randInt(-7, 7); }
-    while (dWrong === dRight || dWrong < 11 || dWrong > 49);
-    const q = Math.floor(A / dWrong);
-    const r = A % dWrong;
+    /* 看错后的商/余数不能和正确答案撞上，否则步骤里就把答案说破了 */
+    let dWrong = 0, q = 0, r = 0;
+    for (let step = 0; step < 40 && !dWrong; step++) {
+      const off = (step % 2 === 0 ? 1 : -1) * (5 + Math.floor(step / 2));
+      const cand = dRight + off;
+      if (cand === dRight || cand < 11 || cand > 49 || cand === Q) continue;
+      const qq = Math.floor(A / cand), rr = A % cand;
+      if (qq < 1 || qq === Q || rr === Q) continue;
+      dWrong = cand; q = qq; r = rr;
+    }
+    if (!dWrong) { dWrong = dRight + 5; q = Math.floor(A / dWrong); r = A % dWrong; }
     const name = pick(['小明', '小华', '琪琪', '小刚']);
     return {
       tag: '四上 · 错中求解（除数看错）',
@@ -2616,7 +2651,9 @@ const problemTemplates = [
       wrongVal = rightVal + d;
       wrongAvg = randInt(30, 70);
       rightAvg = wrongAvg - k;
-    } while (wrongVal > 100 || rightAvg < 10);
+    } while (wrongVal > 100 || rightAvg < 10 ||
+             rightAvg === rightVal || rightAvg === wrongVal ||
+             rightAvg === wrongAvg || rightAvg === n || rightAvg === k);
     const name = pick(['小红', '小明', '兵兵', '小丽']);
     return {
       tag: '四上 · 错中求解（看错数）',
