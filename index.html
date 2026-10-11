@@ -458,7 +458,7 @@ body{
 .stat-box .num{font-size:22px;font-weight:900;color:var(--purple);display:block;}
 .stat-box .lbl{font-size:11.5px;font-weight:800;color:var(--muted);margin-top:3px;display:block;}
 
-/* ============ 双人 PK ============ */
+/* ============ PK：同题竞速 ============ */
 .pk-btn{min-height:46px;padding:8px 12px;border:none;border-radius:14px;
   background:#F8F6FF;color:#8B7FD0;font-family:inherit;
   font-size:14.5px;font-weight:800;cursor:pointer;transition:.18s;
@@ -467,14 +467,22 @@ body{
 .pk-btn.on{background:linear-gradient(135deg,var(--gold-2),var(--gold));
   color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
 
-.pk-bar{display:none;padding:14px;margin-bottom:14px;
-  background:#fff;border-radius:22px;border:2.5px solid #FFE3A8;
+.pk-bar{display:none;padding:12px 14px;margin-bottom:14px;
+  background:#fff;border-radius:20px;border:2.5px solid #FFE3A8;
   box-shadow:0 4px 0 #FFE3A8,0 12px 26px rgba(255,200,100,.18);}
 .pk-bar.on{display:block;}
-.pk-bar-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.pk-bar-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .pk-bar-head .pk-title{font-size:15px;font-weight:900;color:var(--ink-2);}
 .pk-bar-head .pk-meta{font-size:12.5px;font-weight:800;color:var(--muted);}
 .pk-bar-head .pk-meta b{color:var(--purple);}
+.pk-limit{display:flex;align-items:center;gap:5px;font-size:12.5px;
+  font-weight:800;color:var(--muted);}
+.pk-limit-btn{min-height:36px;padding:5px 11px;border:none;border-radius:10px;
+  background:#F8F6FF;color:#8B7FD0;font-family:inherit;font-size:13px;
+  font-weight:800;cursor:pointer;box-shadow:0 2px 0 var(--line-2);}
+.pk-limit-btn.on{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;
+  box-shadow:0 3px 0 var(--purple-deep);}
+.pk-limit-btn:disabled{opacity:.4;cursor:default;}
 .pk-add{min-height:44px;padding:9px 14px;border:none;border-radius:12px;
   background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#8a5a00;
   font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
@@ -482,56 +490,107 @@ body{
 .pk-add:hover:not(:disabled){transform:translateY(-1px);}
 .pk-add:disabled{opacity:.4;cursor:default;box-shadow:none;}
 
-.pk-cards{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;}
-.pk-card{flex:1 1 0;min-width:150px;padding:12px 14px;border-radius:16px;background:#F8F6FF;
-  border:2.5px solid var(--line);transition:background .2s,border-color .2s,box-shadow .2s;
-  position:relative;overflow:hidden;}
-.pk-card .pk-name{font-size:14px;font-weight:900;color:#7C6FA8;
-  display:flex;align-items:center;gap:6px;line-height:1.4;cursor:pointer;}
-.pk-card .pk-name .pk-edit{font-size:11px;opacity:.5;line-height:1;}
-.pk-card .pk-score{font-size:28px;font-weight:900;color:var(--purple);line-height:1.25;}
-.pk-card .pk-score .pk-unit{font-size:12px;font-weight:800;opacity:.7;margin-left:2px;}
-.pk-card .pk-sub{font-size:11.5px;font-weight:800;color:var(--muted);line-height:1.5;}
-.pk-card.turn{background:linear-gradient(135deg,var(--pk,#8B6BFF),var(--pk,#6B4CE6));
-  border-color:transparent;box-shadow:0 6px 18px rgba(107,76,230,.22);}
-.pk-card.turn .pk-name,.pk-card.turn .pk-score,.pk-card.turn .pk-sub{color:#fff;}
-.pk-card.turn .pk-score .pk-unit{color:#fff;}
-.pk-card.turn::after{content:'答题中';position:absolute;right:10px;top:10px;
-  font-size:11px;font-weight:900;background:#fff;color:var(--pk,#6B4CE6);
-  padding:3px 8px;border-radius:8px;}
-.pk-card.correct-flash{background:#E4FBEE;border-color:var(--green);}
-.pk-card.wrong-flash{background:#FFF3E0;border-color:var(--gold);}
-@keyframes pkPop{0%{transform:scale(1);}45%{transform:scale(1.045);}100%{transform:scale(1);}}
-.pk-card.correct-flash,.pk-card.wrong-flash{animation:pkPop .5s ease;}
-.pk-del{position:absolute;right:6px;bottom:6px;width:28px;height:28px;border:none;
-  border-radius:8px;background:rgba(0,0,0,.06);color:#8B7FD0;cursor:pointer;
-  font-size:12px;font-weight:900;line-height:1;font-family:inherit;}
-.pk-del:hover{background:rgba(0,0,0,.12);color:#C2410C;}
-@media (max-width:640px){
-  .pk-cards{gap:10px;}
-  .pk-card{flex:1 1 calc(50% - 5px);min-width:0;}
-  .pk-card .pk-score{font-size:24px;}
+/* 所有人共用的选项（只读展示，按键在自己的格子里） */
+.pk-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.pk-opt{display:flex;align-items:center;gap:9px;padding:14px 16px;border-radius:16px;
+  background:#fff;border:2.5px solid var(--line);box-shadow:0 3px 0 var(--line-2);
+  font-size:17px;font-weight:800;color:var(--ink-2);}
+.pk-opt-key{flex:none;width:30px;height:30px;border-radius:10px;
+  background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;}
+.pk-opt .ans-unit{font-size:13px;font-weight:800;color:var(--muted);margin-left:3px;}
+@media (max-width:700px){
+  .pk-opts{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .pk-opt{font-size:15px;padding:11px 13px;}
 }
 
-/* PK 的最终答案：ABCD 选项，触屏直接点，不用打字 */
-.ans-opts{display:grid;grid-template-columns:1fr;gap:10px;}
-.ans-opt{margin-bottom:0;min-height:56px;}
-.ans-opt .ans-unit{font-size:13px;opacity:.8;font-weight:800;margin-left:2px;}
-.ans-opt.chosen-ok{background:#E4FBEE;border-color:var(--green);
-  box-shadow:0 3px 0 var(--green);color:#17914F;cursor:default;}
-.ans-opt.chosen-ok .opt-key{background:var(--green);border-color:var(--green);color:#fff;}
+/* 竞速计时条 */
+.pk-race-timer{display:flex;align-items:center;gap:10px;padding:11px 15px;margin-bottom:14px;
+  background:#fff;border-radius:16px;border:2px solid #FFD9AB;
+  box-shadow:0 3px 0 rgba(255,150,150,.15);}
+.pk-race-timer.urgent{border-color:#FF6B6B;}
+.pk-race-timer.urgent .pk-race-fill{background:linear-gradient(90deg,#FF6B6B,#E63A3A);}
+.pk-race-ico{font-size:15px;flex:none;}
+.pk-race-track{flex:1;height:14px;background:#F1ECFF;border-radius:8px;overflow:hidden;}
+.pk-race-fill{height:100%;width:100%;border-radius:8px;
+  background:linear-gradient(90deg,#7DE7A8,#2ED573);transition:width .12s linear;}
+.pk-race-text{font-size:15px;font-weight:900;color:#8B7FD0;min-width:46px;text-align:right;}
+.pk-race-timer.urgent .pk-race-text{color:var(--red);}
 
-/* 桌面 / 教室一体机：PK 时把主容器放宽、字号放大，玩家卡横排一眼看全 */
+/* 答题格：每人一格。用 auto-fit，2 人时各占一半、4 人时一行四列 */
+.pk-pads{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  align-items:stretch;}
+.pk-pad{position:relative;padding:13px 13px 13px 19px;border-radius:18px;background:#fff;
+  border:2.5px solid var(--line);box-shadow:0 4px 0 rgba(124,92,255,.08);
+  overflow:hidden;transition:background .2s,border-color .2s;}
+.pk-pad::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;
+  background:var(--pk,#8B6BFF);}
+.pk-pad-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.pk-pad .pk-name{font-size:14.5px;font-weight:900;color:var(--pk,#6B4CE6);
+  cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pk-pad .pk-score{margin-left:auto;font-size:17px;font-weight:900;
+  color:var(--pk,#6B4CE6);flex:none;}
+.pk-pad .pk-score .pk-unit{font-size:11px;font-weight:800;opacity:.7;margin-left:1px;}
+.pk-keys{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.pk-key{min-height:58px;border:2.5px solid var(--line);border-radius:14px;
+  background:#F8F6FF;color:#6B4CE6;font-family:inherit;font-size:22px;font-weight:900;
+  cursor:pointer;transition:transform .12s,background .12s,box-shadow .12s;
+  box-shadow:0 3px 0 var(--line-2);}
+.pk-key:hover:not(:disabled){background:#F1ECFF;transform:translateY(-1px);}
+.pk-key:active:not(:disabled){transform:translateY(2px);box-shadow:none;}
+.pk-key:disabled{cursor:default;opacity:.4;}
+.pk-key.chosen-ok{background:#E4FBEE;border-color:var(--green);color:#17914F;
+  opacity:1;box-shadow:0 3px 0 var(--green);}
+.pk-key.chosen-no{background:#FFF3E0;border-color:var(--gold);color:#B26A00;
+  opacity:1;box-shadow:0 3px 0 var(--gold);}
+.pk-status{margin-top:9px;font-size:12.5px;font-weight:800;color:var(--muted);
+  text-align:center;line-height:1.5;}
+.pk-status.ok{color:#17914F;}
+.pk-status.no{color:#B26A00;}
+.pk-pad.correct-flash{background:#E4FBEE;border-color:var(--green);}
+.pk-pad.wrong-flash{background:#FFF3E0;border-color:var(--gold);}
+@keyframes pkPop{0%{transform:scale(1);}45%{transform:scale(1.035);}100%{transform:scale(1);}}
+.pk-pad.correct-flash,.pk-pad.wrong-flash{animation:pkPop .5s ease;}
+.pk-pad .pk-del{flex:none;width:28px;height:28px;border:none;border-radius:8px;
+  background:rgba(0,0,0,.06);color:#8B7FD0;cursor:pointer;
+  font-size:12px;font-weight:900;line-height:1;font-family:inherit;}
+.pk-pad .pk-del:hover{background:rgba(0,0,0,.12);color:#C2410C;}
+
+/* 本题结算 */
+.pk-result{display:none;margin-top:16px;padding:18px;border-radius:20px;
+  background:linear-gradient(140deg,#FFFCF2,#F5FBFF 60%,#FBF6FF);
+  border:2.5px dashed #FFD98A;}
+.pk-result.on{display:block;animation:fadeUp .25s ease;}
+.pk-res-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  font-size:15px;font-weight:800;color:var(--ink-2);margin-bottom:12px;}
+.pk-res-head b{color:var(--purple);font-weight:900;}
+.pk-res-tip{margin-left:auto;font-size:13.5px;font-weight:900;color:#D97706;}
+.pk-res-rows{display:grid;gap:8px;grid-template-columns:repeat(4,1fr);margin-bottom:12px;}
+.pk-res-row{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:12px;
+  background:#fff;border:2px solid var(--line);}
+.pk-res-row.fast{background:linear-gradient(135deg,#FFF6DC,#FFEEC2);border-color:#FFD98A;}
+.pk-res-row.hit{border-color:#B6EFCB;}
+.pk-res-name{font-size:12.5px;font-weight:900;color:var(--ink-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pk-res-time{font-size:16px;font-weight:900;color:var(--ink-2);}
+.pk-res-row.fast .pk-res-time{color:#D97706;}
+.pk-res-row.hit .pk-res-time{color:#17914F;}
+.pk-res-row.miss .pk-res-time{color:var(--muted);}
+.pk-res-note{font-size:13.5px;line-height:1.8;font-weight:700;color:var(--ink-3);
+  background:#fff;padding:12px 14px;border-radius:14px;}
+@media (max-width:700px){ .pk-res-rows{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:899px){ .pk-pads{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;} }
+
+/* 桌面 / 教室一体机：放大字号、玩家格横排一行 */
 @media (min-width:900px){
-  body[data-pk="1"] .wrap{max-width:min(1180px,96vw);}
-  body[data-pk="1"] .pk-card{padding:16px 18px;}
-  body[data-pk="1"] .pk-card .pk-score{font-size:36px;}
-  body[data-pk="1"] .pk-card .pk-name{font-size:16px;}
-  body[data-pk="1"] .pk-card .pk-sub{font-size:13px;}
-  body[data-pk="1"] .ans-opts{grid-template-columns:1fr 1fr;}
+  body[data-pk="1"] .wrap{max-width:min(1200px,96vw);}
   body[data-pk="1"] .qtext{font-size:19px;}
-  body[data-pk="1"] .opt{font-size:16px;min-height:58px;}
-  body[data-pk="1"] .pk-toast{font-size:22px;padding:16px 34px;}
+  body[data-pk="1"] .pk-opt{font-size:18px;padding:16px 18px;}
+  body[data-pk="1"] .pk-key{min-height:66px;font-size:24px;}
+  body[data-pk="1"] .pk-pad .pk-name{font-size:17px;}
+  body[data-pk="1"] .pk-pad .pk-score{font-size:20px;}
+  body[data-pk="1"] .pk-race-text{font-size:18px;min-width:54px;}
+  body[data-pk="1"] .pk-toast{font-size:26px;padding:18px 40px;}
   body[data-pk="1"] .next-big{font-size:22px;min-height:70px;}
 }
 
@@ -651,12 +710,16 @@ body{
 
     <div class="pk-bar" id="pkBar">
       <div class="pk-bar-head">
-        <span class="pk-title">🎮 同台 PK</span>
-        <span class="pk-meta">每人 <b id="pkRounds">5</b> 题 · 共 <b id="pkRoundsTotal">10</b> 题</span>
+        <span class="pk-title">🎮 同题竞速</span>
+        <span class="pk-meta">第 <b id="pkQNo">1</b> / <b id="pkQTotal">5</b> 题</span>
+        <span class="pk-limit">限时
+          <button class="pk-limit-btn" data-limit="30">30s</button>
+          <button class="pk-limit-btn on" data-limit="60">60s</button>
+          <button class="pk-limit-btn" data-limit="90">90s</button>
+        </span>
         <span class="spacer"></span>
         <button class="pk-add" id="pkAddPlayer">➕ 添加玩家</button>
       </div>
-      <div class="pk-cards" id="pkCards"></div>
     </div>
 
     <div class="goal-bar" id="goalBar">
@@ -700,16 +763,31 @@ body{
         <div class="facts-list" id="factsList"></div>
       </div>
 
-      <div class="section-title">
-        <span class="dot-mark"></span>思路闯关 · 一步一步想清楚
-        <span class="spacer"></span>
-        <button class="mini-btn" id="resetBtn">↺ 重做本题</button>
-        <button class="mini-btn primary" id="changeBtn">🔄 换一题</button>
+      <!-- PK：同题竞速。一道题给所有人，各人在自己格子里抢答，比谁快 -->
+      <div id="pkRace" style="display:none">
+        <div class="pk-opts" id="pkOpts"></div>
+        <div class="pk-race-timer" id="pkRaceTimer">
+          <span class="pk-race-ico">⏱</span>
+          <div class="pk-race-track"><div class="pk-race-fill" id="pkRaceFill"></div></div>
+          <span class="pk-race-text" id="pkRaceText">--</span>
+        </div>
+        <div class="pk-pads" id="pkPads"></div>
+        <div class="pk-result" id="pkResult"></div>
       </div>
-      <div id="steps"></div>
 
-      <div class="card answer locked" id="answerCard">
-        <div id="answerInner"></div>
+      <!-- 单人：一步一步想清楚 -->
+      <div id="soloFlow">
+        <div class="section-title">
+          <span class="dot-mark"></span>思路闯关 · 一步一步想清楚
+          <span class="spacer"></span>
+          <button class="mini-btn" id="resetBtn">↺ 重做本题</button>
+          <button class="mini-btn primary" id="changeBtn">🔄 换一题</button>
+        </div>
+        <div id="steps"></div>
+
+        <div class="card answer locked" id="answerCard">
+          <div id="answerInner"></div>
+        </div>
       </div>
 
       <div class="nav">
@@ -2888,7 +2966,7 @@ function syncUnitUI() {
   const empty = total === 0;
   $('practiceEmpty').style.display = empty ? 'block' : 'none';
   $('practiceBody').style.display = empty ? 'none' : 'block';
-  $('goalBar').style.display = empty ? 'none' : 'block';
+  $('goalBar').style.display = (empty || pkMode) ? 'none' : 'block';
 }
 
 /* =========================================================
@@ -2985,13 +3063,7 @@ function handleTimeout() {
   if (!q || q.state.solved) return;
   const st = q.state;
   st.timedOut = true; st.solved = true; st.timeUsed = TIME_LIMIT;
-  if (pkMode && pkActive) {
-    pkPlayers[pkTurn].done += 1;      /* 超时不得分，但这一题算答过了 */
-    renderPkBar();
-    flashPkCard(pkTurn, false);
-  } else {
-    doneCount++;
-  }
+  doneCount++;
   SFX.timeout();
   addWrongRecord(q, {
     stepIdx: st.stepIdx + 1,
@@ -3058,10 +3130,18 @@ function render() {
   $('counter').textContent = `第 ${current + 1} / ${questions.length} 题`;
   $('qtext').innerHTML = hl(p.text);
   renderFacts();
+  renderPkRace();                 /* PK 显示竞速区，单人自动隐藏 */
+  if (pkMode) {
+    renderPkBar();
+    renderNav();
+    updateBackBtn();
+    stopTimer();
+    $('timerBar').style.display = 'none';
+    return;
+  }
   renderSteps();
   renderAnswer();
   renderNav();
-  renderPkBar();
   renderGoal();
   updateBackBtn();
   startTimer();
@@ -3076,13 +3156,18 @@ function renderFacts() {
   box.style.display = '';
 
   const revealed = new Set();
-  const useReveals = p.steps.some(s => s.reveals && s.reveals.length);
-  if (useReveals) {
-    p.steps.forEach((s, i) => {
-      if (st.stepIdx > i && s.reveals) s.reveals.forEach(f => revealed.add(f));
-    });
+  if (pkMode) {
+    /* PK 是同题竞速，条件一次全给，不搞逐步解锁 */
+    p.facts.forEach((_, i) => revealed.add(i));
   } else {
-    for (let i = 0; i < Math.min(st.stepIdx, p.facts.length); i++) revealed.add(i);
+    const useReveals = p.steps.some(s => s.reveals && s.reveals.length);
+    if (useReveals) {
+      p.steps.forEach((s, i) => {
+        if (st.stepIdx > i && s.reveals) s.reveals.forEach(f => revealed.add(f));
+      });
+    } else {
+      for (let i = 0; i < Math.min(st.stepIdx, p.facts.length); i++) revealed.add(i);
+    }
   }
 
   const list = $('factsList'), countEl = $('factsCount'), subEl = $('factsSub');
@@ -3094,9 +3179,9 @@ function renderFacts() {
   }
   countEl.style.display = 'inline-block';
   countEl.textContent = `${revealed.size} / ${p.facts.length}`;
-  subEl.textContent = revealed.size === p.facts.length
-    ? '条件已经全部找到，可以用它们列式了'
-    : '已经找到部分条件，继续往下想';
+  subEl.textContent = pkMode
+    ? 'PK 模式 · 条件全部给出，看谁算得快！'
+    : (revealed.size === p.facts.length ? '条件已经全部找到，可以用它们列式了' : '已经找到部分条件，继续往下想');
   list.innerHTML = p.facts.map((f, i) => revealed.has(i)
     ? `<div class="fact"><span class="fact-no">${i + 1}</span><span>${hl(f)}</span></div>`
     : `<div class="fact locked"><span class="fact-no">?</span><span class="fact-hidden">待解锁的条件</span></div>`
@@ -3168,10 +3253,10 @@ function renderSteps() {
 
 /* 底部导航：题目可以一直往下出，所以用「第 N 题 + 已完成」代替固定圆点 */
 function renderNav() {
-  if (pkMode && pkActive) {
-    $('navInfo').innerHTML = `第 <b>${current + 1}</b> 题 · 当前 <b>${pkPlayers[pkTurn].name}</b> · 各答 ${PK_ROUNDS} 题`;
-    $('prevBtn').disabled = true;          /* PK 是每题换人，不回头翻 */
-    $('nextBtn').disabled = false;
+  if (pkMode) {
+    $('navInfo').innerHTML = `第 <b>${Math.min(pkRound + 1, PK_ROUNDS)}</b> / ${PK_ROUNDS} 题 · 一起抢答，比谁快`;
+    $('prevBtn').disabled = true;
+    $('nextBtn').disabled = true;      /* PK 用下面的大按钮推进 */
     return;
   }
   $('navInfo').innerHTML = `第 <b>${current + 1}</b> / ${questions.length} 题 · 本轮已完成 <b>${doneCount}</b> 题`;
@@ -3185,14 +3270,10 @@ function renderNav() {
 function nextBtnHtml() {
   const isLast = current >= questions.length - 1;
   let label = '下一题 →', hint;
-  if (pkMode && pkActive) {
-    if (pkGameOver()) {
-      label = '看结果 🏆';
-      hint = '两位玩家都答完啦，看看谁赢了';
-    } else {
-      label = '换 ' + pkPlayers[(pkTurn + 1) % pkPlayers.length].name + ' 来 →';
-      hint = pkPlayers.map(p => `${p.name} ${Math.min(p.done, PK_ROUNDS)}/${PK_ROUNDS}`).join('　·　');
-    }
+  if (pkMode) {
+    const last = pkRound >= PK_ROUNDS;
+    label = last ? '看结果 🏆' : '下一题 →';
+    hint = last ? `${PK_ROUNDS} 题都答完啦，看看谁赢了` : `还剩 ${PK_ROUNDS - pkRound} 题`;
   } else if (isLast) {
     hint = '这是本批最后一题，点一下会自动出新题';
   } else {
@@ -3217,17 +3298,8 @@ function mountNext() {
 }
 
 function goNext() {
+  if (pkMode) { pkNextRound(); return; }   /* PK 的推进交给竞速流程 */
   SFX.click();
-  if (pkMode && pkActive) {
-    if (pkGameOver()) { openPkResult(); return; }
-    pkTurn = (pkTurn + 1) % pkPlayers.length;
-    appendQuestion();
-    current = questions.length - 1;
-    render();
-    showTurnToast();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
   if (current < questions.length - 1) {
     current++;
   } else {
@@ -3262,35 +3334,6 @@ function renderAnswer() {
   }
 
   card.classList.remove('locked');
-
-  /* PK 模式：给 ABCD 四个候选答案，触屏直接点，不用打字（适合教室一体机） */
-  if (pkMode) {
-    const ao = getAnswerOptions(q);
-    const unitTag = p.unit ? `<span class="ans-unit">${p.unit}</span>` : '';
-    inner.innerHTML = `
-      <div class="answer-hint">✍ 算好了就选一个答案吧，点一下就行</div>
-      <div class="ans-opts" id="ansOpts">
-        ${ao.options.map((t, i) => `<button class="opt ans-opt" data-ao="${i}">
-            <span class="opt-key">${LETTER[i]}</span>
-            <span class="opt-text">${t}${unitTag}</span>
-          </button>`).join('')}
-      </div>
-      <div class="feedback" id="feedback"></div>`;
-    $('ansOpts').addEventListener('click', e => {
-      const b = e.target.closest('.ans-opt');
-      if (!b || b.disabled) return;
-      checkMc(+b.dataset.ao);
-    });
-    if (st.solved) {
-      const btns = $('ansOpts').querySelectorAll('.ans-opt');
-      btns.forEach(b => { b.disabled = true; });
-      if (btns[ao.answer]) btns[ao.answer].classList.add('chosen-ok');
-      showFb('ok', `✔ 完全正确！答案是 <b>${p.answer}${p.unit ? ' ' + p.unit : ''}</b>。<br><span class="fb-sub">${p.praise}</span>`);
-      mountNext();
-    }
-    return;
-  }
-
   inner.innerHTML = `
     <div class="answer-hint">✍ 自己算出最后一步的结果，填进来看看！</div>
     <div class="answer-row">
@@ -3384,17 +3427,7 @@ function handleChoose(stepIdx, optIdx) {
 /* =========================================================
    检查最终答案
    ========================================================= */
-/* PK 用的是 ABCD 选项：为每道题生成一份稳定的 4 个候选答案 */
-function getAnswerOptions(q) {
-  if (q._ansOpts) return q._ansOpts;
-  const correct = String(q.problem.answer);
-  const wrongs = numWrongs(q.problem.answer, []).map(String);
-  const pool = shuffleAll([correct, ...wrongs.slice(0, 3)]);
-  q._ansOpts = { options: pool, answer: pool.indexOf(correct) };
-  return q._ansOpts;
-}
-
-/* 答对 / 答错：文字输入和 ABCD 选答共用同一套结算逻辑 */
+/* 答对 / 答错：把结果结算到分、连对、历史、错题本 */
 function finalizeCorrect(q) {
   const p = q.problem, st = q.state;
   const shown = `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
@@ -3405,12 +3438,8 @@ function finalizeCorrect(q) {
   showFb('ok', `✔ 完全正确！答案是 <b>${shown}</b>。<br><span class="fb-sub">${p.praise}</span>`);
   addScore(30, false);
   incCombo();
-  if (pkMode && pkActive) {
-    pkAwardCurrent();
-  } else {
-    doneCount++;
-    renderGoal();
-  }
+  doneCount++;
+  renderGoal();
   if (!st.hadWrong) {
     incPerfect();
     addScore(20, true);
@@ -3466,25 +3495,6 @@ function check() {
     finalizeCorrect(q);
   } else {
     finalizeWrong(q, raw);
-  }
-}
-
-/* PK 模式：点 ABCD 直接判定，不用打字 */
-function checkMc(idx) {
-  const q = questions[current];
-  if (!q) return;
-  const st = q.state;
-  if (st.solved) return;
-  const ao = getAnswerOptions(q);
-  const wrap = $('ansOpts');
-  const btns = wrap ? wrap.querySelectorAll('.ans-opt') : [];
-  if (idx === ao.answer) {
-    btns.forEach(b => { b.disabled = true; });
-    if (btns[idx]) btns[idx].classList.add('chosen-ok');
-    finalizeCorrect(q);
-  } else {
-    if (btns[idx]) { btns[idx].disabled = true; btns[idx].classList.add('wrong'); }
-    finalizeWrong(q, `${LETTER[idx]}. ${ao.options[idx]}`);
   }
 }
 
@@ -3739,21 +3749,33 @@ $('clearHistory').addEventListener('click', () => {
 });
 
 /* =========================================================
-   双人 PK（同机轮流答题）
+   PK：同题竞速
+   一道题同时发给所有人，各人在自己的格子里点 ABCD，比谁又快又对。
+   PK 里不再一步步引导——那是单人模式的活；这里条件一次全给。
    ========================================================= */
-let PK_ROUNDS = 5;                   /* 每人答几题；人多时自动调小，别让一局太长 */
-let pkMode = false, pkActive = false, pkTurn = 0;
 const PK_MAX = 4;
+const PK_ROUNDS = 5;                 /* 一局共几题（所有人做同一道题） */
 const PK_COLORS = ['#6B4CE6', '#FF6B9D', '#2ED573', '#FFA751'];
-let pkPlayers = [
-  { name: '玩家1', score: 0, done: 0, perfect: 0 },
-  { name: '玩家2', score: 0, done: 0, perfect: 0 }
-];
+let PK_LIMIT = 60;                   /* 每题限时（秒） */
+let pkMode = false;
+let pkRound = 0;                     /* 已完成的题数 */
+let pkRace = null;                   /* 当前这一题的竞速状态 */
 let pkRenderedCount = -1;
-function syncPkRounds() { PK_ROUNDS = pkPlayers.length <= 2 ? 5 : 3; }
+let pkPlayers = [
+  { name: '玩家1', score: 0, correct: 0, fast: 0 },
+  { name: '玩家2', score: 0, correct: 0, fast: 0 }
+];
 function pkNewPlayer() {
-  return { name: '玩家' + (pkPlayers.length + 1), score: 0, done: 0, perfect: 0 };
+  return { name: '玩家' + (pkPlayers.length + 1), score: 0, correct: 0, fast: 0 };
 }
+function pkResetStats() {
+  pkPlayers.forEach(p => { p.score = 0; p.correct = 0; p.fast = 0; });
+  pkRound = 0;
+}
+/* 本题正在作答中：不许加人减人改限时，否则每人一格的索引会错位 */
+function pkRaceLive() { return !!pkRace && pkRace.live && !pkRace.resolved; }
+/* 本题还没收官（含倒计时）：这种时候也不许改人数 */
+function pkRaceBusy() { return !!pkRace && !pkRace.resolved; }
 
 /* 同一个元素要重放同一个动画，必须先摘类、强制重排一次，否则不会重播 */
 function replayAnim(el, cls) {
@@ -3762,93 +3784,277 @@ function replayAnim(el, cls) {
   void el.offsetWidth;
   el.classList.add(cls);
 }
-function flashPkCard(idx, good) {
-  const card = $('pkCard' + idx);
-  if (!card) return;
-  const cls = good ? 'correct-flash' : 'wrong-flash';
-  replayAnim(card, cls);
-  setTimeout(() => card.classList.remove(cls), 620);
-}
 
-/* 玩家卡：人数变化时才整体重建，平时原地更新文字（否则闪一下就被丢掉了） */
-function buildPkCards() {
-  const wrap = $('pkCards');
+/* 一题的 4 个候选答案：正确答案 + 3 个像样的干扰项，生成一次就固定 */
+function buildPkOptions(problem) {
+  const correct = String(problem.answer);
+  const wrongs = numWrongs(problem.answer, []).map(String);
+  const pool = shuffleAll([correct, ...wrongs.slice(0, 3)]);
+  return { options: pool, answer: pool.indexOf(correct) };
+}
+/* ---------- 玩家格（每人一格，只放 ABCD 四个键） ---------- */
+function buildPkPads() {
+  const wrap = $('pkPads');
   if (!wrap) return;
   wrap.innerHTML = pkPlayers.map((p, i) => `
-    <div class="pk-card" id="pkCard${i}" data-idx="${i}" style="--pk:${PK_COLORS[i % PK_COLORS.length]}">
-      <div class="pk-name" data-rename="${i}" title="点一下可以改名"><span id="pkName${i}">${p.name}</span><span class="pk-edit">✏️</span></div>
-      <div class="pk-score"><span id="pkScore${i}">${p.score}</span><span class="pk-unit">分</span></div>
-      <div class="pk-sub" id="pkSub${i}">0/${PK_ROUNDS} 题 · 完美 0</div>
-      ${pkPlayers.length > 2 ? `<button class="pk-del" data-del="${i}" title="移除这位玩家" aria-label="移除这位玩家">✕</button>` : ''}
+    <div class="pk-pad" id="pkPad${i}" data-idx="${i}" style="--pk:${PK_COLORS[i % PK_COLORS.length]}">
+      <div class="pk-pad-head">
+        <span class="pk-name" data-rename="${i}" title="点一下可以改名">${p.name}</span>
+        <span class="pk-score" id="pkPadScore${i}">${p.score}<span class="pk-unit">分</span></span>
+        ${pkPlayers.length > 2 ? `<button class="pk-del" data-del="${i}" title="移除这位玩家" aria-label="移除这位玩家">✕</button>` : ''}
+      </div>
+      <div class="pk-keys">
+        ${LETTER.split('').map((L, k) =>
+          `<button class="pk-key" data-p="${i}" data-k="${k}" aria-label="${p.name} 选 ${L}">${L}</button>`).join('')}
+      </div>
+      <div class="pk-status" id="pkPadStatus${i}">准备…</div>
     </div>`).join('');
   pkRenderedCount = pkPlayers.length;
+  wrap.querySelectorAll('.pk-key').forEach(b => {
+    b.addEventListener('click', () => pkAnswer(+b.dataset.p, +b.dataset.k));
+  });
   wrap.querySelectorAll('[data-del]').forEach(b => {
     b.addEventListener('click', () => removePkPlayer(+b.dataset.del));
   });
   wrap.querySelectorAll('[data-rename]').forEach(el => {
     el.addEventListener('click', () => renamePkPlayer(+el.dataset.rename));
   });
+  pkSetKeysEnabled(false);
+}
+function pkSetKeysEnabled(on) {
+  document.querySelectorAll('#pkPads .pk-key').forEach(b => {
+    if (!on) { b.disabled = true; return; }
+    if (b.classList.contains('chosen-ok') || b.classList.contains('chosen-no')) return;
+    b.disabled = false;
+  });
+}
+/* 新的一题：把上一题留在按键上的对错痕迹清掉 */
+function pkResetPads() {
+  document.querySelectorAll('#pkPads .pk-key').forEach(b => {
+    b.classList.remove('chosen-ok', 'chosen-no');
+    b.disabled = true;
+  });
 }
 function renamePkPlayer(i) {
-  if (!pkPlayers[i]) return;
+  if (!pkPlayers[i] || pkRaceBusy()) return;
   const v = window.prompt('给这位玩家改个名字（最多 6 个字）：', pkPlayers[i].name);
   if (v === null) return;
   const s = v.trim().slice(0, 6);
   if (!s) return;
   pkPlayers[i].name = s;
-  renderPkBar();
+  const pad = $('pkPad' + i);
+  if (pad) { const el = pad.querySelector('.pk-name'); if (el) el.textContent = s; }
   SFX.click();
 }
 function addPkPlayer() {
-  if (pkPlayers.length >= PK_MAX) return;
+  if (pkPlayers.length >= PK_MAX || pkRaceBusy()) return;
   pkPlayers.push(pkNewPlayer());
-  syncPkRounds();
-  buildPkCards();
+  if (pkRace) pkRace.done.push(null);          /* 新玩家的作答位跟着补一个 */
+  buildPkPads();
   renderPkBar();
+  renderPkStatus();
+  if (pkRace && pkRace.resolved) renderPkResult();
   SFX.click();
 }
 function removePkPlayer(i) {
-  if (pkPlayers.length <= 2) return;
+  if (pkPlayers.length <= 2 || pkRaceBusy()) return;
   pkPlayers.splice(i, 1);
   pkPlayers.forEach((p, k) => { if (/^玩家\d+$/.test(p.name)) p.name = '玩家' + (k + 1); });
-  if (pkTurn >= pkPlayers.length) pkTurn = 0;
-  syncPkRounds();
-  buildPkCards();
+  if (pkRace) pkRace.done.splice(i, 1);        /* 对位删掉，别把别人的成绩错位 */
+  buildPkPads();
   renderPkBar();
+  renderPkStatus();
+  if (pkRace && pkRace.resolved) renderPkResult();
   SFX.click();
 }
-function pkGameOver() {
-  return pkMode && pkActive && pkPlayers.every(p => p.done >= PK_ROUNDS);
+
+/* ---------- 竞速核心 ---------- */
+function pkStartRound() {
+  const pool = poolTemplates();
+  if (pool.length === 0) return;
+  const q = newQuestion(nextTemplate(pool));
+  questions.push(q);
+  current = questions.length - 1;
+  if (pkRace && pkRace.tick) clearInterval(pkRace.tick);
+  pkRace = {
+    q,
+    opts: buildPkOptions(q.problem),
+    startedAt: 0,
+    endsAt: 0,
+    done: pkPlayers.map(() => null),   /* null=还没按；{ok,ms,key}=已按 */
+    fastest: -1,
+    live: false,
+    resolved: false,
+    tick: null
+  };
+  const box = $('pkResult');
+  if (box) { box.classList.remove('on'); box.innerHTML = ''; }
+  render();
+  pkResetPads();
+  pkCountdown();
+}
+/* 3-2-1：所有人同时看到题目、同时开始计时，才谈得上比快 */
+function pkCountdown() {
+  let n = 3;
+  const step = () => {
+    if (!pkRace || pkRace.resolved) return;
+    if (n > 0) { pkToastMsg(String(n)); n--; setTimeout(step, 650); return; }
+    pkToastMsg('开始！');
+    pkRace.live = true;
+    pkRace.startedAt = Date.now();
+    pkRace.endsAt = pkRace.startedAt + PK_LIMIT * 1000;
+    pkSetKeysEnabled(true);
+    updatePkTimer(PK_LIMIT * 1000);
+    renderPkStatus();
+    pkRace.tick = setInterval(pkTick, 120);
+  };
+  step();
+}
+function pkTick() {
+  if (!pkRace || pkRace.resolved) return;
+  const left = Math.max(0, pkRace.endsAt - Date.now());
+  updatePkTimer(left);
+  if (left <= 0) pkResolve();
+}
+function updatePkTimer(leftMs) {
+  const fill = $('pkRaceFill'), txt = $('pkRaceText'), bar = $('pkRaceTimer');
+  if (!fill || !txt) return;
+  fill.style.width = Math.max(0, Math.min(100, leftMs / (PK_LIMIT * 1000) * 100)) + '%';
+  txt.textContent = Math.ceil(leftMs / 1000) + 's';
+  if (bar) bar.classList.toggle('urgent', leftMs <= 10000);
+}
+function pkAnswer(pi, keyIdx) {
+  if (!pkRace || !pkRace.live || pkRace.resolved) return;
+  if (pkRace.done[pi]) return;                     /* 每人每题只有一次机会，按下就定 */
+  const ok = keyIdx === pkRace.opts.answer;
+  pkRace.done[pi] = { ok, ms: Date.now() - pkRace.startedAt, key: keyIdx };
+  /* 反馈必须先落在这一帧上，再谈别的 */
+  const pad = $('pkPad' + pi);
+  if (pad) {
+    replayAnim(pad, ok ? 'correct-flash' : 'wrong-flash');
+    setTimeout(() => pad.classList.remove('correct-flash', 'wrong-flash'), 640);
+  }
+  const btn = document.querySelector(`.pk-key[data-p="${pi}"][data-k="${keyIdx}"]`);
+  if (btn) { btn.classList.remove('chosen-ok', 'chosen-no'); btn.classList.add(ok ? 'chosen-ok' : 'chosen-no'); }
+  document.querySelectorAll(`.pk-key[data-p="${pi}"]`).forEach(b => { b.disabled = true; });
+  if (ok) SFX.correct(); else SFX.wrong();
+  renderPkStatus();
+  if (pkRace.done.every(d => d)) pkResolve();      /* 都按完了，立刻收官，不用等满 */
+}
+function pkResolve() {
+  if (!pkRace || pkRace.resolved) return;
+  pkRace.resolved = true;
+  if (pkRace.tick) { clearInterval(pkRace.tick); pkRace.tick = null; }
+  pkRound++;
+  const correctOnes = pkRace.done
+    .map((d, i) => (d && d.ok ? { i, ms: d.ms } : null))
+    .filter(Boolean).sort((a, b) => a.ms - b.ms);
+  const fastest = correctOnes.length ? correctOnes[0].i : -1;
+  pkRace.fastest = fastest;
+  pkPlayers.forEach((p, i) => {
+    const d = pkRace.done[i];
+    if (!d || !d.ok) return;
+    p.correct += 1;
+    p.score += (i === fastest) ? 3 : 2;             /* 答对 2 分，最快再 +1 */
+    if (i === fastest) p.fast += 1;
+  });
+  renderPkBar();
+  renderPkStatus();
+  renderPkResult();
+  if (correctOnes.length) SFX.levelup(); else SFX.timeout();
+}
+function renderPkResult() {
+  const box = $('pkResult');
+  if (!box || !pkRace) return;
+  const fastest = pkRace.fastest;
+  const p = pkRace.q.problem, o = pkRace.opts;
+  const rows = pkPlayers.map((pl, i) => {
+    const d = pkRace.done[i];
+    let t = '未作答', cls = 'miss';
+    if (d && d.ok) { t = (d.ms / 1000).toFixed(1) + ' 秒'; cls = (i === fastest) ? 'fast' : 'hit'; }
+    else if (d) { t = '答错'; }
+    return `<div class="pk-res-row ${cls}">
+        <span class="pk-res-name">${pl.name}</span>
+        <span class="pk-res-time">${i === fastest ? '⚡ ' : ''}${t}</span>
+      </div>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="pk-res-head">
+      <span>本题答案：<b>${LETTER[o.answer]}. ${o.options[o.answer]}${p.unit ? ' ' + p.unit : ''}</b></span>
+      <span class="pk-res-tip">${fastest >= 0 ? '⚡ ' + pkPlayers[fastest].name + ' 最快' : '本题没人答对'}</span>
+    </div>
+    <div class="pk-res-rows">${rows}</div>
+    <div class="pk-res-note">💡 ${p.wrongTip}</div>
+    <div class="next-wrap">${nextBtnHtml().html}</div>`;
+  box.classList.add('on');
+  const b = $('nextBig');
+  if (b) b.addEventListener('click', pkNextRound);
+}
+function pkNextRound() {
+  SFX.click();
+  if (pkRound >= PK_ROUNDS) { openPkResult(); return; }
+  pkStartRound();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function renderPkRace() {
+  const race = $('pkRace'), solo = $('soloFlow');
+  if (!race || !solo) return;
+  if (!pkMode) { race.style.display = 'none'; solo.style.display = ''; return; }
+  solo.style.display = 'none';
+  race.style.display = 'block';
+  if (pkRenderedCount !== pkPlayers.length) buildPkPads();
+  if (!pkRace) return;
+  const o = pkRace.opts, p = pkRace.q.problem;
+  const box = $('pkOpts');
+  if (box) box.innerHTML = o.options.map((t, i) =>
+    `<div class="pk-opt"><span class="pk-opt-key">${LETTER[i]}</span>
+      <span class="pk-opt-text">${t}${p.unit ? `<span class="ans-unit">${p.unit}</span>` : ''}</span></div>`
+  ).join('');
+  renderPkStatus();
 }
 function renderPkBar() {
   if (!pkMode) return;
-  if (pkRenderedCount !== pkPlayers.length) buildPkCards();
-  pkPlayers.forEach((p, i) => {
-    const nm = $('pkName' + i), sc = $('pkScore' + i), sb = $('pkSub' + i), cd = $('pkCard' + i);
-    if (!nm || !sc || !sb || !cd) return;
-    if (nm.textContent !== p.name) nm.textContent = p.name;
-    if (sc.textContent !== String(p.score)) sc.textContent = p.score;
-    sb.textContent = `${Math.min(p.done, PK_ROUNDS)}/${PK_ROUNDS} 题 · 完美 ${p.perfect}`;
-    cd.classList.toggle('turn', pkActive && pkTurn === i);
-  });
   const addBtn = $('pkAddPlayer');
   if (addBtn) {
-    const started = pkActive && pkPlayers.some(p => p.done > 0);
-    addBtn.disabled = pkPlayers.length >= PK_MAX || started;
-    addBtn.textContent = pkPlayers.length >= PK_MAX ? '已满 4 人'
-      : started ? '开局后不能加人' : '➕ 添加玩家';
+    const full = pkPlayers.length >= PK_MAX, busy = pkRaceBusy();
+    addBtn.disabled = full || busy;
+    addBtn.textContent = full ? '已满 4 人' : busy ? '本题进行中…' : '➕ 添加玩家';
   }
-  const r = $('pkRounds'), rt = $('pkRoundsTotal');
-  if (r) r.textContent = PK_ROUNDS;
-  if (rt) rt.textContent = pkPlayers.length * PK_ROUNDS;
+  const qn = $('pkQNo'), qt = $('pkQTotal');
+  if (qn) qn.textContent = Math.min(pkRound + 1, PK_ROUNDS);
+  if (qt) qt.textContent = PK_ROUNDS;
+  document.querySelectorAll('.pk-limit-btn').forEach(b => {
+    b.disabled = pkRaceBusy();
+    b.classList.toggle('on', +b.dataset.limit === PK_LIMIT);
+  });
 }
-function showTurnToast() {
+function renderPkStatus() {
+  pkPlayers.forEach((p, i) => {
+    const st = $('pkPadStatus' + i), sc = $('pkPadScore' + i);
+    if (sc) sc.innerHTML = p.score + '<span class="pk-unit">分</span>';
+    if (!st) return;
+    const d = pkRace && pkRace.done[i];
+    if (!d) {
+      const waiting = pkRace && !pkRace.live && !pkRace.resolved;
+      st.textContent = waiting ? '准备…'
+        : (pkRace && pkRace.resolved ? '未作答' : '作答中…');
+      st.className = 'pk-status';
+    } else if (d.ok) {
+      st.textContent = (d.ms / 1000).toFixed(1) + ' 秒 ✓';
+      st.className = 'pk-status ok';
+    } else {
+      st.textContent = '答错了 ✗';
+      st.className = 'pk-status no';
+    }
+  });
+}
+function pkToastMsg(text) {
   const t = $('pkToast');
   if (!t) return;
-  t.textContent = `轮到 ${pkPlayers[pkTurn].name} 啦！`;
+  t.textContent = text;
   t.classList.add('on');
   clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('on'), 1500);
+  t._t = setTimeout(() => t.classList.remove('on'), 1400);
 }
 function closePkResult() {
   const m = $('pkModal');
@@ -3856,44 +4062,39 @@ function closePkResult() {
 }
 function setPkMode(on) {
   pkMode = on;
-  pkActive = on;
-  pkTurn = 0;
   document.body.dataset.pk = on ? '1' : '0';   /* 桌面/一体机据此切成宽屏布局 */
   $('pkToggle').classList.toggle('on', on);
   $('pkToggle').textContent = on ? '🎮 PK' : '🎮';
   $('pkBar').classList.toggle('on', on);
   $('goalBar').style.display = on ? 'none' : (selectedUnits.length ? 'block' : 'none');
   closePkResult();
-  syncPkRounds();
+  /* 清掉上一局的残留 */
+  if (pkRace && pkRace.tick) clearInterval(pkRace.tick);
+  pkRace = null;
+  questions = []; tplQueue = []; current = 0;
+  const box = $('pkResult');
+  if (box) { box.classList.remove('on'); box.innerHTML = ''; }
+  /* 单人区也要清空：否则 #nextBig 会在隐藏的引导区里留一个，出现重复 id */
+  const ai = $('answerInner'); if (ai) ai.innerHTML = '';
+  const stEl = $('steps'); if (stEl) stEl.innerHTML = '';
+  pkResetStats();
   if (on) {
-    pkPlayers.forEach(p => { p.score = 0; p.done = 0; p.perfect = 0; });
-    buildPkCards();
+    syncUnitUI();
+    if (poolTemplates().length === 0) { renderPkRace(); renderPkBar(); return; }
     SFX.levelup();
+    pkStartRound();
+  } else {
+    buildSession();
+    renderAll();
   }
-  buildSession();
-  renderAll();
-  if (on) showTurnToast();
-}
-/* 当前这一题算给谁：答对 30 分，整题零失误再加 20 分 */
-function pkAwardCurrent() {
-  const p = pkPlayers[pkTurn];
-  const st = questions[current] && questions[current].state;
-  const clean = !(st && st.hadWrong);
-  p.score += clean ? 50 : 30;
-  p.done += 1;
-  if (clean) p.perfect += 1;
-  renderPkBar();
-  flashPkCard(pkTurn, clean);
 }
 function openPkResult() {
-  pkActive = false;
-  renderPkBar();
   const MEDALS = ['🥇', '🥈', '🥉', '4️⃣'];
-  const sorted = pkPlayers.slice().sort((a, b) => b.score - a.score);
+  const sorted = pkPlayers.slice().sort((a, b) => b.score - a.score || b.correct - a.correct);
   const tie = sorted.length > 1 && sorted[0].score === sorted[1].score;
   const rows = sorted.map((p, i) => `<div class="pk-rank-row${(!tie && i === 0) ? ' first' : ''}">
       <span class="pk-medal">${tie && i < 2 ? '🤝' : (MEDALS[i] || (i + 1))}</span>
-      <span>第 ${i + 1} 名 · ${p.name}<span class="pk-rd"> · 答 ${p.done} 题 · 完美 ${p.perfect}</span></span>
+      <span>第 ${i + 1} 名 · ${p.name}<span class="pk-rd"> · 答对 ${p.correct} 题 · 最快 ${p.fast} 次</span></span>
       <span class="pk-rs">${p.score}<span style="font-size:12px;">分</span></span>
     </div>`).join('');
   $('pkModalCard').innerHTML = `
@@ -3912,6 +4113,14 @@ function openPkResult() {
 
 $('pkToggle').addEventListener('click', () => { SFX.click(); setPkMode(!pkMode); });
 $('pkAddPlayer').addEventListener('click', addPkPlayer);
+document.querySelectorAll('.pk-limit-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    if (pkRaceBusy()) return;
+    PK_LIMIT = +b.dataset.limit;    renderPkBar();
+    updatePkTimer(PK_LIMIT * 1000);
+    SFX.click();
+  });
+});
 
 /* =========================================================
    启动
