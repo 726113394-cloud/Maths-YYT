@@ -6,8 +6,32 @@
 <title>数学思维闯关 · 四年级上册</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;}
+
+:root{
+  --ink:#3a3355;
+  --ink-2:#4a4166;
+  --ink-3:#6b6385;
+  --muted:#a79fc2;
+  --line:#EDE8FF;
+  --line-2:#E4DDFF;
+  --purple:#6B4CE6;
+  --purple-2:#8B6BFF;
+  --purple-deep:#4E35C4;
+  --gold:#FFA751;
+  --gold-2:#FFD86B;
+  --gold-deep:#E8944A;
+  --pink:#FF6B9D;
+  --pink-deep:#B83060;
+  --green:#2ED573;
+  --green-deep:#1FA85A;
+  --red:#E63A3A;
+  --card:#ffffff;
+  --shadow-1:0 4px 0 rgba(124,92,255,.06),0 10px 22px rgba(124,92,255,.08);
+  --shadow-2:0 5px 0 rgba(124,92,255,.07),0 16px 32px rgba(124,92,255,.11);
+}
+
 body{
-  margin:0;padding:0;min-height:100vh;color:#3a3355;
+  margin:0;padding:0;min-height:100vh;color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   background-color:#FFFBF2;
   background-image:
@@ -19,60 +43,59 @@ body{
 }
 .wrap{max-width:760px;margin:0 auto;padding:24px 16px 64px;}
 
-.hero{text-align:center;margin-bottom:16px;}
+.hero{text-align:center;margin-bottom:14px;}
 .hero .mascot{font-size:46px;line-height:1;margin-bottom:4px;
   display:inline-block;animation:bob 3s ease-in-out infinite;}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-9px) rotate(4deg);}}
 .hero h1{font-size:27px;margin:0 0 7px;font-weight:900;letter-spacing:.8px;
   background:linear-gradient(120deg,#FF9F43 0%,#FF6B9D 45%,#7C5CFF 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.hero p{margin:0;font-size:13px;font-weight:700;color:#a79fc2;letter-spacing:.5px;}
+.hero p{margin:0;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.5px;}
 
-.tab-nav{display:flex;gap:8px;margin-bottom:16px;padding:6px;
-  background:rgba(255,255,255,.85);backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);border-radius:18px;
+/* ============ 顶部标签 ============ */
+.tab-nav{display:flex;gap:8px;margin-bottom:14px;padding:6px;
+  background:#fff;border-radius:18px;
   border:2.5px solid #FFE3A8;box-shadow:0 4px 0 #FFE3A8;}
-.tab-btn{flex:1;padding:10px 12px;border:none;background:transparent;
-  font-family:inherit;font-size:13.5px;font-weight:800;color:#8B7FD0;
+.tab-btn{flex:1;min-height:48px;padding:10px 12px;border:none;background:transparent;
+  font-family:inherit;font-size:14.5px;font-weight:800;color:#8B7FD0;
   cursor:pointer;border-radius:12px;transition:.2s;letter-spacing:.3px;}
-.tab-btn:hover{background:#F8F6FF;color:#6B4CE6;}
-.tab-btn.active{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;
-  box-shadow:0 3px 0 #4E35C4;}
+.tab-btn:hover{background:#F8F6FF;color:var(--purple);}
+.tab-btn.active{background:linear-gradient(135deg,var(--purple-2),var(--purple));color:#fff;
+  box-shadow:0 3px 0 var(--purple-deep);}
 .tab-btn .badge{display:inline-block;min-width:19px;height:19px;
-  padding:0 5px;margin-left:3px;background:#FF6B9D;color:#fff;
+  padding:0 5px;margin-left:3px;background:var(--pink);color:#fff;
   font-size:11px;font-weight:900;border-radius:10px;line-height:19px;text-align:center;}
-.tab-btn.active .badge{background:#fff;color:#6B4CE6;}
+.tab-btn.active .badge{background:#fff;color:var(--purple);}
 
+/* ============ 计分条 ============ */
 .score-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;
-  margin-bottom:14px;background:rgba(255,255,255,.94);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-radius:18px;border:2.5px solid #FFE3A8;
+  margin-bottom:14px;background:#fff;border-radius:18px;border:2.5px solid #FFE3A8;
   box-shadow:0 4px 0 #FFE3A8,0 12px 28px rgba(255,200,100,.18);}
-.score-item{display:flex;align-items:center;gap:5px;padding:6px 12px;
+.score-item{display:flex;align-items:center;gap:5px;padding:6px 10px;
   border-radius:12px;background:linear-gradient(140deg,#FFFCF2,#FFF6E0);}
 .score-icon{font-size:16px;line-height:1;}
 .score-value{font-size:17px;font-weight:900;color:#D97706;
   min-width:18px;text-align:center;transition:color .2s;}
-.score-label{font-size:11.5px;font-weight:800;color:#a79fc2;}
+.score-label{font-size:11.5px;font-weight:800;color:var(--muted);}
 .score-actions{margin-left:auto;display:flex;gap:5px;}
 .score-toggle{border:none;background:transparent;color:#8B7FD0;
-  font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;
-  padding:6px 10px;border-radius:10px;transition:.18s;}
-.score-toggle:hover{background:#F6F2FF;color:#6B4CE6;}
+  font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;
+  min-height:44px;padding:6px 10px;border-radius:10px;transition:.18s;}
+.score-toggle:hover{background:#F6F2FF;color:var(--purple);}
 .score-bar.collapsed .score-item{display:none;}
 .score-bar.collapsed .score-actions{margin-left:0;}
 .score-value.pulse{animation:scorePulse .55s ease;}
 @keyframes scorePulse{
   0%{transform:scale(1);color:#D97706;}
-  45%{transform:scale(1.55);color:#FF9F43;}
+  45%{transform:scale(1.55);color:var(--gold);}
   100%{transform:scale(1);color:#D97706;}
 }
 .score-float{position:fixed;z-index:999;pointer-events:none;
-  font-size:24px;font-weight:900;color:#FF9F43;
+  font-size:24px;font-weight:900;color:var(--gold);
   transform:translate(-50%,0);will-change:transform,opacity;
   text-shadow:0 2px 6px rgba(255,150,50,.4);
   animation:floatUp 1.4s cubic-bezier(.34,1.2,.64,1) forwards;}
-.score-float.bonus{font-size:28px;color:#FF6B9D;}
+.score-float.bonus{font-size:28px;color:var(--pink);}
 @keyframes floatUp{
   0%{opacity:0;transform:translate(-50%,0) scale(.5);}
   18%{opacity:1;transform:translate(-50%,-14px) scale(1.18);}
@@ -80,31 +103,72 @@ body{
   100%{opacity:0;transform:translate(-50%,-80px) scale(1);}
 }
 
-/* 难度选择 */
-.tool-bar{display:flex;align-items:center;gap:8px;padding:12px 14px;
-  margin-bottom:14px;flex-wrap:wrap;background:#fff;border-radius:18px;
+/* ============ 进度条（本轮目标） ============ */
+.goal-bar{padding:12px 16px;margin-bottom:14px;background:#fff;border-radius:18px;
+  box-shadow:0 3px 0 rgba(124,92,255,.06),0 8px 18px rgba(124,92,255,.08);
+  border:2px solid #EFE9FF;}
+.goal-line{display:flex;align-items:center;gap:8px;font-size:14px;
+  font-weight:800;color:var(--ink-2);margin-bottom:8px;}
+.goal-line .goal-num{margin-left:auto;color:var(--purple);font-weight:900;font-size:15px;}
+.goal-track{height:14px;background:#F1ECFF;border-radius:8px;overflow:hidden;}
+.goal-fill{height:100%;width:0%;border-radius:8px;
+  background:linear-gradient(90deg,#7DE7A8,#2ED573);
+  transition:width .45s cubic-bezier(.34,1.2,.64,1);}
+.goal-bar.reached{border-color:#B6EFCB;background:linear-gradient(140deg,#FBFFFD,#F3FFF8);}
+.goal-bar.reached .goal-fill{background:linear-gradient(90deg,var(--gold-2),var(--gold));}
+.goal-bar.reached .goal-num{color:#17914F;}
+
+/* ============ 单元选择 ============ */
+.tool-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;
+  margin-bottom:14px;background:#fff;border-radius:18px;
   box-shadow:0 4px 0 rgba(124,92,255,.06),0 10px 22px rgba(124,92,255,.08);}
-.diff-filter{display:flex;gap:6px;flex-wrap:wrap;}
-.diff-btn{padding:8px 12px;border:none;border-radius:10px;
+.unit-btn{display:flex;align-items:center;gap:8px;min-height:46px;
+  padding:9px 14px;border:2.5px solid var(--line);background:#F8F6FF;
+  border-radius:14px;font-family:inherit;font-size:14.5px;font-weight:800;
+  color:var(--purple);cursor:pointer;transition:.18s;
+  box-shadow:0 3px 0 var(--line-2);max-width:100%;}
+.unit-btn:hover{background:#F1ECFF;}
+.unit-btn.open{background:linear-gradient(135deg,var(--purple-2),var(--purple));
+  color:#fff;border-color:transparent;box-shadow:0 3px 0 var(--purple-deep);}
+.unit-btn .unit-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.unit-btn .unit-caret{font-size:12px;flex:none;}
+.unit-btn.open .unit-caret{transform:rotate(180deg);}
+.tool-actions{margin-left:auto;display:flex;gap:6px;flex:none;}
+.timer-btn,.sound-btn{min-height:46px;padding:8px 13px;border:none;border-radius:14px;
   background:#F8F6FF;color:#8B7FD0;font-family:inherit;
-  font-size:12.5px;font-weight:800;cursor:pointer;
-  transition:transform .15s,background .15s,color .15s,box-shadow .15s;
-  box-shadow:0 2px 0 #E4DDFF;line-height:1.35;text-align:left;}
-.diff-btn:hover{background:#F1ECFF;color:#6B4CE6;transform:translateY(-1px);}
-.diff-btn.active{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
-  color:#fff;box-shadow:0 3px 0 #4E35C4;}
-.diff-btn .diff-sub{display:block;font-size:10.5px;font-weight:700;
-  opacity:.7;margin-top:1px;letter-spacing:.2px;}
-.tool-actions{margin-left:auto;display:flex;gap:6px;}
-.timer-btn,.sound-btn{padding:7px 12px;border:none;border-radius:10px;
-  background:#F8F6FF;color:#8B7FD0;font-family:inherit;
-  font-size:12.5px;font-weight:800;cursor:pointer;transition:.18s;
-  box-shadow:0 2px 0 #E4DDFF;}
-.timer-btn:hover,.sound-btn:hover{background:#F1ECFF;color:#6B4CE6;}
-.timer-btn.on{background:linear-gradient(135deg,#FF6B9D,#E64A7C);
-  color:#fff;box-shadow:0 3px 0 #B83060;}
+  font-size:14.5px;font-weight:800;cursor:pointer;transition:.18s;
+  box-shadow:0 3px 0 var(--line-2);flex:none;}
+.timer-btn:hover,.sound-btn:hover{background:#F1ECFF;color:var(--purple);}
+.timer-btn.on{background:linear-gradient(135deg,var(--pink),#E64A7C);
+  color:#fff;box-shadow:0 3px 0 var(--pink-deep);}
 .sound-btn.muted{opacity:.5;}
 
+.unit-panel{display:none;padding:16px;margin-bottom:14px;background:#fff;
+  border-radius:20px;border:2.5px dashed #D8CEFF;
+  box-shadow:0 5px 0 rgba(124,92,255,.06),0 12px 26px rgba(124,92,255,.09);}
+.unit-panel.open{display:block;animation:fadeUp .22s ease;}
+.unit-panel-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  font-size:14.5px;font-weight:900;color:var(--ink-2);margin-bottom:12px;}
+.unit-panel-head .spacer{flex:1;}
+.unit-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.unit-chip{display:flex;align-items:center;gap:7px;min-height:44px;
+  padding:9px 14px;border:2.5px solid var(--line);border-radius:14px;
+  background:#F8F6FF;color:#7C6FA8;font-family:inherit;font-size:14px;
+  font-weight:800;cursor:pointer;transition:.18s;box-shadow:0 3px 0 var(--line-2);
+  text-align:left;line-height:1.35;}
+.unit-chip:hover{background:#F1ECFF;color:var(--purple);}
+.unit-chip .chip-tick{font-size:13px;flex:none;opacity:.35;}
+.unit-chip .chip-sub{display:block;font-size:11.5px;font-weight:700;opacity:.75;margin-top:1px;}
+.unit-chip.on{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;
+  border-color:transparent;box-shadow:0 3px 0 var(--purple-deep);}
+.unit-chip.on .chip-tick{opacity:1;}
+.unit-summary{font-size:13.5px;font-weight:700;color:var(--ink-3);
+  padding:10px 14px;border-radius:12px;background:#FAF8FF;line-height:1.7;}
+.unit-summary b{color:var(--purple);font-weight:900;}
+.unit-summary.warn{background:#FFF7EC;color:#B26A00;}
+.unit-summary.warn b{color:#B26A00;}
+
+/* ============ 计时条 ============ */
 .timer-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;
   margin-bottom:14px;background:#fff;border-radius:16px;
   box-shadow:0 3px 0 rgba(255,150,150,.15);border:2px solid #FFD9AB;}
@@ -117,22 +181,21 @@ body{
 .timer-bar.urgent .timer-progress{background:linear-gradient(90deg,#FF6B6B,#E63A3A);}
 .timer-text{font-size:14px;font-weight:900;color:#8B7FD0;
   min-width:52px;text-align:right;}
-.timer-bar.urgent .timer-text{color:#E63A3A;}
+.timer-bar.urgent .timer-text{color:var(--red);}
 
-.card{background:#fff;border-radius:24px;
-  box-shadow:0 5px 0 rgba(124,92,255,.07),0 16px 32px rgba(124,92,255,.11);}
+.card{background:var(--card);border-radius:24px;box-shadow:var(--shadow-2);}
 
 .problem{padding:20px 22px 22px 26px;margin-bottom:16px;position:relative;overflow:hidden;}
 .problem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;
   background:linear-gradient(180deg,#FFB84D 0%,#FF7A9C 55%,#A78BFA 100%);}
 .meta{display:flex;justify-content:space-between;align-items:center;
-  font-size:12px;font-weight:700;color:#a79fc2;margin-bottom:12px;
+  font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:12px;
   gap:8px;flex-wrap:wrap;}
 .meta .tag{background:linear-gradient(135deg,#FFE08A,#FFC24D);
   color:#8a5a00;padding:5px 13px;border-radius:20px;font-weight:800;
-  font-size:11.5px;box-shadow:0 2px 0 #EBA92E;}
+  font-size:12.5px;box-shadow:0 2px 0 #EBA92E;}
 .meta .counter{margin-left:auto;}
-.qtext{font-size:17.5px;line-height:1.95;color:#3a3355;font-weight:500;}
+.qtext{font-size:17.5px;line-height:1.95;color:var(--ink);font-weight:500;}
 .qtext b{color:#5B3FD9;font-weight:800;
   background:linear-gradient(180deg,transparent 62%,#DDD4FF 62%,#DDD4FF 92%,transparent 92%);
   padding:0 2px;}
@@ -148,28 +211,28 @@ body{
   30%{box-shadow:0 0 0 7px rgba(255,200,100,.42);border-color:#FFB84D;}
 }
 .facts-head{display:flex;align-items:center;gap:8px;font-size:14.5px;
-  font-weight:900;color:#4a4166;margin-bottom:5px;}
+  font-weight:900;color:var(--ink-2);margin-bottom:5px;}
 .facts-count{font-size:11.5px;font-weight:800;color:#fff;
-  background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+  background:linear-gradient(135deg,var(--purple-2),var(--purple));
   padding:3px 10px;border-radius:20px;margin-left:auto;
-  box-shadow:0 2px 0 #4E35C4;}
-.facts-sub{font-size:12.5px;color:#a79fc2;margin-bottom:13px;padding-left:26px;font-weight:600;}
+  box-shadow:0 2px 0 var(--purple-deep);}
+.facts-sub{font-size:12.5px;color:var(--muted);margin-bottom:13px;padding-left:26px;font-weight:600;}
 .facts-list{display:flex;flex-wrap:wrap;gap:10px;min-height:2px;}
-.fact{display:flex;align-items:center;gap:9px;background:#fff;color:#4a4166;
+.fact{display:flex;align-items:center;gap:9px;background:#fff;color:var(--ink-2);
   font-size:13.5px;font-weight:600;padding:9px 15px 9px 9px;
   border-radius:14px;line-height:1.5;border:2.5px solid #FFE3A8;
   box-shadow:0 3px 0 #FFE3A8;
   animation:factPop .42s cubic-bezier(.34,1.5,.64,1);}
 .fact-no{flex:none;width:22px;height:22px;border-radius:8px;
-  background:linear-gradient(135deg,#FFD86B,#FFA751);color:#fff;
+  background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#fff;
   font-size:11.5px;font-weight:900;display:flex;align-items:center;
-  justify-content:center;box-shadow:0 1.5px 0 #E8944A;}
+  justify-content:center;box-shadow:0 1.5px 0 var(--gold-deep);}
 .fact b{color:#D97706;font-weight:900;}
 .fact.locked{background:#F6F4FC;border:2.5px dashed #D8D2EC;
   box-shadow:none;color:#B0A9C6;animation:none;}
 .fact.locked .fact-no{background:#E4DFF3;color:#B0A9C6;box-shadow:none;}
 .fact-hidden{font-style:normal;font-size:13px;}
-.facts-empty{padding:14px 4px;font-size:13.5px;color:#a79fc2;
+.facts-empty{padding:14px 4px;font-size:13.5px;color:var(--muted);
   text-align:center;line-height:1.8;width:100%;font-weight:600;}
 @keyframes factPop{
   0%{opacity:0;transform:scale(.8) translateY(8px);}
@@ -178,24 +241,26 @@ body{
 }
 
 .section-title{display:flex;align-items:center;gap:9px;font-size:14px;
-  font-weight:800;color:#6b6385;margin:0 0 13px 6px;flex-wrap:wrap;}
+  font-weight:800;color:var(--ink-3);margin:0 0 13px 6px;flex-wrap:wrap;}
 .dot-mark{width:10px;height:10px;border-radius:50%;
   background:linear-gradient(135deg,#FFB84D,#FF7A9C);
   box-shadow:0 0 0 3px rgba(255,140,120,.18);flex:none;}
 .spacer{flex:1;}
-.mini-btn{border:none;background:#fff;color:#7C5CFF;font-size:12.5px;
-  font-weight:800;cursor:pointer;font-family:inherit;padding:7px 13px;
-  border-radius:12px;transition:transform .15s,box-shadow .15s,background .15s;
+.mini-btn{border:none;background:#fff;color:#7C5CFF;font-size:14.5px;
+  font-weight:800;cursor:pointer;font-family:inherit;padding:8px 14px;
+  min-height:44px;border-radius:12px;transition:transform .15s,box-shadow .15s,background .15s;
   box-shadow:0 3px 0 rgba(124,92,255,.13);}
 .mini-btn:hover{transform:translateY(-1px);box-shadow:0 4px 0 rgba(124,92,255,.18);background:#F8F6FF;}
 .mini-btn:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(124,92,255,.13);}
-.mini-btn.primary{background:linear-gradient(135deg,#FFD86B,#FFA751);
-  color:#8a5a00;box-shadow:0 3px 0 #E8944A;}
+.mini-btn.primary{background:linear-gradient(135deg,var(--gold-2),var(--gold));
+  color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
+.mini-btn.danger{color:#C2410C;}
+.mini-btn.danger:hover{background:#FFF4EC;}
 
 /* ============ 步骤卡 ============ */
 .step{background:#fff;border-radius:20px;margin-bottom:12px;
   box-shadow:0 4px 0 rgba(124,92,255,.06),0 10px 22px rgba(124,92,255,.09);
-  overflow:hidden;transition:box-shadow .25s,transform .2s;will-change:transform;}
+  overflow:hidden;transition:box-shadow .25s,transform .2s;}
 .step.active{box-shadow:0 0 0 3px #A78BFA,0 12px 28px rgba(124,92,255,.22);}
 .step.locked{opacity:.55;background:#FAF9FE;box-shadow:0 2px 0 rgba(124,92,255,.04);}
 .step.done{background:linear-gradient(180deg,#FBFFFD,#F6FFFA);}
@@ -206,59 +271,32 @@ body{
   background:#EDE8FF;color:#7C5CFF;font-size:13px;font-weight:900;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 2px 0 #D8CEFF;transition:background .2s,color .2s,transform .2s;}
-.step.active .step-num{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
-  color:#fff;box-shadow:0 3px 0 #4E35C4;}
+.step.active .step-num{background:linear-gradient(135deg,var(--purple-2),var(--purple));
+  color:#fff;box-shadow:0 3px 0 var(--purple-deep);}
 .step.done .step-num{background:linear-gradient(135deg,#4EE08B,#2ED573);
-  color:#fff;box-shadow:0 3px 0 #1FA85A;font-size:14px;}
+  color:#fff;box-shadow:0 3px 0 var(--green-deep);font-size:14px;}
 .step.locked .step-num{background:#EDEBF5;color:#B0A9C6;
   box-shadow:0 2px 0 #E0DDF0;font-size:13px;}
-.step-q{font-size:15px;font-weight:800;color:#4a4166;line-height:1.6;flex:1;}
-.step.done .step-q{color:#6b6385;font-weight:700;font-size:14px;}
+.step-q{font-size:15px;font-weight:800;color:var(--ink-2);line-height:1.6;flex:1;}
+.step.done .step-q{color:var(--ink-3);font-weight:700;font-size:14px;}
 .step.locked .step-q{color:#B0A9C6;font-weight:600;font-size:13.5px;}
 
-/* 已完成步骤：紧凑模式 */
 .step.done{cursor:pointer;}
-.step.done .step-head{
-  padding:11px 20px;
-  transition:background .2s;
-}
+.step.done .step-head{padding:11px 20px;transition:background .2s;}
 .step.done .step-head:hover{background:rgba(78,224,139,.06);}
-.step-compact-tag{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;font-weight:900;color:#17914F;
-  background:#E4FBEE;padding:3px 9px;border-radius:8px;
-  flex:none;
-}
-.step-chevron{
-  flex:none;color:#8B7FD0;font-size:13px;
-  transition:transform .3s cubic-bezier(.34,1.2,.64,1);
-  display:inline-block;
-}
+.step-chevron{flex:none;color:#8B7FD0;font-size:13px;
+  transition:transform .3s cubic-bezier(.34,1.2,.64,1);display:inline-block;}
 .step.done.expanded .step-chevron{transform:rotate(180deg);}
 
-/* 折叠内容 */
-.step-body-wrap{
-  display:grid;
-  grid-template-rows:0fr;
-  transition:grid-template-rows .35s cubic-bezier(.4,0,.2,1);
-  will-change:grid-template-rows;
-}
+.step-body-wrap{display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .35s cubic-bezier(.4,0,.2,1);will-change:grid-template-rows;}
 .step.done.expanded .step-body-wrap{grid-template-rows:1fr;}
-.step-body-wrap > .step-body{
-  overflow:hidden;
-  padding:0 18px 0 60px;
-}
-.step.done.expanded .step-body-wrap > .step-body{
-  padding:0 18px 18px 60px;
-}
+.step-body-wrap > .step-body{overflow:hidden;padding:0 18px 0 60px;}
+.step.done.expanded .step-body-wrap > .step-body{padding:0 18px 18px 60px;}
 @media(max-width:520px){
   .step-body-wrap > .step-body,
-  .step.done.expanded .step-body-wrap > .step-body{
-    padding-left:16px;padding-right:16px;
-  }
+  .step.done.expanded .step-body-wrap > .step-body{padding-left:16px;padding-right:16px;}
 }
-
-/* 活跃步骤的步骤体 */
 .step.active .step-body{padding:0 18px 18px 60px;}
 @media(max-width:520px){
   .step.active .step-body{padding:0 16px 16px 16px;}
@@ -266,11 +304,10 @@ body{
 
 .opts{margin-top:2px;}
 .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-  padding:13px 16px;margin-bottom:10px;border-radius:16px;cursor:pointer;
-  background:#F8F6FF;border:2.5px solid #EDE8FF;box-shadow:0 3px 0 #E4DDFF;
-  font-family:inherit;font-size:14.5px;font-weight:700;color:#4a4166;
-  line-height:1.55;transition:transform .15s,box-shadow .15s,background .15s,border-color .15s;
-  will-change:transform;}
+  min-height:52px;padding:13px 16px;margin-bottom:10px;border-radius:16px;cursor:pointer;
+  background:#F8F6FF;border:2.5px solid var(--line);box-shadow:0 3px 0 var(--line-2);
+  font-family:inherit;font-size:15px;font-weight:700;color:var(--ink-2);
+  line-height:1.55;transition:transform .15s,box-shadow .15s,background .15s,border-color .15s;}
 .opt:last-child{margin-bottom:0;}
 .opt:hover:not(:disabled){background:#F1ECFF;border-color:#C4B5FD;
   box-shadow:0 4px 0 #C4B5FD;transform:translateY(-2px);}
@@ -279,43 +316,40 @@ body{
 .opt-key{flex:none;width:28px;height:28px;border-radius:10px;background:#fff;
   border:2px solid #DDD4FF;color:#8B7FD0;font-size:13px;font-weight:900;
   display:flex;align-items:center;justify-content:center;transition:.18s;}
-.opt:hover:not(:disabled) .opt-key{border-color:#A78BFA;color:#6B4CE6;}
+.opt:hover:not(:disabled) .opt-key{border-color:#A78BFA;color:var(--purple);}
 .opt.wrong{background:#FFF6EC;border-color:#FFD9AB;box-shadow:0 3px 0 #FFD9AB;color:#b06a10;}
 .opt.wrong .opt-key{background:#FFD9AB;border-color:#FFD9AB;color:#fff;}
 .opt.wrong .opt-text{text-decoration:line-through;opacity:.65;}
 
 .fb-inline{margin-top:12px;font-size:13.5px;line-height:1.85;
-  padding:12px 16px;border-radius:14px;font-weight:700;
-  animation:fadeUp .25s ease;}
+  padding:12px 16px;border-radius:14px;font-weight:700;animation:fadeUp .25s ease;}
 .fb-inline.ok{background:#E4FBEE;color:#17914F;}
 .fb-inline.no{background:#FFF3E0;color:#B26A00;}
-.fb-inline.brief{background:#EEF6FF;color:#2B6CB0;}
-.chosen-line{font-size:14px;color:#6b6385;margin-top:12px;margin-bottom:9px;font-weight:600;}
+.chosen-line{font-size:14px;color:var(--ink-3);margin-top:12px;margin-bottom:9px;font-weight:600;}
 .chosen-line b{color:#17914F;font-weight:800;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 
+/* ============ 答题区 ============ */
 .answer{margin-top:24px;padding:22px;transition:.3s;}
 .answer.locked{background:#FAF9FE;box-shadow:0 3px 0 rgba(124,92,255,.05);}
-.lock-msg{font-size:13.5px;color:#a79fc2;text-align:center;line-height:1.9;font-weight:700;}
-.answer-hint{font-size:12.5px;color:#8B7FD0;font-weight:700;
-  margin-bottom:12px;padding-left:2px;}
+.lock-msg{font-size:13.5px;color:var(--muted);text-align:center;line-height:1.9;font-weight:700;}
+.answer-hint{font-size:12.5px;color:#8B7FD0;font-weight:700;margin-bottom:12px;padding-left:2px;}
 .answer-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.answer-label{font-size:15px;font-weight:800;color:#4a4166;}
-#ansInput{width:120px;padding:12px 15px;font-size:17px;font-weight:800;
-  border:2.5px solid #E4DDFF;border-radius:14px;outline:none;
+.answer-label{font-size:15px;font-weight:800;color:var(--ink-2);}
+#ansInput{width:140px;min-height:52px;padding:12px 15px;font-size:17px;font-weight:800;
+  border:2.5px solid var(--line-2);border-radius:14px;outline:none;
   transition:border-color .2s,box-shadow .2s;font-family:inherit;
-  color:#3a3355;background:#FBF9FF;text-align:center;}
-#ansInput:focus{border-color:#A78BFA;background:#fff;
-  box-shadow:0 0 0 5px rgba(167,139,250,.16);}
-.unit{font-size:15px;color:#6b6385;font-weight:700;}
-.btn{padding:12px 26px;border:none;border-radius:14px;font-size:15px;
-  font-weight:800;cursor:pointer;font-family:inherit;
+  color:var(--ink);background:#FBF9FF;text-align:center;}
+#ansInput:focus{border-color:#A78BFA;background:#fff;box-shadow:0 0 0 5px rgba(167,139,250,.16);}
+.unit{font-size:15px;color:var(--ink-3);font-weight:700;}
+.btn{padding:13px 26px;border:none;border-radius:14px;font-size:15.5px;
+  font-weight:800;cursor:pointer;font-family:inherit;min-height:52px;
   transition:transform .18s,box-shadow .18s;letter-spacing:.5px;}
-.btn-primary{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;
-  box-shadow:0 4px 0 #4E35C4,0 8px 18px rgba(107,76,230,.32);}
+.btn-primary{background:linear-gradient(135deg,var(--purple-2),var(--purple));color:#fff;
+  box-shadow:0 4px 0 var(--purple-deep),0 8px 18px rgba(107,76,230,.32);}
 .btn-primary:hover{transform:translateY(-2px);
-  box-shadow:0 6px 0 #4E35C4,0 10px 22px rgba(107,76,230,.4);}
-.btn-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #4E35C4;}
+  box-shadow:0 6px 0 var(--purple-deep),0 10px 22px rgba(107,76,230,.4);}
+.btn-primary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--purple-deep);}
 
 .feedback{margin-top:16px;font-size:14.5px;line-height:1.85;
   padding:14px 18px;border-radius:16px;display:none;font-weight:700;}
@@ -325,50 +359,70 @@ body{
 .feedback.warn{background:#EEF6FF;color:#2B6CB0;}
 .fb-sub{font-size:13px;opacity:.85;font-weight:600;}
 
-.nav{display:flex;justify-content:center;align-items:center;gap:18px;margin-top:28px;}
-.nav-btn{width:44px;height:44px;border-radius:50%;border:none;background:#fff;
+/* ★ 大的「下一题」按钮
+   尺寸写进基础规则（平板 768–1024 不进 max-width 媒体查询） */
+.next-wrap{margin-top:20px;}
+.next-big{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;min-height:64px;padding:16px 24px;border:none;border-radius:20px;
+  font-family:inherit;font-size:20px;font-weight:900;letter-spacing:1.5px;
+  color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#4EE08B 0%,#2ED573 55%,#22B863 100%);
+  box-shadow:0 6px 0 var(--green-deep),0 14px 26px rgba(46,213,115,.34);
+  transition:transform .18s,box-shadow .18s;}
+.next-big:hover{transform:translateY(-2px);
+  box-shadow:0 8px 0 var(--green-deep),0 18px 32px rgba(46,213,115,.42);}
+.next-big:active{transform:translateY(3px);box-shadow:0 3px 0 var(--green-deep);}
+.next-big .nb-arrow{font-size:22px;line-height:1;}
+.next-big .nb-sub{font-size:12.5px;font-weight:700;opacity:.9;letter-spacing:0;}
+.next-hint{margin-top:9px;text-align:center;font-size:12.5px;
+  font-weight:700;color:var(--muted);}
+
+/* ============ 底部导航 ============ */
+.nav{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:28px;}
+.nav-btn{width:52px;height:52px;border-radius:50%;border:none;background:#fff;
   box-shadow:0 4px 0 rgba(124,92,255,.10),0 8px 18px rgba(124,92,255,.14);
-  cursor:pointer;font-size:18px;font-weight:900;font-family:inherit;
+  cursor:pointer;font-size:20px;font-weight:900;font-family:inherit;
   color:#7C5CFF;transition:transform .18s,box-shadow .18s;line-height:1;
-  display:flex;align-items:center;justify-content:center;}
+  display:flex;align-items:center;justify-content:center;flex:none;}
 .nav-btn:hover:not(:disabled){transform:translateY(-2px);
   box-shadow:0 6px 0 rgba(124,92,255,.12),0 10px 22px rgba(124,92,255,.2);}
 .nav-btn:disabled{opacity:.35;cursor:default;}
-.dots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-.dot-i{width:11px;height:11px;border-radius:50%;background:#E4DDFF;
-  transition:transform .25s,background .25s;cursor:pointer;
-  box-shadow:inset 0 -1.5px 0 rgba(0,0,0,.06);}
-.dot-i.done{background:linear-gradient(135deg,#4EE08B,#2ED573);box-shadow:0 0 0 3px #D6F5E3;}
-.dot-i.active{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
-  transform:scale(1.4);box-shadow:0 0 0 4px #EDE8FF;}
+.nav-info{font-size:14px;font-weight:800;color:var(--ink-3);text-align:center;
+  background:#fff;padding:11px 18px;border-radius:14px;min-height:44px;
+  display:flex;align-items:center;
+  box-shadow:0 3px 0 rgba(124,92,255,.07);}
+.nav-info b{color:var(--purple);font-weight:900;margin:0 2px;}
 
 .back-to-facts{position:fixed;right:24px;bottom:24px;z-index:100;
-  display:flex;align-items:center;gap:7px;padding:12px 18px 12px 14px;
-  border:2.5px solid #C4B5FD;border-radius:999px;background:#fff;
-  color:#6B4CE6;font-family:inherit;font-size:13.5px;font-weight:800;
+  display:flex;align-items:center;gap:7px;padding:13px 18px 13px 14px;
+  min-height:48px;border:2.5px solid #C4B5FD;border-radius:999px;background:#fff;
+  color:var(--purple);font-family:inherit;font-size:14.5px;font-weight:800;
   cursor:pointer;box-shadow:0 4px 0 #DDD4FF,0 12px 26px rgba(124,92,255,.20);
   opacity:0;transform:translateY(18px) scale(.9);pointer-events:none;
   transition:opacity .28s cubic-bezier(.34,1.3,.64,1),
-             transform .28s cubic-bezier(.34,1.3,.64,1);will-change:transform,opacity;}
+             transform .28s cubic-bezier(.34,1.3,.64,1);}
 .back-to-facts.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
 .back-to-facts:hover{background:#F6F2FF;transform:translateY(-2px) scale(1.03);}
 @media(max-width:520px){
-  .back-to-facts{right:14px;bottom:14px;padding:11px 16px 11px 12px;font-size:12.5px;}
+  .back-to-facts{right:14px;bottom:14px;padding:12px 16px 12px 12px;font-size:13.5px;}
 }
 
 .page-head{display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:16px;padding:0 4px;gap:10px;}
-.page-head h2{font-size:19px;margin:0;font-weight:900;color:#4a4166;}
-.page-head .mini-btn{background:linear-gradient(135deg,#FFD86B,#FFA751);
-  color:#8a5a00;box-shadow:0 3px 0 #E8944A;}
+  margin-bottom:16px;padding:0 4px;gap:10px;flex-wrap:wrap;}
+.page-head h2{font-size:19px;margin:0;font-weight:900;color:var(--ink-2);}
+.page-head .mini-btn{background:linear-gradient(135deg,var(--gold-2),var(--gold));
+  color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
+.page-head .mini-btn.danger{background:#fff;color:#C2410C;box-shadow:0 3px 0 rgba(194,65,12,.18);}
 
-.empty-state{text-align:center;padding:50px 20px;color:#a79fc2;
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted);
   font-size:14px;font-weight:600;line-height:1.9;background:#fff;
-  border-radius:24px;box-shadow:0 5px 0 rgba(124,92,255,.07),0 16px 32px rgba(124,92,255,.09);}
+  border-radius:24px;box-shadow:var(--shadow-2);}
 .empty-state .em-icon{font-size:52px;display:block;margin-bottom:10px;}
+.empty-state .mini-btn{margin-top:16px;background:linear-gradient(135deg,var(--gold-2),var(--gold));
+  color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
 
 .record-card{background:#fff;border-radius:20px;padding:18px 20px;
-  margin-bottom:14px;box-shadow:0 4px 0 rgba(124,92,255,.06),0 10px 22px rgba(124,92,255,.08);
+  margin-bottom:14px;box-shadow:var(--shadow-1);
   position:relative;overflow:hidden;animation:factPop .35s cubic-bezier(.34,1.3,.64,1);}
 .record-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;}
 .record-card.wrong::before{background:linear-gradient(180deg,#FF9F43,#FF6B6B);}
@@ -377,34 +431,48 @@ body{
   gap:8px;margin-bottom:10px;font-size:11.5px;font-weight:800;flex-wrap:wrap;}
 .record-tag{background:linear-gradient(135deg,#FFE08A,#FFC24D);
   color:#8a5a00;padding:3px 10px;border-radius:12px;}
-.record-time{color:#a79fc2;font-weight:700;}
-.record-q{font-size:14px;color:#4a4166;line-height:1.8;font-weight:600;margin-bottom:10px;}
+.record-time{color:var(--muted);font-weight:700;}
+.record-q{font-size:14px;color:var(--ink-2);line-height:1.8;font-weight:600;margin-bottom:10px;}
 .record-q b{color:#5B3FD9;font-weight:900;}
 .record-line{display:flex;gap:8px;align-items:flex-start;font-size:13px;
   line-height:1.75;font-weight:700;margin-top:6px;padding:8px 12px;border-radius:10px;}
 .record-line.wrong-line{background:#FFF3E0;color:#B26A00;}
 .record-line.right-line{background:#E4FBEE;color:#17914F;}
 .record-line .lbl{flex:none;font-weight:900;}
-.record-actions{margin-top:12px;display:flex;gap:8px;justify-content:flex-end;}
+.record-actions{margin-top:12px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
 .record-actions button{border:none;background:#F8F6FF;color:#8B7FD0;
-  padding:6px 12px;border-radius:10px;font-family:inherit;font-size:12px;
-  font-weight:800;cursor:pointer;transition:.18s;}
-.record-actions button:hover{background:#F1ECFF;color:#6B4CE6;}
+  padding:8px 14px;border-radius:10px;font-family:inherit;font-size:14.5px;
+  font-weight:800;cursor:pointer;transition:.18s;min-height:44px;}
+.record-actions button:hover{background:#F1ECFF;color:var(--purple);}
+.record-actions button.practice{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+  color:#fff;box-shadow:0 3px 0 var(--purple-deep);}
 
 .stats-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .stat-box{flex:1;min-width:90px;padding:14px;background:#fff;border-radius:16px;
   text-align:center;box-shadow:0 3px 0 rgba(124,92,255,.06),0 8px 18px rgba(124,92,255,.08);}
-.stat-box .num{font-size:22px;font-weight:900;color:#6B4CE6;display:block;}
-.stat-box .lbl{font-size:11.5px;font-weight:800;color:#a79fc2;margin-top:3px;display:block;}
+.stat-box .num{font-size:22px;font-weight:900;color:var(--purple);display:block;}
+.stat-box .lbl{font-size:11.5px;font-weight:800;color:var(--muted);margin-top:3px;display:block;}
+
+/* ============ 低配 / 减少动效 ============ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;}
+  .hero .mascot{animation:none;}
+}
+[data-perf="low"] .hero .mascot{animation:none;}
+[data-perf="low"] .score-float{animation-duration:.9s;}
+[data-perf="low"] .card,[data-perf="low"] .step,
+[data-perf="low"] .record-card{box-shadow:0 3px 0 rgba(124,92,255,.07);}
+[data-perf="low"] .problem::before{background:#A78BFA;}
 </style>
 </head>
-<body>
+<body data-perf="high">
 <div class="wrap">
 
   <div class="hero">
     <div class="mascot">🦊</div>
     <h1>数学思维闯关</h1>
-    <p>四年级上册 · 冀教版</p>
+    <p>四年级上册 · 冀教版 · 一步一步想清楚</p>
   </div>
 
   <div class="tab-nav">
@@ -436,24 +504,34 @@ body{
     </div>
 
     <div class="tool-bar">
-      <div class="diff-filter" id="diffFilter">
-        <button class="diff-btn active" data-diff="1">
-          🌱 完整引导
-          <span class="diff-sub">4 选 1 · 详细解析</span>
-        </button>
-        <button class="diff-btn" data-diff="2">
-          🌿 适度引导
-          <span class="diff-sub">3 选 1 · 只判对错</span>
-        </button>
-        <button class="diff-btn" data-diff="3">
-          🔥 挑战模式
-          <span class="diff-sub">2 选 1 · 全给条件</span>
-        </button>
-      </div>
+      <button class="unit-btn" id="unitToggle" aria-expanded="false" aria-controls="unitPanel">
+        <span>📌</span>
+        <span class="unit-label" id="unitLabel">选择单元</span>
+        <span class="unit-caret">▾</span>
+      </button>
       <div class="tool-actions">
-        <button class="sound-btn" id="soundToggle">🔊</button>
-        <button class="timer-btn" id="timerToggle">⏱</button>
+        <button class="sound-btn" id="soundToggle" title="音效开关">🔊</button>
+        <button class="timer-btn" id="timerToggle" title="计时开关">⏱</button>
       </div>
+    </div>
+
+    <div class="unit-panel" id="unitPanel">
+      <div class="unit-panel-head">
+        <span>要练哪几个单元？可以多选</span>
+        <span class="spacer"></span>
+        <button class="mini-btn" id="unitAll">全选</button>
+        <button class="mini-btn" id="unitNone">全部取消</button>
+      </div>
+      <div class="unit-chips" id="unitChips"></div>
+      <div class="unit-summary" id="unitSummary"></div>
+    </div>
+
+    <div class="goal-bar" id="goalBar">
+      <div class="goal-line">
+        <span>🎯 本轮目标</span>
+        <span class="goal-num" id="goalNum">0 / 10 题</span>
+      </div>
+      <div class="goal-track"><div class="goal-fill" id="goalFill"></div></div>
     </div>
 
     <div class="timer-bar" id="timerBar" style="display:none">
@@ -462,46 +540,54 @@ body{
       <span class="timer-text" id="timerText">--</span>
     </div>
 
-    <div class="card problem">
-      <div class="meta">
-        <span class="tag" id="tag"></span>
-        <span class="counter" id="counter"></span>
+    <div id="practiceEmpty" class="empty-state" style="display:none">
+      <span class="em-icon">📌</span>
+      还没有选练习单元<br>点上面的「选择单元」，挑一个就开始吧
+      <br><button class="mini-btn" id="emptyPick">去选单元</button>
+    </div>
+
+    <div id="practiceBody">
+      <div class="card problem">
+        <div class="meta">
+          <span class="tag" id="tag"></span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <div class="qtext" id="qtext"></div>
       </div>
-      <div class="qtext" id="qtext"></div>
-    </div>
 
-    <div class="facts" id="factsBox">
-      <div class="facts-head">
-        📋 已知信息
-        <span class="facts-count" id="factsCount" style="display:none;"></span>
+      <div class="facts" id="factsBox">
+        <div class="facts-head">
+          📋 已知信息
+          <span class="facts-count" id="factsCount" style="display:none;"></span>
+        </div>
+        <div class="facts-sub" id="factsSub">完成思考步骤，条件会逐步出现</div>
+        <div class="facts-list" id="factsList"></div>
       </div>
-      <div class="facts-sub" id="factsSub">完成思考步骤，条件会逐步出现</div>
-      <div class="facts-list" id="factsList"></div>
-    </div>
 
-    <div class="section-title">
-      <span class="dot-mark"></span>思路闯关 · 一步一步想清楚
-      <span class="spacer"></span>
-      <button class="mini-btn primary" id="changeBtn">🔄 换一题</button>
-      <button class="mini-btn" id="resetBtn">↺ 重做</button>
-    </div>
-    <div id="steps"></div>
+      <div class="section-title">
+        <span class="dot-mark"></span>思路闯关 · 一步一步想清楚
+        <span class="spacer"></span>
+        <button class="mini-btn" id="resetBtn">↺ 重做本题</button>
+        <button class="mini-btn primary" id="changeBtn">🔄 换一题</button>
+      </div>
+      <div id="steps"></div>
 
-    <div class="card answer locked" id="answerCard">
-      <div id="answerInner"></div>
-    </div>
+      <div class="card answer locked" id="answerCard">
+        <div id="answerInner"></div>
+      </div>
 
-    <div class="nav">
-      <button class="nav-btn" id="prevBtn">‹</button>
-      <div class="dots" id="dots"></div>
-      <button class="nav-btn" id="nextBtn">›</button>
+      <div class="nav">
+        <button class="nav-btn" id="prevBtn" title="上一题">‹</button>
+        <div class="nav-info" id="navInfo"></div>
+        <button class="nav-btn" id="nextBtn" title="下一题">›</button>
+      </div>
     </div>
   </div>
 
   <div id="page-wrong" style="display:none">
     <div class="page-head">
       <h2>📕 错题本</h2>
-      <button class="mini-btn" id="clearWrong">🗑 清空</button>
+      <button class="mini-btn danger" id="clearWrong">🗑 清空</button>
     </div>
     <div id="wrongList"></div>
   </div>
@@ -509,7 +595,7 @@ body{
   <div id="page-history" style="display:none">
     <div class="page-head">
       <h2>📊 练习历史</h2>
-      <button class="mini-btn" id="clearHistory">🗑 清空</button>
+      <button class="mini-btn danger" id="clearHistory">🗑 清空</button>
     </div>
     <div class="stats-row" id="historyStats"></div>
     <div id="historyList"></div>
@@ -520,10 +606,9 @@ body{
 <button class="back-to-facts" id="backToFacts" aria-label="回到已知信息栏">
   <span>📋</span><span>看已知信息</span>
 </button>
-
 <script>
 /* =========================================================
-   音效
+   音效（Web Audio 合成，零外链）
    ========================================================= */
 let audioCtx = null;
 let soundEnabled = true;
@@ -582,6 +667,12 @@ const SFX = {
     playNote(1318.5, 0.35, 'sine', 0.20, 0.28);
   },
   click() { playNote(880, 0.035, 'sine', 0.06, 0); },
+  levelup() {
+    playNote(659.25, 0.10, 'sine', 0.18, 0);
+    playNote(783.99, 0.10, 'sine', 0.18, 0.09);
+    playNote(1046.5, 0.10, 'sine', 0.18, 0.18);
+    playNote(1318.5, 0.34, 'sine', 0.18, 0.27);
+  },
   timeout() {
     playNote(523.25, 0.12, 'sawtooth', 0.10, 0);
     playNote(415.30, 0.12, 'sawtooth', 0.10, 0.10);
@@ -598,396 +689,1497 @@ document.addEventListener('pointerdown', function once() {
    工具
    ========================================================= */
 function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
-function tryLoad(k, fb) {
-  try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : fb; }
-  catch (e) { return fb; }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function shuffleAll(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
-function trySave(k, v) {
-  try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
-}
+/* localStorage 全部带工具前缀 math4a. —— 同域下五个工具共用，不加前缀会互踩 */
+const LS = {
+  get(k, fb) {
+    try { const s = localStorage.getItem('math4a.' + k); return s === null ? fb : JSON.parse(s); }
+    catch (e) { return fb; }
+  },
+  set(k, v) { try { localStorage.setItem('math4a.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+/* 一次性迁移旧的无前缀键，别让老师之前的错题本凭空消失 */
+(function migrateLegacy() {
+  const pairs = [['mathWrongBook', 'wrongBook'], ['mathHistory', 'history']];
+  pairs.forEach(([oldK, newK]) => {
+    try {
+      if (localStorage.getItem('math4a.' + newK) !== null) return;
+      const old = localStorage.getItem(oldK);
+      if (old === null) return;
+      localStorage.setItem('math4a.' + newK, old);
+      localStorage.removeItem(oldK);
+    } catch (e) {}
+  });
+})();
+
 function fmtTime(ts) {
   const d = new Date(ts);
   const p = n => String(n).padStart(2, '0');
   return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+const $ = id => document.getElementById(id);
+const hl = t => String(t).replace(/(\d+(?:\.\d+)?)/g, '<b>$1</b>');
+const LETTER = 'ABCD';
 
-/* 确定性洗牌（同一 seed 结果一样，避免重渲染时选项顺序变化） */
-function seededShuffle(arr, seed) {
-  const a = arr.slice();
-  let s = seed * 9301 + 49297;
-  for (let i = a.length - 1; i > 0; i--) {
-    s = (s * 9301 + 49297) % 233280;
-    const j = Math.floor((s / 233280) * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+/* 低配降级：低端机 / 用户要求减少动效 */
+(function detectPerf() {
+  let low = false;
+  try {
+    const cores = navigator.hardwareConcurrency;
+    const mem = navigator.deviceMemory;
+    if (typeof cores === 'number' && cores <= 4) low = true;
+    if (typeof mem === 'number' && mem <= 4) low = true;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) low = true;
+  } catch (e) {}
+  document.body.dataset.perf = low ? 'low' : 'high';
+})();
+
+/* =========================================================
+   选项构造器
+   S(题干, 正确项, [3个干扰项], {ok, no, reveals})
+   生成时就把顺序打乱并固定，重渲染时顺序不会变
+   ========================================================= */
+function S(q, correct, wrongs, extra) {
+  const c = String(correct);
+  const pool = shuffleAll([c, ...wrongs.slice(0, 3).map(String)]);
+  const e = extra || {};
+  return {
+    q,
+    options: pool,
+    answer: pool.indexOf(c),
+    correct: e.ok || '太棒了，就是这样！',
+    wrong: e.no || '别急，再读一遍这一步在问什么。',
+    reveals: e.reveals || []
+  };
 }
 
 /* =========================================================
-   难度配置
+   单元（依据《小学学霸冲A卷·冀教版四年级上册》实测结构）
    ========================================================= */
-const DIFF_CONFIG = {
-  1: { name: '完整引导', options: 4, detail: 'full',  revealAll: false },
-  2: { name: '适度引导', options: 3, detail: 'brief', revealAll: false },
-  3: { name: '挑战模式', options: 2, detail: 'brief', revealAll: true }
-};
+const UNITS = [
+  { key: '度量衡', name: '度量衡的故事', sub: '单位换算 · 古代计量', icon: '⚖️' },
+  { key: '除法', name: '第一单元 · 三位数除以两位数', sub: '试商 · 商的位数 · 余数', icon: '➗' },
+  { key: '图形', name: '第二单元 · 图形与几何', sub: '三角形 · 平行四边形 · 梯形', icon: '🔺' },
+  { key: '大数', name: '第三单元 · 认识更大的数', sub: '读写 · 改写 · 近似数', icon: '🔢' },
+  { key: '周长', name: '第四单元 · 周长', sub: '长方形 · 正方形 · 剪拼', icon: '📐' },
+  { key: '平均数', name: '第五单元 · 平均数', sub: '求平均 · 逆向 · 总量', icon: '📊' },
+  { key: '探索', name: '第六单元 · 探索乐园', sub: '植树 · 锯木 · 找规律', icon: '🧩' }
+];
+const UNIT_MAP = {};
+UNITS.forEach(u => { UNIT_MAP[u.key] = u; });
 
 /* =========================================================
    题库
+   依据《小学学霸冲A卷·冀教版四年级上册》88 页实测题型整理。
+   每个模板都参数化随机生成；数值按现实取值（人数取整、价格合理、
+   单位进率整齐、结果不出现无意义小数）；配合指纹去重避免重复出题。
    ========================================================= */
-const problemTemplates = [
-  /* 归一问题 */
-  {
-    tag: '四上 · 归一问题',
-    generate() {
-      const up = randInt(20, 99), c1 = randInt(3, 9);
-      const t1 = up * c1, c2 = randInt(12, 40), answer = up * c2;
-      return {
-        tag: '四上 · 归一问题',
-        text: `光明小学买来 ${c1} 块磁性黑板，花了 ${t1} 元。学校计划再买 ${c2} 块，还要花多少钱？`,
-        facts: [`买来 ${c1} 块黑板`, `花了 ${t1} 元`, `计划再买 ${c2} 块`],
-        steps: [
-          { q: '这道题最后要求我们求什么？',
-            options: [`${c1} 块黑板一共多少钱`, `再买 ${c2} 块还要花多少钱`, '每块黑板多少钱', '学校一共买了多少块黑板'],
-            answer: 1, reveals: [],
-            correct: `对！题目问的是「再买 ${c2} 块，还要花多少钱」。`,
-            wrong: '再读一遍题目的最后一句——「还要花多少钱？」' },
-          { q: `要求「再买 ${c2} 块要花多少钱」，必须先知道什么？`,
-            options: ['学校一共要买几块黑板', '每块黑板多少元', '已经买了几块黑板', '每块黑板有多重'],
-            answer: 1, reveals: [0, 1],
-            correct: `没错！要求 ${c2} 块的总价，必须先知道每块多少元。`,
-            wrong: `要求「${c2} 块的总价」，得先知道「1 块多少钱」。` },
-          { q: '每块黑板多少元？——先想：该用哪个算式？',
-            options: [`${t1} × ${c1}`, `${t1} ÷ ${c1}`, `${t1} − ${c1}`, `${c2} ÷ ${c1}`],
-            answer: 1, reveals: [2],
-            correct: `对！用 ${t1} ÷ ${c1}。算一算：${t1} ÷ ${c1} = <b>${up}</b> 元。`,
-            wrong: `「${c1} 块一共 ${t1} 元」求每块价钱，用除法。` },
-          { q: `每块 ${up} 元，再买 ${c2} 块要花多少钱？——先想：该用哪个算式？`,
-            options: [`${up} + ${c2}`, `${up} × ${c2}`, `${t1} × ${c2}`, `${t1} ÷ ${c2}`],
-            answer: 1, reveals: [],
-            correct: `对！用 ${up} × ${c2}。<br>请你把 ${up} × ${c2} 算出来，填进下面的框里吧！`,
-            wrong: `每块 ${up} 元，买 ${c2} 块，用乘法。` }
-        ],
-        answer, unit: '元',
-        praise: '你抓住了「先求单价，再求总价」的归一问题核心思路！',
-        wrongTip: `想一想：总价 = 每块价钱 × ${c2}。每块是 ${up} 元。`
-      };
-    }
-  },
-  /* 归总问题 */
-  {
-    tag: '四上 · 归总问题',
-    generate() {
-      const k = randInt(2, 5), d2 = randInt(10, 40), d1 = d2 * k;
-      const r1 = randInt(6, 12), r2 = r1 * k, total = r1 * d1, answer = d2;
-      return {
-        tag: '四上 · 归总问题',
-        text: `白塔村计划修一条水渠，如果每天修 ${r1} 米，${d1} 天就能修完。实际每天修 ${r2} 米，多少天能修完？`,
-        facts: [`每天修 ${r1} 米，${d1} 天修完`, `实际每天修 ${r2} 米`],
-        steps: [
-          { q: '这道题最后要求我们求什么？',
-            options: ['水渠一共有多少米', '计划每天修多少米', '实际多少天能修完', '实际每天比计划多修几米'],
-            answer: 2, reveals: [],
-            correct: '对！题目问的是「实际多少天能修完」。',
-            wrong: '看题目最后一句话——「多少天能修完？」' },
-          { q: '要求「实际多少天修完」，必须先知道什么？',
-            options: ['水渠的总长度', '计划每天修几米', '实际每天修几米', '计划修了多少天'],
-            answer: 0, reveals: [0],
-            correct: '很好！「天数」＝总长度 ÷ 每天修的长度。',
-            wrong: '要算「几天修完」，需要知道水渠一共多长。' },
-          { q: '这条水渠一共多少米？——先想：该用哪个算式？',
-            options: [`${r1} + ${d1}`, `${r1} × ${d1}`, `${d1} ÷ ${r1}`, `${r1} × ${r2}`],
-            answer: 1, reveals: [1],
-            correct: `对！用 ${r1} × ${d1}。算一算：${r1} × ${d1} = <b>${total}</b> 米。`,
-            wrong: `每天修 ${r1} 米，修了 ${d1} 天，用乘法。` },
-          { q: `总长 ${total} 米，实际每天修 ${r2} 米，多少天能修完？——先想：该用哪个算式？`,
-            options: [`${total} + ${r2}`, `${total} − ${r2}`, `${total} ÷ ${r2}`, `${total} × ${r2}`],
-            answer: 2, reveals: [],
-            correct: `对！用 ${total} ÷ ${r2}。请你算出结果，填进下面的框里！`,
-            wrong: `求「${total} 里面有几个 ${r2}」，用除法。` }
-        ],
-        answer, unit: '天',
-        praise: '你理解了「先求总量，再求天数」的归总思路！',
-        wrongTip: `想一想：${total} 米里有多少个 ${r2} 米。`
-      };
-    }
-  },
-  /* 平均数 */
-  {
-    tag: '四上 · 平均数',
-    generate() {
-      const n = 5, avg = randInt(128, 145), total = avg * n;
-      const heights = []; let rem = total;
-      for (let i = 0; i < n - 1; i++) {
-        const slots = n - i - 1;
-        const maxV = rem - slots * (avg - 15);
-        const minV = rem - slots * (avg + 15);
-        const lo = Math.max(avg - 12, minV);
-        const hi = Math.min(avg + 12, maxV);
-        const v = randInt(lo, hi);
-        heights.push(v); rem -= v;
-      }
-      heights.push(rem);
-      return {
-        tag: '四上 · 平均数',
-        text: `四（1）班第一小组 ${n} 位同学的身高分别是 ${heights.join(' 厘米、')} 厘米。这个小组同学的平均身高是多少厘米？`,
-        facts: [`${n} 位同学的身高`, `身高分别是 ${heights.join('、')} 厘米`],
-        steps: [
-          { q: '这道题要求我们求什么？',
-            options: ['最高的同学多高', '最矮的同学多高', `${n} 位同学的平均身高`, `${n} 位同学身高的总和`],
-            answer: 2, reveals: [],
-            correct: '对！题目问的是「平均身高」。',
-            wrong: '题目最后问的是「平均身高」。' },
-          { q: '要求「平均身高」，必须知道什么？',
-            options: ['最高的身高', '身高总和与总人数', '最矮的身高', '身高排第几'],
-            answer: 1, reveals: [0, 1],
-            correct: '对！平均数 = 总数 ÷ 总份数。',
-            wrong: '回忆一下：平均数 = 总数 ÷ 总份数。' },
-          { q: `${n} 位同学的身高总和是多少厘米？——先想：该用哪个算式？`,
-            options: [heights.join(' + '), `${avg} × ${n}`, `${Math.max(...heights)} − ${Math.min(...heights)}`, `${heights[0]} + ${heights[1]}`],
-            answer: 0, reveals: [],
-            correct: `对！${heights.join(' + ')} = <b>${total}</b> 厘米。`,
-            wrong: `求总和就是把每个同学的身高都加起来。` },
-          { q: `身高总和 ${total} 厘米，一共 ${n} 人，平均身高是多少？——先想：该用哪个算式？`,
-            options: [`${total} × ${n}`, `${total} ÷ ${n}`, `${total} − ${n}`, `${total} + ${n}`],
-            answer: 1, reveals: [],
-            correct: `对！用 ${total} ÷ ${n}。算出结果，填进下面的框里吧！`,
-            wrong: `平均数 = 总数 ÷ 总份数。` }
-        ],
-        answer: avg, unit: '厘米',
-        praise: '你掌握了求平均数的核心方法！',
-        wrongTip: `平均数 = 总数 ÷ 总份数。`
-      };
-    }
-  },
-  /* 长方形周长 */
-  {
-    tag: '四上 · 周长',
-    generate() {
-      const len = randInt(10, 25), wid = randInt(5, 12);
-      const up = randInt(8, 20), per = (len + wid) * 2, answer = per * up;
-      return {
-        tag: '四上 · 周长',
-        text: `一个长方形花坛，长 ${len} 米，宽 ${wid} 米。要在花坛四周围一圈栅栏，栅栏长多少米？如果每米栅栏 ${up} 元，买栅栏一共要花多少钱？`,
-        facts: [`花坛长 ${len} 米`, `花坛宽 ${wid} 米`, `每米栅栏 ${up} 元`],
-        steps: [
-          { q: '这道题第一问要求什么？',
-            options: ['花坛的面积', '花坛的周长', '花坛的长', '花坛的宽'],
-            answer: 1, reveals: [],
-            correct: '对！「在花坛四周围一圈栅栏」，求的就是周长。',
-            wrong: '「围一圈」就是绕花坛走一圈的长度。' },
-          { q: '长方形的周长怎么求？',
-            options: ['长 + 宽', '长 × 宽', '(长 + 宽) × 2', '长 × 2 + 宽'],
-            answer: 2, reveals: [0, 1],
-            correct: `对！长方形周长 = (长 + 宽) × 2。`,
-            wrong: '想一想长方形的周长公式。' },
-          { q: '这个花坛的周长是多少米？——先想：该用哪个算式？',
-            options: [`${len} + ${wid}`, `${len} × ${wid}`, `(${len} + ${wid}) × 2`, `${len} × 2 + ${wid}`],
-            answer: 2, reveals: [2],
-            correct: `对！(${len} + ${wid}) × 2 = ${len + wid} × 2 = <b>${per}</b> 米。`,
-            wrong: `长方形周长 = (长 + 宽) × 2。` },
-          { q: `每米栅栏 ${up} 元，${per} 米一共要花多少钱？——先想：该用哪个算式？`,
-            options: [`${per} + ${up}`, `${per} × ${up}`, `${per} ÷ ${up}`, `${up} − ${per}`],
-            answer: 1, reveals: [],
-            correct: `对！用 ${per} × ${up}。算出结果，填进下面的框里！`,
-            wrong: `每米 ${up} 元，${per} 米就是求「${per} 个 ${up}」，用乘法。` }
-        ],
-        answer, unit: '元',
-        praise: '你分清了「先求周长、再求总价」两步！',
-        wrongTip: `先算周长 (${len} + ${wid}) × 2，再乘以 ${up}。`
-      };
-    }
-  },
-  /* 连乘问题 */
-  {
-    tag: '四上 · 连乘问题',
-    generate() {
-      const boxes = randInt(3, 8), perBox = randInt(12, 30);
-      const price = randInt(4, 9);
-      const totalItems = boxes * perBox, total = totalItems * price;
-      return {
-        tag: '四上 · 连乘问题',
-        text: `学校买了 ${boxes} 箱钢笔，每箱 ${perBox} 支，每支钢笔 ${price} 元。学校一共花了多少钱？`,
-        facts: [`买了 ${boxes} 箱`, `每箱 ${perBox} 支`, `每支 ${price} 元`],
-        steps: [
-          { q: '这道题最后要求什么？',
-            options: ['一共买了几箱', '一共花了多少钱', '一共买了多少支', '每支钢笔多少钱'],
-            answer: 1, reveals: [],
-            correct: '对！求的是一共花的钱数。',
-            wrong: '看题目的问题——「一共花了多少钱」。' },
-          { q: '要求「一共花的钱」，必须先知道什么？',
-            options: ['每箱多少支', '一共买了多少支钢笔', '每支多少钱', '每箱多少钱'],
-            answer: 1, reveals: [0, 1],
-            correct: `对！总价 = 总数量 × 单价。单价 ${price} 元已经知道。`,
-            wrong: `单价已经知道了。要求总价，还缺什么？` },
-          { q: '一共买了多少支钢笔？——先想：该用哪个算式？',
-            options: [`${boxes} + ${perBox}`, `${boxes} × ${perBox}`, `${perBox} ÷ ${boxes}`, `${boxes} × ${price}`],
-            answer: 1, reveals: [2],
-            correct: `对！${boxes} × ${perBox} = <b>${totalItems}</b> 支。`,
-            wrong: `${boxes} 箱，每箱 ${perBox} 支，求总数用乘法。` },
-          { q: `一共 ${totalItems} 支，每支 ${price} 元，一共花多少钱？——先想：该用哪个算式？`,
-            options: [`${totalItems} + ${price}`, `${totalItems} × ${price}`, `${totalItems} ÷ ${price}`, `${price} × ${boxes}`],
-            answer: 1, reveals: [],
-            correct: `对！用 ${totalItems} × ${price}。算出结果，填进下面的框里！`,
-            wrong: `总价 = 数量 × 单价。` }
-        ],
-        answer, unit: '元',
-        praise: '你理清了「先求总数、再求总价」的两步连乘思路！',
-        wrongTip: `先算总数量 ${boxes}×${perBox}，再乘以单价 ${price}。`
-      };
-    }
-  },
-  /* 植树问题 */
-  {
-    tag: '四上 · 植树问题',
-    generate() {
-      const gap = randInt(4, 8), segs = randInt(10, 25);
-      const length = gap * segs, answer = segs + 1;
-      return {
-        tag: '四上 · 植树问题',
-        text: `一条小路长 ${length} 米，在小路的一边每隔 ${gap} 米种一棵树，两端都种。一共要种多少棵树？`,
-        facts: [`小路长 ${length} 米`, `每隔 ${gap} 米种一棵树`, `两端都种`],
-        steps: [
-          { q: '这道题最后要求什么？',
-            options: ['小路一共多长', '每隔多少米种一棵', '一共要种多少棵树', '小路的两端有几棵'],
-            answer: 2, reveals: [],
-            correct: '对！求的是「一共要种多少棵树」。',
-            wrong: '看题目最后一句——「一共要种多少棵树」。' },
-          { q: '要求种几棵树，必须先知道什么？',
-            options: ['小路多长', '小路被分成几段', '每棵树多高', '一共几个人种'],
-            answer: 1, reveals: [0, 1],
-            correct: `对！先看小路被分成几段，再根据"两端都种"加 1。`,
-            wrong: `关键是要先看小路被分成几段。` },
-          { q: `小路被分成了几段？——先想：该用哪个算式？`,
-            options: [`${length} + ${gap}`, `${length} − ${gap}`, `${length} ÷ ${gap}`, `${length} × ${gap}`],
-            answer: 2, reveals: [2],
-            correct: `对！${length} ÷ ${gap} = <b>${segs}</b> 段。`,
-            wrong: `求"${length} 里面有几个 ${gap}"，用除法。` },
-          { q: `${segs} 段，两端都种——一共要种多少棵树？——先想：该怎么算？`,
-            options: [`${segs} 棵`, `${segs} + 1 = ${segs + 1} 棵`, `${segs} − 1 = ${segs - 1} 棵`, `${segs} × 2 = ${segs * 2} 棵`],
-            answer: 1, reveals: [],
-            correct: `对！两端都种，棵数 = 段数 + 1 = ${segs + 1} 棵。`,
-            wrong: `"两端都种"，棵数比段数多 1。` }
-        ],
-        answer, unit: '棵',
-        praise: '你掌握了植树问题的核心：段数 + 1 = 棵数！',
-        wrongTip: `段数是 ${length}÷${gap}=${segs}，两端都种要 +1。`
-      };
-    }
-  },
-  /* 三步归一 */
-  {
-    tag: '四上 · 三步归一',
-    generate() {
-      const tr1 = randInt(2, 4), tp1 = randInt(2, 4), pu = randInt(4, 9);
-      const total1 = tr1 * tp1 * pu;
-      const tr2 = randInt(5, 8), tp2 = randInt(3, 6);
-      const answer = pu * tr2 * tp2;
-      return {
-        tag: '四上 · 三步归一',
-        text: `${tr1} 辆卡车 ${tp1} 次一共运货 ${total1} 吨。照这样计算，${tr2} 辆同样的卡车 ${tp2} 次能运货多少吨？`,
-        facts: [`${tr1} 辆卡车 ${tp1} 次运 ${total1} 吨`, `要算 ${tr2} 辆 ${tp2} 次`],
-        steps: [
-          { q: '这道题最后要求什么？',
-            options: ['一共运了多少吨', `${tr2} 辆卡车 ${tp2} 次能运多少吨`, '每辆卡车运多少吨', '一共有几辆卡车'],
-            answer: 1, reveals: [],
-            correct: '对！求的是"多少辆、多少次"的总运量。',
-            wrong: '看题目的问题。' },
-          { q: '要求新运量，必须先知道什么？',
-            options: ['每辆卡车 1 次运几吨', '一共运了几次', '有几辆卡车', '每次运货花多少钱'],
-            answer: 0, reveals: [0, 1],
-            correct: `对！"照这样计算"就是要先求出"一辆车一次运多少吨"。`,
-            wrong: `"照这样计算"就是先求"一辆车一次运几吨"。` },
-          { q: '一辆卡车一次运多少吨？——先想：该用哪个算式？',
-            options: [`${total1} ÷ ${tr1}`, `${total1} ÷ ${tr1} ÷ ${tp1}`, `${total1} × ${tr1}`, `${total1} − ${tp1}`],
-            answer: 1, reveals: [],
-            correct: `对！${total1} ÷ ${tr1} ÷ ${tp1} = ${total1 / tr1} ÷ ${tp1} = <b>${pu}</b> 吨。`,
-            wrong: `要把总吨数平均分到每辆车每次上：先除以车辆数，再除以次数。` },
-          { q: `一辆车一次运 ${pu} 吨，${tr2} 辆 ${tp2} 次一共运多少吨？——先想：该怎么算？`,
-            options: [`${pu} + ${tr2} + ${tp2}`, `${pu} × ${tr2} × ${tp2}`, `${pu} × ${tr2} ÷ ${tp2}`, `${pu} + ${tr2} × ${tp2}`],
-            answer: 1, reveals: [],
-            correct: `对！用 ${pu} × ${tr2} × ${tp2}。算出结果，填进下面的框里！`,
-            wrong: `一辆车一次 ${pu} 吨，${tr2} 辆 ${tp2} 次，用乘法。` }
-        ],
-        answer, unit: '吨',
-        praise: '你成功抓住了"先求单位量，再求总量"的三步归一思路！',
-        wrongTip: `先求一辆车一次运 ${total1}÷${tr1}÷${tp1}=${pu} 吨，再乘 ${tr2} 乘 ${tp2}。`
-      };
-    }
-  },
-  /* 周长逆运算 */
-  {
-    tag: '四上 · 周长逆运算',
-    generate() {
-      const wid = randInt(6, 15), len = randInt(15, 30);
-      const per = (len + wid) * 2, answer = wid;
-      return {
-        tag: '四上 · 周长逆运算',
-        text: `一个长方形操场，周长是 ${per} 米，长是 ${len} 米。宽是多少米？`,
-        facts: [`周长 ${per} 米`, `长 ${len} 米`],
-        steps: [
-          { q: '这道题要求什么？',
-            options: ['长方形的周长', '长方形的长', '长方形的宽', '长方形的面积'],
-            answer: 2, reveals: [],
-            correct: '对！题目问的是"宽是多少米"。',
-            wrong: '看题目最后一句——"宽是多少米"。' },
-          { q: '知道周长和长，要求宽，先要算出什么？',
-            options: ['长 + 宽 的和是多少', '宽是多少', '长是多少', '面积是多少'],
-            answer: 0, reveals: [0, 1],
-            correct: `对！周长 = (长 + 宽) × 2，所以长 + 宽 = 周长 ÷ 2 = ${per} ÷ 2 = ${per / 2} 米。`,
-            wrong: `根据周长公式，先算"长 + 宽"，再减去长。` },
-          { q: '"长 + 宽"等于多少？——先想：该用哪个算式？',
-            options: [`${per} × 2`, `${per} ÷ 2`, `${per} ÷ 4`, `${per} − 2`],
-            answer: 1, reveals: [],
-            correct: `对！用 ${per} ÷ 2 = <b>${per / 2}</b> 米。`,
-            wrong: `周长 = (长 + 宽) × 2，所以长 + 宽 = 周长 ÷ 2。` },
-          { q: `长 + 宽 = ${per / 2} 米，长 = ${len} 米，宽是多少米？——先想：该怎么算？`,
-            options: [`${per / 2} + ${len}`, `${per / 2} − ${len}`, `${per / 2} × ${len}`, `${len} − ${per / 2}`],
-            answer: 1, reveals: [],
-            correct: `对！宽 = 长 + 宽 − 长 = ${per / 2} − ${len}。`,
-            wrong: `"长 + 宽"减去"长"，就是宽。` }
-        ],
-        answer, unit: '米',
-        praise: '你掌握了周长公式的逆推：先求"长+宽"，再减去长！',
-        wrongTip: `先算 ${per} ÷ 2 = ${per / 2}，再减去长 ${len}。`
-      };
-    }
+
+/* 生成 3 个与正确答案不同、又都在数量级上的干扰项 */
+function numWrongs(v, extra) {
+  const cands = shuffleAll([
+    v * 10, v * 2, v + 10, v + 100, v - 10, v + 1,
+    Math.round(v / 10), v * 100
+  ].concat(extra || []));
+  const out = [];
+  cands.forEach(x => {
+    if (out.length >= 3) return;
+    if (!Number.isInteger(x) || x <= 0 || x === v || out.includes(x)) return;
+    out.push(x);
+  });
+  let k = 1;
+  while (out.length < 3) {
+    const c = v + k * 7;
+    if (c !== v && !out.includes(c)) out.push(c);
+    k++;
   }
+  return out;
+}
+/* 三个文字型干扰项必须与正确项不同 */
+function textWrongs(correct, list) {
+  const c = String(correct);
+  const out = [];
+  list.forEach(x => {
+    const s = String(x);
+    if (out.length < 3 && s !== c && !out.includes(s)) out.push(s);
+  });
+  let k = 1;
+  while (out.length < 3) {
+    const s = c + '？'.repeat(k);
+    if (!out.includes(s)) out.push(s);
+    k++;
+  }
+  return out;
+}
+function S2(q, correct, wrongs, extra) { return S(q, correct, textWrongs(correct, wrongs), extra); }
+
+const problemTemplates = [
+
+/* ================= 度量衡的故事 ================= */
+
+/* 单位换算：大化小 / 小化大 / 复名数 */
+{
+  unit: '度量衡', kp: '单位换算',
+  gen() {
+    const fams = [
+      { a: '升', b: '毫升', r: 1000, small: [250, 500, 750], scene: '一瓶饮料' },
+      { a: '米', b: '厘米', r: 100, small: [5, 10, 15, 25, 50], scene: '一根彩带' },
+      { a: '千克', b: '克', r: 1000, small: [100, 250, 500, 750], scene: '一袋大米' },
+      { a: '吨', b: '千克', r: 1000, small: [100, 200, 500, 600], scene: '一车煤' },
+      { a: '分米', b: '厘米', r: 10, small: [1, 2, 3, 5, 7], scene: '一根木条' }
+    ];
+    const f = pick(fams);
+    const mode = pick(['down', 'up', 'mix']);
+    const k = randInt(2, 9);
+    const facts = [`1 ${f.a} = ${f.r} ${f.b}`];
+    const steps = [];
+    let text = '', answer = 0;
+
+    if (mode === 'down') {
+      text = `${k}${f.a} 等于多少${f.b}？`;
+      answer = k * f.r;
+      facts.push(`要换算的量是 ${k} ${f.a}`);
+      steps.push(S2(`1${f.a} 等于多少${f.b}？`, f.r, numWrongs(f.r),
+        { ok: `对！1${f.a} = ${f.r}${f.b}。`, no: `记住进率：1${f.a} = ${f.r}${f.b}。` }));
+      steps.push(S2(`${f.a} 是高级单位，化成 ${f.b} 是低级单位，用什么方法？`, '乘进率',
+        ['除以进率', '加进率', '减进率'],
+        { ok: '对！大单位换小单位，乘进率。', no: '大化小，数字会变大，所以是乘进率。' }));
+      steps.push(S2(`那么算式应该是哪一个？`, `${k} × ${f.r}`,
+        [`${k} ÷ ${f.r}`, `${k} + ${f.r}`, `${f.r} ÷ ${k}`],
+        { ok: `对！用 ${k} × ${f.r}。算出来填进下面的框吧！`, no: `求 ${k} 个 ${f.r}，用乘法。` }));
+    } else if (mode === 'up') {
+      const big = k * f.r;
+      text = `${big}${f.b} 等于多少${f.a}？`;
+      answer = k;
+      facts.push(`要换算的量是 ${big} ${f.b}`);
+      steps.push(S2(`1${f.a} 等于多少${f.b}？`, f.r, numWrongs(f.r),
+        { ok: `对！1${f.a} = ${f.r}${f.b}。`, no: `记住进率：1${f.a} = ${f.r}${f.b}。` }));
+      steps.push(S2(`${f.b} 是低级单位，化成 ${f.a} 是高级单位，用什么方法？`, '除以进率',
+        ['乘进率', '加进率', '减进率'],
+        { ok: '对！小单位换大单位，除以进率。', no: '小化大，数字会变小，所以是除以进率。' }));
+      steps.push(S2(`那么算式应该是哪一个？`, `${big} ÷ ${f.r}`,
+        [`${big} × ${f.r}`, `${big} − ${f.r}`, `${f.r} ÷ ${big}`],
+        { ok: `对！用 ${big} ÷ ${f.r}。算出来填进下面的框吧！`, no: `看 ${big} 里面有几个 ${f.r}，用除法。` }));
+    } else {
+      const big = randInt(2, 5);
+      const small = pick(f.small);
+      const part = big * f.r;
+      answer = part + small;
+      text = `${big}${f.a}${small}${f.b} 等于多少${f.b}？`;
+      facts.push(`${big} ${f.a} 和 ${small} ${f.b}`);
+      steps.push(S2(`先把 ${big}${f.a} 化成${f.b}，是多少？`, part, numWrongs(part),
+        { ok: `对！${big} × ${f.r} = ${part}${f.b}。`, no: `${big}${f.a} 就是 ${big} 个 ${f.r}${f.b}。` }));
+      steps.push(S2(`还要再加上剩下的 ${small}${f.b}，算式是哪一个？`, `${part} + ${small}`,
+        [`${part} − ${small}`, `${part} × ${small}`, `${small} − ${part}`],
+        { ok: `对！把 ${part}${f.b} 和 ${small}${f.b} 合起来。`, no: '合起来用加法。' }));
+      steps.push(S2(`最后的结果是多少${f.b}？请你算一算。`, `${part} + ${small} = ${answer}`,
+        [`${part} + ${small} = ${part - small}`, `${part} − ${small} = ${part - small}`, `${part} + ${small} = ${part * small}`],
+        { ok: `对！${part} + ${small} = ${answer}${f.b}。`, no: `${part} 再加 ${small}，就是 ${answer}。` }));
+    }
+
+    return {
+      tag: '四上 · 单位换算',
+      text, facts, steps, answer, unit: f.b,
+      praise: '你分清了「大化小乘进率、小化大除以进率」！',
+      wrongTip: `先看进率：1${f.a} = ${f.r}${f.b}，再判断该乘还是该除。`
+    };
+  }
+},
+
+/* 古代度量衡 */
+{
+  unit: '度量衡', kp: '古代度量衡',
+  gen() {
+    const ctx = pick([
+      { unit: '尺', rule: '1 尺约等于现在的 23 厘米', step: 23, tgt: '厘米', src: '古代一尺' },
+      { unit: '丈', rule: '1 丈 = 10 尺，1 尺约等于现在的 23 厘米', step: 230, tgt: '厘米', src: '古代一丈' },
+      { unit: '斗', rule: '唐代 1 斗约等于 6000 毫升', step: 6, tgt: '升', src: '唐代一斗' },
+      { unit: '斤', rule: '元代 1 斤约等于现在的 640 克', step: 640, tgt: '克', src: '元代一斤' },
+      { unit: '斤', rule: '秦朝 1 斤约等于现在的 250 克', step: 250, tgt: '克', src: '秦朝一斤' }
+    ]);
+    const n = randInt(3, 9);
+    const answer = n * ctx.step;
+    return {
+      tag: '四上 · 古代度量衡',
+      text: `据史料记载，${ctx.rule}。那么 ${n}${ctx.unit}约相当于现在的多少${ctx.tgt}？`,
+      facts: [ctx.rule, `要换算的是 ${n}${ctx.unit}`],
+      steps: [
+        S2(`1${ctx.unit}相当于现在的多少${ctx.tgt}？`, ctx.step, numWrongs(ctx.step),
+          { ok: `对！1${ctx.unit}≈${ctx.step}${ctx.tgt}。`, no: `题目里写了：${ctx.rule}。` }),
+        S2(`求 ${n}${ctx.unit}，就是求 ${n} 个 ${ctx.step}${ctx.tgt}，用什么方法？`, '乘法',
+          ['除法', '加法', '减法'],
+          { ok: `对！${n} 个 ${ctx.step} 相加，用乘法最方便。`, no: '求几个相同加数的和，用乘法。' }),
+        S2(`算式应该是哪一个？`, `${n} × ${ctx.step}`,
+          [`${n} ÷ ${ctx.step}`, `${n} + ${ctx.step}`, `${ctx.step} ÷ ${n}`],
+          { ok: `对！用 ${n} × ${ctx.step}。算出结果填进下面的框吧！`, no: `求 ${n} 个 ${ctx.step}，用乘法。` })
+      ],
+      answer, unit: ctx.tgt,
+      praise: '你能用古代的计量单位换算出现代的数，很有历史感！',
+      wrongTip: `1${ctx.unit}≈${ctx.step}${ctx.tgt}，${n}${ctx.unit}就是 ${n}×${ctx.step}。`
+    };
+  }
+},
+
+/* 容积：先求总毫升，再化成升 */
+{
+  unit: '度量衡', kp: '升和毫升',
+  gen() {
+    const q = pick([250, 500, 750]);
+    const mul = q === 500 ? 2 : 4;
+    const n = mul * randInt(2, 6);
+    const total = n * q;
+    const answer = total / 1000;
+    const drink = pick(['果汁', '牛奶', '矿泉水', '酸梅汤']);
+    return {
+      tag: '四上 · 升和毫升',
+      text: `妈妈买了 ${n} 瓶${drink}，每瓶 ${q} 毫升。一共是多少毫升？合多少升？`,
+      facts: [`买了 ${n} 瓶`, `每瓶 ${q} 毫升`],
+      steps: [
+        S2(`要求一共多少毫升，就是求 ${n} 个 ${q}，算式是哪一个？`, `${n} × ${q}`,
+          [`${n} ÷ ${q}`, `${n} + ${q}`, `${q} ÷ ${n}`],
+          { ok: `对！用 ${n} × ${q}。`, no: '求几个相同加数的和，用乘法。' }),
+        S2(`${n} × ${q} = ${total}，所以一共是多少毫升？`, total, numWrongs(total),
+          { ok: `对！一共 ${total} 毫升。`, no: `${n} × ${q} = ${total}。` }),
+        S2(`${total} 毫升合多少升？该怎么算？`, `${total} ÷ 1000`,
+          [`${total} × 1000`, `${total} ÷ 100`, `${total} − 1000`],
+          { ok: `对！1 升 = 1000 毫升，毫升化升要除以 1000。`, no: '毫升化升，除以进率 1000。' })
+      ],
+      answer, unit: '升',
+      praise: '你算出了总量，还把它换成了更大的单位！',
+      wrongTip: `先算 ${n}×${q}=${total} 毫升，再除以 1000 得到 ${answer} 升。`
+    };
+  }
+},
+
+/* ================= 第一单元 · 三位数除以两位数 ================= */
+
+/* 商的位数：□ 里最小 / 最大填几 */
+{
+  unit: '除法', kp: '商的位数',
+  gen() {
+    const t = randInt(2, 8);
+    const u = randInt(2, 9);
+    const d = t * 10 + u;
+    const p = randInt(1, u - 1);
+    const q = randInt(0, 9);
+    const m = p * 10 + q;
+    const askMin = Math.random() < 0.55;
+    const answer = askMin ? t + 1 : t;
+    const steps = [];
+    const wrongDigit = (v) => {
+      const cands = shuffleAll([v - 1, v + 1, v + 2, v - 2, 1, 2, 3, 4, 9])
+        .filter(x => x >= 1 && x <= 9 && x !== v);
+      const out = [];
+      cands.forEach(x => { if (out.length < 3 && !out.includes(x)) out.push(x); });
+      return out;
+    };
+    steps.push(S2(`要判断商是几位数，先看被除数的前两位够不够除。${d} × 10 等于多少？`, d * 10,
+      numWrongs(d * 10),
+      { ok: `对！${d} × 10 = ${d * 10}。商要是两位数，被除数就不能小于它。`, no: `除数 ${d} 乘 10 就是 ${d * 10}。` }));
+    if (askMin) {
+      steps.push(S2(`要使 □${m} ÷ ${d} 的商是两位数，□ 里最小填几？`, t + 1, wrongDigit(t + 1),
+        { ok: `对！最小填 ${t + 1}。`, no: `□${m} 要不小于 ${d * 10}，所以 □ 至少是 ${t + 1}。` }));
+      steps.push(S2(`验证一下：把 □ 填成 ${t + 1}，${(t + 1) * 100 + m} ÷ ${d} 的商是几位数？`, '两位数',
+        ['一位数', '三位数', '无法确定'],
+        { ok: '对，商是两位数，说明填对了！', no: `算一算 ${(t + 1) * 100 + m} ÷ ${d}，商确实是两位数。` }));
+    } else {
+      steps.push(S2(`要使 □${m} ÷ ${d} 的商是一位数，□ 里最大填几？`, t, wrongDigit(t),
+        { ok: `对！最大填 ${t}。`, no: `□${m} 要小于 ${d * 10}，所以 □ 最大是 ${t}。` }));
+      steps.push(S2(`验证一下：把 □ 填成 ${t}，${t * 100 + m} ÷ ${d} 的商是几位数？`, '一位数',
+        ['两位数', '三位数', '无法确定'],
+        { ok: '对，商是一位数，说明填对了！', no: `算一算 ${t * 100 + m} ÷ ${d}，商确实是一位数。` }));
+    }
+    return {
+      tag: '四上 · 商的位数',
+      text: `要使 □${m} ÷ ${d} 的商是${askMin ? '两位数，□ 里最小' : '一位数，□ 里最大'}填几？`,
+      facts: [`除数是 ${d}`, `被除数是 □${m}`],
+      steps, answer, unit: '',
+      praise: '你会用「先估算、再填数、最后验证」来判断商的位数！',
+      wrongTip: `关键：除数 ${d}×10 = ${d * 10}。被除数比它大商就是两位数，比它小商就是一位数。`
+    };
+  }
+},
+
+/* 调商：余数比除数大 */
+{
+  unit: '除法', kp: '调商',
+  gen() {
+    const b = randInt(12, 45);
+    const Q = randInt(4, 30);
+    const R = randInt(1, b - 1);
+    const badQ = Q - 1;
+    const badR = R + b;
+    return {
+      tag: '四上 · 试商与调商',
+      text: `小马虎在计算一个除法算式时，试出的商是 ${badQ}，余数是 ${badR}，而除数是 ${b}。他正确的商应该是多少？`,
+      facts: [`试出的商是 ${badQ}`, `余数是 ${badR}`, `除数是 ${b}`],
+      steps: [
+        S2(`余数 ${badR} 比除数 ${b} 大，说明什么？`, '商试小了，还要调大',
+          ['商试大了，要调小', '商正好，不用调', '被除数算错了'],
+          { ok: '对！余数 ≥ 除数，说明商试小了。', no: `余数必须比除数小。现在 ${badR} > ${b}，说明商试小了。` }),
+        S2(`既然商试小了，要把它调大几？`, '调大 1',
+          ['调大 2', '调大 10', '调小 1'],
+          { ok: '对！每次调 1 就够了。', no: '试商是一步一步调的，每次调大 1。' }),
+        S2(`那么正确的商是哪一个？`, `${badQ} + 1 = ${Q}`,
+          [`${badQ} + 2 = ${badQ + 2}`, `${badQ} − 1 = ${badQ - 1}`, `${badQ} + 10 = ${badQ + 10}`],
+          { ok: `对！正确商是 ${Q}。`, no: `${badQ} 再加 1 就是 ${Q}。` })
+      ],
+      answer: Q, unit: '',
+      praise: '你抓住了调商的关键：余数比除数大，就把商调大 1！',
+      wrongTip: `余数 ${badR} 比除数 ${b} 大 → 商 ${badQ} 试小了 → 正确商是 ${badQ}+1=${Q}。`
+    };
+  }
+},
+
+/* 商不变规律与余数 */
+{
+  unit: '除法', kp: '商不变规律',
+  gen() {
+    const d2 = randInt(3, 9);
+    const q = randInt(3, 25);
+    const r = randInt(1, d2 - 1);
+    const a2 = d2 * q + r;
+    const A = a2 * 10, D = d2 * 10, R = r * 10;
+    return {
+      tag: '四上 · 商不变规律',
+      text: `计算 ${A} ÷ ${D} 时，把被除数和除数同时除以 10，得到 ${a2} ÷ ${d2} = ${q} …… ${r}。那么 ${A} ÷ ${D} 的余数是多少？`,
+      facts: [`${a2} ÷ ${d2} = ${q} …… ${r}`, `被除数和除数同时除以了 10`],
+      steps: [
+        S2('被除数和除数同时除以 10，商变不变？', '不变',
+          ['变成原来的 10 倍', '变成原来的十分之一', '无法确定'],
+          { ok: '对！被除数和除数同时乘或除以相同的数，商不变。', no: '这就是商不变的规律：商不变。' }),
+        S2('那余数变不变呢？', '也跟着缩小了 10 倍',
+          ['不变', '扩大 10 倍', '和商一样不变'],
+          { ok: '对！余数会跟着缩小 10 倍，所以要把算出的余数还原回去。', no: '注意：商不变，但余数会跟着变。' }),
+        S2(`要把余数还原，应该怎么算？`, `${r} × 10`,
+          [`${r} ÷ 10`, `${r} + 10`, `${r} × 100`],
+          { ok: `对！原来的余数 = ${r} × 10。`, no: '缩小了 10 倍，还原就要乘 10。' })
+      ],
+      answer: R, unit: '',
+      praise: '你记住了商不变规律里最容易错的一点：商不变，余数要还原！',
+      wrongTip: `商不变 = ${q}；余数缩小了 10 倍，原来应是 ${r}×10=${R}。`
+    };
+  }
+},
+
+/* 商的变化规律：除数扩大 k 倍 */
+{
+  unit: '除法', kp: '商的变化规律',
+  gen() {
+    const b = randInt(3, 20);
+    const q = randInt(2, 20);
+    const k = randInt(2, 5);
+    const q0 = q * k;
+    const a = b * q0;
+    const b2 = b * k;
+    const steps = [
+      S2(`原来 ${a} ÷ ${b} = ${q0}。现在被除数不变，除数扩大到原来的 ${k} 倍，商会怎样？`, `缩小到原来的 ${k} 分之一`,
+        [`扩大到原来的 ${k} 倍`, '不变', `增加 ${k}`],
+        { ok: '对！被除数不变，除数乘几，商就除以几。', no: '除数变大，商就变小。' }),
+      S2(`那么 ${a} ÷ ${b2} 的商是多少？`, q, numWrongs(q),
+        { ok: `对！${q0} ÷ ${k} = ${q}。`, no: `${q0} 除以 ${k} 就是 ${q}。` }),
+      S2(`检验一下：${a} ÷ ${b2} 是不是等于 ${q}？该用哪个算式验算？`, `${q} × ${b2}`,
+        [`${q} × ${b}`, `${q} ÷ ${b2}`, `${b2} ÷ ${q}`],
+        { ok: `对！商 × 除数 = 被除数，${q} × ${b2} = ${a}。`, no: '用「商 × 除数 = 被除数」验算。' })
+    ];
+    return {
+      tag: '四上 · 商的变化规律',
+      text: `已知 ${a} ÷ ${b} = ${q0}。被除数不变，把除数扩大到原来的 ${k} 倍，那么 ${a} ÷ ${b2} 等于多少？`,
+      facts: [`${a} ÷ ${b} = ${q0}`, `除数 ${b} 变成 ${b2}`],
+      steps, answer: q, unit: '',
+      praise: '你掌握了「被除数不变时，除数乘几，商就除以几」！',
+      wrongTip: `除数 ×${k}，商就 ÷${k}：${q0} ÷ ${k} = ${q}。`
+    };
+  }
+},
+
+/* 进一法：至少需要几个箱子 */
+{
+  unit: '除法', kp: '进一法',
+  gen() {
+    const per = randInt(20, 60);
+    const q = randInt(12, 30);
+    const r = randInt(1, per - 1);
+    const total = per * q + r;
+    const answer = q + 1;
+    const scene = pick([
+      { thing: '本图书', box: '个箱子', per: '本', verb: '装' },
+      { thing: '千克苹果', box: '个纸箱', per: '千克', verb: '装' },
+      { thing: '个鸡蛋', box: '个盒子', per: '个', verb: '装' }
+    ]);
+    return {
+      tag: '四上 · 解决问题（进一法）',
+      text: `四年级同学捐了 ${total} ${scene.thing}，如果每 ${per} ${scene.per}${scene.verb}一${scene.box.replace('个', '')}，需要准备多少${scene.box}？`,
+      facts: [`一共 ${total} ${scene.thing}`, `每 ${per} ${scene.per}${scene.verb}一${scene.box.replace('个', '')}`],
+      steps: [
+        S2(`求需要多少个${scene.box}，用什么方法？`, '除法',
+          ['乘法', '加法', '减法'],
+          { ok: '对！看总数里有多少个「一份」，用除法。', no: '「平均分」的问题用除法。' }),
+        S2(`${total} ÷ ${per} 的商和余数分别是多少？`, `${q} …… ${r}`,
+          [`${q} …… ${r + per}`, `${q - 1} …… ${r}`, `${q + 1} …… ${r}`],
+          { ok: `对！${total} ÷ ${per} = ${q} …… ${r}。`, no: `算一算 ${total} ÷ ${per}，商 ${q} 余 ${r}。` }),
+        S2(`还剩下 ${r} ${scene.per}没装，这部分要不要再准备一个${scene.box}？`, `要，所以再加 1 个`,
+          ['不要，剩下的丢掉', '不要，剩下的塞进已有的箱子', '再加 2 个'],
+          { ok: `对！剩下的 ${r} ${scene.per}也得装，所以还要多 1 个。`, no: '题目要求「都装起来」，剩下的一点也得占一个。' })
+      ],
+      answer, unit: scene.box.replace('个', ''),
+      praise: '你记住了「有余数时，要再多准备一个」！',
+      wrongTip: `${total}÷${per}=${q}……${r}，还剩 ${r} 要装，所以需要 ${q}+1=${answer} 个。`
+    };
+  }
+},
+
+/* 去尾法：最多坐满几排 */
+{
+  unit: '除法', kp: '去尾法',
+  gen() {
+    const per = randInt(24, 48);
+    const q = randInt(8, 20);
+    const r = randInt(1, per - 1);
+    const total = per * q + r;
+    const answer = q;
+    return {
+      tag: '四上 · 解决问题（去尾法）',
+      text: `学校开展阅读分享会，${total} 名同学报名参加。报告厅每排有 ${per} 个座位，最多能坐满几排？`,
+      facts: [`一共 ${total} 名同学`, `每排 ${per} 个座位`],
+      steps: [
+        S2(`求「能坐满几排」，就是求 ${total} 里面有几个 ${per}，用什么方法？`, '除法',
+          ['乘法', '加法', '减法'],
+          { ok: '对！用除法。', no: '「一个数里有几个另一个数」用除法。' }),
+        S2(`${total} ÷ ${per} 的商和余数分别是多少？`, `${q} …… ${r}`,
+          [`${q} …… ${r + per}`, `${q + 1} …… ${r}`, `${q - 1} …… ${r}`],
+          { ok: `对！${total} ÷ ${per} = ${q} …… ${r}。`, no: `算一算 ${total} ÷ ${per}，商 ${q} 余 ${r}。` }),
+        S2(`剩下的 ${r} 人够坐满一排吗？那最多能坐满几排？`, `不够，所以是 ${q} 排`,
+          [`够，所以是 ${q + 1} 排`, `够，所以是 ${q + 2} 排`, `不够，所以是 ${q - 1} 排`],
+          { ok: `对！剩下 ${r} 人不满一排，不算「坐满」。`, no: `一排要坐满 ${per} 人，剩下 ${r} 人不够，所以只能算 ${q} 排。` })
+      ],
+      answer, unit: '排',
+      praise: '你分清了「坐满」和「都坐下」的区别！',
+      wrongTip: `${total}÷${per}=${q}……${r}。剩 ${r} 人不满一排，所以最多坐满 ${q} 排。`
+    };
+  }
+},
+
+/* 脱式计算：运算顺序 */
+{
+  unit: '除法', kp: '运算顺序',
+  gen() {
+    const v = Math.random() < 0.5 ? 1 : 2;
+    const steps = [];
+    let text = '', answer = 0, factList = [];
+    if (v === 1) {
+      const c = randInt(11, 19), q = randInt(11, 30);
+      const b = c * q, a = randInt(11, 60);
+      answer = a * q;
+      text = `计算 ${a} × (${b} ÷ ${c})，结果是多少？`;
+      factList = [`算式是 ${a} × (${b} ÷ ${c})`, '有括号，先算括号里的'];
+      steps.push(S2('先算哪一步？', `先算括号里的 ${b} ÷ ${c}`,
+        [`先算 ${a} × ${b}`, `先算 ${a} × ${c}`, `先算 ${b} × ${c}`],
+        { ok: '对！有括号就先算括号里的。', no: '有括号，先算括号里面的。' }));
+      steps.push(S2(`${b} ÷ ${c} 等于多少？`, q, numWrongs(q),
+        { ok: `对！${b} ÷ ${c} = ${q}。`, no: `算一算 ${b} ÷ ${c}，等于 ${q}。` }));
+      steps.push(S2(`再接下去该算什么？`, `${a} × ${q}`,
+        [`${a} + ${q}`, `${a} ÷ ${q}`, `${a} − ${q}`],
+        { ok: `对！原式变成 ${a} × ${q}。`, no: `括号算完后，剩下的是 ${a} 乘 ${q}。` }));
+    } else {
+      const b = randInt(11, 19), q = randInt(11, 30);
+      const a = b * q, c = randInt(11, 40);
+      answer = q * c;
+      text = `计算 ${a} ÷ ${b} × ${c}，结果是多少？`;
+      factList = [`算式是 ${a} ÷ ${b} × ${c}`, '只有乘除，同级运算从左往右'];
+      steps.push(S2('只有乘除法，应该按什么顺序算？', '从左往右，先算 ' + a + ' ÷ ' + b,
+        [`先算 ${b} × ${c}`, `先算 ${a} × ${c}`, `先算 ${a} × ${b}`],
+        { ok: '对！只有乘除，同级运算从左往右。', no: '乘除法是同级运算，从左往右依次算。' }));
+      steps.push(S2(`${a} ÷ ${b} 等于多少？`, q, numWrongs(q),
+        { ok: `对！${a} ÷ ${b} = ${q}。`, no: `算一算 ${a} ÷ ${b}，等于 ${q}。` }));
+      steps.push(S2(`再接下去该算什么？`, `${q} × ${c}`,
+        [`${q} + ${c}`, `${q} ÷ ${c}`, `${q} − ${c}`],
+        { ok: `对！原式变成 ${q} × ${c}。`, no: `前一步得 ${q}，再乘 ${c}。` }));
+    }
+    return {
+      tag: '四上 · 脱式计算',
+      text, facts: factList, steps, answer, unit: '',
+      praise: '你把运算顺序理得很清楚！',
+      wrongTip: '记牢：有括号先算括号；只有乘除时从左往右。'
+    };
+  }
+},
+
+/* 简便算法：商不变的规律 */
+{
+  unit: '除法', kp: '简便计算',
+  gen() {
+    const f = pick([{ b: 25, mul: 4 }, { b: 50, mul: 2 }]);
+    const q = randInt(8, 40);
+    const a = f.b * q;
+    const a2 = a * f.mul;
+    return {
+      tag: '四上 · 简便计算',
+      text: `计算 ${a} ÷ ${f.b} 时，把被除数和除数同时乘 ${f.mul}，就变成 ${a2} ÷ 100。结果是( )。`,
+      facts: [`${a} ÷ ${f.b}`, `被除数和除数同时乘 ${f.mul}`],
+      steps: [
+        S2(`把被除数和除数同时乘 ${f.mul}，商变不变？`, '不变',
+          [`变成 ${f.mul} 倍`, `缩小 ${f.mul} 倍`, '无法确定'],
+          { ok: '对！这就是商不变的规律。', no: '被除数和除数同时乘相同的数，商不变。' }),
+        S2(`${a} × ${f.mul} 等于多少？`, a2, numWrongs(a2),
+          { ok: `对！${a} × ${f.mul} = ${a2}，而 ${f.b} × ${f.mul} = 100。`, no: `${a} 乘 ${f.mul} 就是 ${a2}。` }),
+        S2(`${a2} ÷ 100 该怎么算？`, `${a2} ÷ 100`,
+          [`${a2} × 100`, `${a2} − 100`, `100 ÷ ${a2}`],
+          { ok: `对！用 ${a2} ÷ 100。算出来填进下面的框吧！`, no: `${a2} 除以 100，就是把小数点前的数去掉两个 0。` })
+      ],
+      answer: q, unit: '',
+      praise: '你会用商不变的规律把除法变简单！',
+      wrongTip: `商不变，所以 ${a} ÷ ${f.b} = ${a2} ÷ 100 = ${q}。`
+    };
+  }
+},
+/* ================= 第二单元 · 图形与几何 ================= */
+
+/* 三角形内角和 */
+{
+  unit: '图形', kp: '三角形内角和',
+  gen() {
+    let a, b;
+    do { a = randInt(30, 80); b = randInt(25, 70); } while (a + b > 170 || a + b < 100);
+    const answer = 180 - a - b;
+    return {
+      tag: '四上 · 三角形内角和',
+      text: `在一个三角形中，有两个角分别是 ${a}° 和 ${b}°。第三个角是多少度？`,
+      facts: [`两个角分别是 ${a}° 和 ${b}°`, '三角形内角和是 180°'],
+      steps: [
+        S2('任意三角形的内角和是多少度？', 180, [90, 270, 360],
+          { ok: '对！任意三角形的内角和都是 180°。', no: '记牢：三角形的内角和是 180°。' }),
+        S2(`已知的两个角一共是多少度？`, a + b, numWrongs(a + b, [b - a > 0 ? b - a : a - b, 180 - a - b, 90]),
+          { ok: `对！${a} + ${b} = ${a + b}°。`, no: `把两个已知角加起来：${a} + ${b} = ${a + b}。` }),
+        S2('求第三个角，该用哪个算式？', `180 − ${a + b}`,
+          [`180 + ${a + b}`, `360 − ${a + b}`, `${a + b} − 180`],
+          { ok: `对！用 180 − ${a + b}。算出来填进下面的框吧！`, no: '内角和减掉两个已知角，就是第三个角。' })
+      ],
+      answer, unit: '°',
+      praise: '你会用「内角和 180°」求未知角了！',
+      wrongTip: `第三个角 = 180 − ${a} − ${b} = ${answer}°。`
+    };
+  }
+},
+
+/* 等腰三角形（顶角↔底角 / 求周长） */
+{
+  unit: '图形', kp: '等腰三角形',
+  gen() {
+    const mode = pick(['apex', 'base', 'peri']);
+    const steps = [];
+    let text = '', answer = 0, unit = '°', tip = '', factList = [];
+    if (mode === 'apex') {
+      const a = randInt(10, 70) * 2;
+      const base = (180 - a) / 2;
+      answer = base;
+      text = `一个等腰三角形的顶角是 ${a}°，它的一个底角是多少度？`;
+      factList = [`顶角 ${a}°`, '两个底角相等', '三角形内角和是 180°'];
+      tip = `两个底角相等，一共 180 − ${a} = ${180 - a}°，所以一个底角是 ${180 - a} ÷ 2 = ${base}°。`;
+      steps.push(S2('等腰三角形的两个底角有什么关系？', '两个底角相等',
+        ['两个底角相加等于 90°', '两个底角都等于顶角', '两个底角相差 90°'],
+        { ok: '对！等腰三角形两个底角相等，这是它的关键特征。', no: '「等腰」的意思就是两条腰相等，对应的两个底角也相等。' }));
+      steps.push(S2(`两个底角一共是多少度？`, 180 - a, [a, 180 - a / 2, 360 - a],
+        { ok: `对！180 − ${a} = ${180 - a}°。`, no: `内角和 180° 减去顶角 ${a}°。` }));
+      steps.push(S2('求一个底角，该怎么算？', `(180 − ${a}) ÷ 2`,
+        [`(180 − ${a}) × 2`, `180 − ${a}`, `${a} ÷ 2`],
+        { ok: `对！${180 - a} 平均分成 2 份。`, no: '两个底角相等，所以把它们的和平均分成 2 份。' }));
+    } else if (mode === 'base') {
+      const a = randInt(20, 80);
+      answer = 180 - 2 * a;
+      text = `一个等腰三角形的一个底角是 ${a}°，它的顶角是多少度？`;
+      factList = [`一个底角 ${a}°`, '两个底角相等', '三角形内角和是 180°'];
+      tip = `两个底角一共 ${a} × 2 = ${2 * a}°，顶角 = 180 − ${2 * a} = ${answer}°。`;
+      steps.push(S2('等腰三角形两个底角相等，那么两个底角一共是多少度？', 2 * a, numWrongs(2 * a, [a, 180 - a, a * 2 + 10]),
+        { ok: `对！${a} × 2 = ${2 * a}°。`, no: `两个底角都是 ${a}°，合起来是 ${a} × 2。` }));
+      steps.push(S2('求顶角，该用哪个算式？', `180 − ${2 * a}`,
+        [`180 − ${a}`, `180 + ${2 * a}`, `360 − ${2 * a}`],
+        { ok: `对！用 180 − ${2 * a}。`, no: '内角和减去两个底角，就是顶角。' }));
+      steps.push(S2(`请你算一算 180 − ${2 * a}，把结果填进下面的框。`, answer, numWrongs(answer, [2 * a, 180 - a, answer + 20]),
+        { ok: `对！顶角是 ${answer}°。`, no: `180 − ${2 * a} = ${answer}。` }));
+    } else {
+      const w = randInt(8, 30);
+      const b = randInt(6, 34);
+      const P = 2 * w + b;
+      answer = P; unit = '厘米';
+      text = `一个等腰三角形的一条腰长 ${w} 厘米，底边长 ${b} 厘米。它的周长是多少厘米？`;
+      factList = [`一条腰长 ${w} 厘米`, `底边长 ${b} 厘米`, '两条腰长度相等'];
+      tip = `两条腰共 ${w} × 2 = ${2 * w} 厘米，再加底边 ${b} 厘米，周长是 ${P} 厘米。`;
+      steps.push(S2('等腰梯形的两条腰相等，等腰三角形的两条腰呢？', '两条腰长度相等',
+        ['两条腰相差 3 厘米', '两条腰的比是 2:1', '两条腰加起来等于底边'],
+        { ok: '对！「等腰」就是两条腰一样长。', no: '等腰三角形两条腰相等。' }));
+      steps.push(S2(`两条腰一共是多少厘米？`, 2 * w, numWrongs(2 * w, [w, 3 * w, w + b]),
+        { ok: `对！${w} × 2 = ${2 * w} 厘米。`, no: `两条腰都是 ${w} 厘米，合起来 ${w} × 2。` }));
+      steps.push(S2('求周长，该用哪个算式？', `${w} × 2 + ${b}`,
+        [`${w} + ${b} × 2`, `${w} × 2 − ${b}`, `${w} + ${b}`],
+        { ok: `对！周长 = 两条腰 + 底边。`, no: '周长要把三条边都加起来：两条腰 + 一条底边。' }));
+    }
+    return {
+      tag: '四上 · 等腰三角形',
+      text, facts: factList, steps, answer, unit,
+      praise: '你把等腰三角形的特征用得又快又准！',
+      wrongTip: tip
+    };
+  }
+},
+
+/* 三角形三边关系 */
+{
+  unit: '图形', kp: '三边关系',
+  gen() {
+    const a = randInt(4, 20);
+    let b = randInt(4, 20);
+    if (b === a) b = a + randInt(1, 5);
+    const askMax = Math.random() < 0.5;
+    const d = Math.abs(a - b);
+    const answer = askMax ? a + b - 1 : d + 1;
+    return {
+      tag: '四上 · 三角形三边关系',
+      text: `一个三角形的三条边都是整厘米数，其中两条边分别是 ${a} 厘米和 ${b} 厘米。第三条边${askMax ? '最长' : '最短'}是多少厘米？`,
+      facts: [`两条边分别是 ${a} 厘米和 ${b} 厘米`, '三条边都是整厘米数'],
+      steps: [
+        S2('三角形的三条边之间有什么关系？', '任意两边之和大于第三边',
+          ['任意两边之和小于第三边', '三条边必须一样长', '任意两边之差大于第三边'],
+          { ok: '对！任意两边之和大于第三边，这是判断能不能围成三角形的依据。', no: '记牢：任意两边之和必须大于第三边。' }),
+        S2(`${a} + ${b} = ${a + b}，所以第三条边必须比 ${a + b} 怎么样？`, `比 ${a + b} 小`,
+          [`比 ${a + b} 大`, `等于 ${a + b}`, `比 ${a + b} 大 ${a + b}`],
+          { ok: `对！第三条边要小于 ${a + b}。`, no: '两边之和要大于第三边，所以第三边一定小于两边之和。' }),
+        S2(`三条边都是整厘米数，那么第三条边${askMax ? '最长' : '最短'}是多少？`, answer,
+          numWrongs(answer, askMax ? [a + b, a + b - 2, answer + 1] : [d, d + 2, answer + 1]),
+          { ok: `对！是 ${answer} 厘米。`, no: askMax ? `比 ${a + b} 小、并且是整数的最大数就是 ${answer}。` : `比 ${d} 大、并且是整数的最小数就是 ${answer}。` })
+      ],
+      answer, unit: '厘米',
+      praise: '你用三边关系推出了第三条边的范围！',
+      wrongTip: `两边之和 ${a}+${b}=${a + b}，两边之差 ${Math.max(a, b)}−${Math.min(a, b)}=${d}。第三条边要在这两个数之间。`
+    };
+  }
+},
+
+/* 多边形内角和 */
+{
+  unit: '图形', kp: '多边形内角和',
+  gen() {
+    const n = randInt(5, 9);
+    const cnt = n - 2;
+    const answer = cnt * 180;
+    return {
+      tag: '四上 · 多边形内角和',
+      text: `从一个${['', '', '', '', '四', '五', '六', '七', '八', '九'][n]}边形的一个顶点出发，向不相邻的顶点连线，可以把它分成几个三角形？这个${['', '', '', '', '四', '五', '六', '七', '八', '九'][n]}边形的内角和是多少度？`,
+      facts: [`这是一个 ${n} 边形`, '每个三角形的内角和是 180°'],
+      steps: [
+        S2(`从 ${n} 边形的一个顶点出发连线，可以分成几个三角形？`, cnt, numWrongs(cnt, [n, n + 2, cnt + 1]),
+          { ok: `对！可以分成 ${cnt} 个三角形。`, no: `从一个顶点出发分成的三角形个数 = 边数 − 2 = ${n} − 2 = ${cnt}。` }),
+        S2('每个三角形的内角和是多少度？', 180, [90, 270, 360],
+          { ok: '对！每个都是 180°。', no: '任意三角形的内角和都是 180°。' }),
+        S2('求整个多边形的内角和，该用哪个算式？', `${cnt} × 180`,
+          [`${n} × 180`, `${cnt} × 90`, `${cnt} × 360`],
+          { ok: `对！用 ${cnt} × 180。算出来填进下面的框吧！`, no: `${cnt} 个三角形，每个 180°，所以用乘法。` })
+      ],
+      answer, unit: '°',
+      praise: '你发现了「多边形内角和 =（边数 − 2）× 180°」的规律！',
+      wrongTip: `${n} 边形能分成 ${n}−2=${cnt} 个三角形，内角和 ${cnt}×180=${answer}°。`
+    };
+  }
+},
+
+/* 等腰梯形周长 */
+{
+  unit: '图形', kp: '等腰梯形',
+  gen() {
+    const up = randInt(6, 20);
+    const low = up + randInt(4, 20);
+    const w = randInt(5, 25);
+    const answer = up + low + 2 * w;
+    return {
+      tag: '四上 · 等腰梯形',
+      text: `一个等腰梯形的上底是 ${up} 厘米，下底是 ${low} 厘米，一条腰长 ${w} 厘米。围成这个等腰梯形要用多少厘米长的绳子？`,
+      facts: [`上底 ${up} 厘米`, `下底 ${low} 厘米`, `一条腰长 ${w} 厘米`],
+      steps: [
+        S2('等腰梯形的两条腰有什么关系？', '两条腰长度相等',
+          ['两条腰相差 2 厘米', '上底和下底相等', '两条腰的和等于下底'],
+          { ok: '对！等腰梯形的两条腰一样长。', no: '「等腰」就是两条腰相等。' }),
+        S2('两条腰一共长多少厘米？', 2 * w, numWrongs(2 * w, [w, 3 * w, up + low]),
+          { ok: `对！${w} × 2 = ${2 * w} 厘米。`, no: `两条腰都是 ${w} 厘米，一共 ${w} × 2。` }),
+        S2('求梯形的周长，该用哪个算式？', `${up} + ${low} + ${w} × 2`,
+          [`${up} + ${low} + ${w}`, `(${up} + ${low}) × 2`, `${up} + ${low} + ${w} × 4`],
+          { ok: '对！四条边全部加起来才是周长。', no: '周长是四条边的总长：上底 + 下底 + 两条腰。' })
+      ],
+      answer, unit: '厘米',
+      praise: '你数清了梯形有四条边，而且两条腰一样长！',
+      wrongTip: `周长 = ${up} + ${low} + ${w} × 2 = ${answer} 厘米。`
+    };
+  }
+},
+
+/* ================= 第三单元 · 认识更大的数 ================= */
+
+/* 大数改写（用「亿」作单位） */
+{
+  unit: '大数', kp: '大数改写',
+  gen() {
+    const n = randInt(6, 99);
+    const num = n * 100000000;
+    const scene = pick([
+      { what: '全年累计客运量', unit: '人次' },
+      { what: '一年减少的碳排放', unit: '克' },
+      { what: '网站全年的访问量', unit: '次' }
+    ]);
+    return {
+      tag: '四上 · 大数改写',
+      text: `某市地铁${scene.what}达到 ${num} ${scene.unit}。把这个数改写成用「亿」作单位的数是( )亿。`,
+      facts: [`原数是 ${num}`, '1 亿 = 100000000'],
+      steps: [
+        S2('1 亿等于多少？', 100000000, [10000000, 1000000000, 100000],
+          { ok: '对！1 亿 = 100000000。', no: '1 亿是 1 后面 8 个 0：100000000。' }),
+        S2(`把 ${num} 改写成用「亿」作单位，要划掉末尾几个 0？`, 8, [4, 6, 9],
+          { ok: '对！去掉末尾 8 个 0。', no: '1 亿有 8 个 0，所以去掉 8 个 0。' }),
+        S2('去掉 8 个 0 后，前面剩下的数是几？', n, numWrongs(n, [n * 10, n + 1, n - 1]),
+          { ok: `对！剩下 ${n}，所以是 ${n} 亿。`, no: `去掉末尾 8 个 0，剩下的就是 ${n}。` })
+      ],
+      answer: n, unit: '亿',
+      praise: '你会把大数改写成用「亿」作单位的数了！',
+      wrongTip: `${num} = ${n}亿（去掉末尾 8 个 0）。`
+    };
+  }
+},
+
+/* 求近似数（省略万位后面的尾数） */
+{
+  unit: '大数', kp: '求近似数',
+  gen() {
+    const base = randInt(120, 9800);
+    const rest = randInt(0, 9999);
+    const num = base * 10000 + rest;
+    const thousand = Math.floor(rest / 1000);
+    const answer = rest >= 5000 ? base + 1 : base;
+    return {
+      tag: '四上 · 求近似数',
+      text: `${num} 省略万位后面的尾数，约是多少万？`,
+      facts: [`原数是 ${num}`, '要求精确到万位'],
+      steps: [
+        S2('省略万位后面的尾数，要看哪一位上的数？', '千位',
+          ['百位', '万位', '十万位'],
+          { ok: '对！看千位，再四舍五入。', no: '精确到万位，就看它后面一位，也就是千位。' }),
+        S2(`这个数千位上的数字是几？`, thousand, numWrongs(thousand, [thousand + 1, thousand - 1, 5]),
+          { ok: `对！千位上是 ${thousand}。`, no: `看 ${num} 的千位，是 ${thousand}。` }),
+        S2(`千位是 ${thousand}，${thousand >= 5 ? '满 5 要向前一位进 1' : '不满 5 要直接舍去'}，所以约是多少万？`,
+          answer, numWrongs(answer, [base, base + 1, base - 1]),
+          { ok: `对！约是 ${answer} 万。`, no: `${thousand >= 5 ? '满 5 进 1' : '不满 5 舍去'}，结果约是 ${answer} 万。` })
+      ],
+      answer, unit: '万',
+      praise: '你掌握了「看下一位、满五进一」的四舍五入！',
+      wrongTip: `${num} 的千位是 ${thousand}，${thousand >= 5 ? '满 5 进 1' : '不满 5 舍去'}，所以约是 ${answer} 万。`
+    };
+  }
+},
+
+/* 计数单位 */
+{
+  unit: '大数', kp: '计数单位',
+  gen() {
+    const pool = [
+      { name: '一万', v: 10000 },
+      { name: '十万', v: 100000 },
+      { name: '一百万', v: 1000000 },
+      { name: '一千万', v: 10000000 }
+    ];
+    const it = pick(pool);
+    const answer = it.v * 10;
+    return {
+      tag: '四上 · 计数单位',
+      text: `10 个${it.name}是多少？`,
+      facts: [`要算 10 个${it.name}`, '相邻两个计数单位之间的进率是 10'],
+      steps: [
+        S2('相邻两个计数单位之间的进率是多少？', 10, [100, 1000, 1],
+          { ok: '对！相邻两个计数单位之间是「满十进一」。', no: '每相邻两个计数单位之间的进率都是 10。' }),
+        S2(`求 10 个${it.name}，用什么方法？`, '乘法',
+          ['除法', '加法', '减法'],
+          { ok: '对！求几个相同加数的和，用乘法。', no: '10 个相同的数相加，用乘法最快。' }),
+        S2('算式应该是哪一个？', `10 × ${it.v}`,
+          [`${it.v} ÷ 10`, `10 + ${it.v}`, `${it.v} × 100`],
+          { ok: `对！用 10 × ${it.v}。算出来填进下面的框吧！`, no: `10 个${it.name}就是 ${it.v} × 10。` })
+      ],
+      answer, unit: '',
+      praise: '你对计数单位之间的进率很清楚！',
+      wrongTip: `10 个${it.name} = 10 × ${it.v} = ${answer}。`
+    };
+  }
+},
+
+/* 计算器误操作（倒推） */
+{
+  unit: '大数', kp: '倒推还原',
+  gen() {
+    const d = randInt(3, 15);
+    const C = randInt(3, 20);
+    const orig = C * d;
+    const R = orig * d;
+    return {
+      tag: '四上 · 倒推还原',
+      text: `小明用计算器算题时，把一个数除以 ${d} 看成了乘 ${d}，结果得到 ${R}。这道题的正确结果是多少？`,
+      facts: [`看错成「乘 ${d}」`, `得到的结果是 ${R}`],
+      steps: [
+        S2('要求正确结果，先要知道什么？', '原来那个数是多少',
+          ['计算器有没有坏', '一共按了几个键', '正确结果是多少'],
+          { ok: '对！先要把原来那个数还原出来。', no: '先把「原来那个数」求出来，再按正确的方法算。' }),
+        S2(`小明把「除以 ${d}」看成了「乘 ${d}」，也就是说 ${R} 是那个数乘 ${d} 得到的。那个数怎么求？`, `${R} ÷ ${d}`,
+          [`${R} × ${d}`, `${R} − ${d}`, `${R} + ${d}`],
+          { ok: `对！用 ${R} ÷ ${d} = ${orig}。`, no: `乘 ${d} 得到 ${R}，要求原数就除以 ${d}。` }),
+        S2(`原来那个数是 ${orig}。按题目要求应该除以 ${d}，算式是哪一个？`, `${orig} ÷ ${d}`,
+          [`${orig} × ${d}`, `${orig} + ${d}`, `${d} ÷ ${orig}`],
+          { ok: `对！用 ${orig} ÷ ${d}。算出来填进下面的框吧！`, no: `原数 ${orig} 除以 ${d}，才是正确结果。` })
+      ],
+      answer: C, unit: '',
+      praise: '你会「从错误结果倒推出原数」，再算出正确答案！',
+      wrongTip: `原数 = ${R} ÷ ${d} = ${orig}；正确结果 = ${orig} ÷ ${d} = ${C}。`
+    };
+  }
+},
+/* ================= 第四单元 · 周长 ================= */
+
+/* 长方形周长 + 单价（两步） */
+{
+  unit: '周长', kp: '长方形周长',
+  gen() {
+    const len = randInt(12, 45), wid = randInt(6, 22);
+    const per = (len + wid) * 2;
+    const price = randInt(8, 26);
+    const answer = per * price;
+    const scene = pick([
+      { what: '一块长方形花坛', act: '在花坛四周围一圈栅栏', per: '每米栅栏' },
+      { what: '一间长方形教室', act: '给教室地面四周贴一圈踢脚线', per: '每米踢脚线' },
+      { what: '一个长方形鱼塘', act: '给鱼塘周围围一圈护栏', per: '每米护栏' }
+    ]);
+    return {
+      tag: '四上 · 长方形周长',
+      text: `${scene.what}，长 ${len} 米，宽 ${wid} 米。${scene.act}，一共长多少米？如果${scene.per} ${price} 元，一共要花多少钱？`,
+      facts: [`长 ${len} 米`, `宽 ${wid} 米`, `${scene.per} ${price} 元`],
+      steps: [
+        S2('「围一圈」求的是这个长方形的什么？', '周长',
+          ['面积', '长', '宽'],
+          { ok: '对！围一圈的长度就是周长。', no: '「围一圈」就是绕它走一圈的长度，也就是周长。' }),
+        S2('长方形的周长公式是什么？', '(长 + 宽) × 2',
+          ['长 × 宽', '长 + 宽', '长 × 2 + 宽'],
+          { ok: '对！长方形周长 = (长 + 宽) × 2。', no: '长方形有 2 条长、2 条宽，所以是 (长 + 宽) × 2。' }),
+        S2(`周长是多少米？该用哪个算式？`, `(${len} + ${wid}) × 2`,
+          [`${len} + ${wid}`, `${len} × ${wid}`, `${len} × 2 + ${wid}`],
+          { ok: `对！(${len} + ${wid}) × 2 = ${per} 米。`, no: '先把长和宽加起来，再乘 2。' }),
+        S2(`一共 ${per} 米，${scene.per} ${price} 元，一共要花多少钱？该用哪个算式？`, `${per} × ${price}`,
+          [`${per} + ${price}`, `${per} ÷ ${price}`, `${price} − ${per}`],
+          { ok: `对！用 ${per} × ${price}。算出来填进下面的框吧！`, no: `每米 ${price} 元，${per} 米就是求 ${per} 个 ${price}，用乘法。` })
+      ],
+      answer, unit: '元',
+      praise: '你分清了「先求周长、再求总价」两步！',
+      wrongTip: `先算周长 (${len} + ${wid}) × 2 = ${per} 米，再乘 ${price}，得 ${answer} 元。`
+    };
+  }
+},
+
+/* 周长逆运算：已知周长和长，求宽 */
+{
+  unit: '周长', kp: '周长逆运算',
+  gen() {
+    const wid = randInt(8, 26), len = randInt(20, 50);
+    const per = (len + wid) * 2;
+    const half = per / 2;
+    return {
+      tag: '四上 · 周长逆运算',
+      text: `一个长方形操场的周长是 ${per} 米，长是 ${len} 米。宽是多少米？`,
+      facts: [`周长 ${per} 米`, `长 ${len} 米`],
+      steps: [
+        S2('根据周长公式，周长 ÷ 2 得到的是什么？', '长 + 宽',
+          ['长', '宽', '长 × 宽'],
+          { ok: '对！周长 = (长 + 宽) × 2，所以周长 ÷ 2 = 长 + 宽。', no: '把公式反过来想：周长 ÷ 2 就是「长 + 宽」。' }),
+        S2(`长 + 宽 等于多少米？`, half, numWrongs(half, [per, per * 2, len + wid]),
+          { ok: `对！${per} ÷ 2 = ${half} 米。`, no: `用 ${per} ÷ 2 = ${half}。` }),
+        S2(`长 + 宽 = ${half} 米，长 = ${len} 米，求宽该用哪个算式？`, `${half} − ${len}`,
+          [`${half} + ${len}`, `${len} − ${half}`, `${half} ÷ ${len}`],
+          { ok: `对！用 ${half} − ${len}。算出来填进下面的框吧！`, no: '「长 + 宽」减去「长」，剩下的就是宽。' })
+      ],
+      answer: wid, unit: '米',
+      praise: '你会把周长公式反过来用，求出宽！',
+      wrongTip: `先算 ${per} ÷ 2 = ${half}，再减去长 ${len}，得 ${wid} 米。`
+    };
+  }
+},
+
+/* 剪最大正方形后剩余部分的周长 */
+{
+  unit: '周长', kp: '剪拼求周长',
+  gen() {
+    const b = randInt(5, 18);
+    const a = b + randInt(3, 20);
+    const restW = a - b;
+    const answer = (b + restW) * 2;
+    return {
+      tag: '四上 · 剪拼求周长',
+      text: `一张长 ${a} 厘米、宽 ${b} 厘米的长方形纸，从上面剪下一个最大的正方形。剩下部分的长方形周长是多少厘米？`,
+      facts: [`长 ${a} 厘米`, `宽 ${b} 厘米`, '要剪下最大的正方形'],
+      steps: [
+        S2('要剪下的最大正方形，边长只能是多少？', b, numWrongs(b, [a, a - b, a + b]),
+          { ok: `对！边长最大只能是长方形的宽 ${b} 厘米。`, no: '正方形四条边一样长，所以边长最多只能等于长方形的宽。' }),
+        S2(`剪下边长 ${b} 厘米的正方形后，剩下部分的长是多少厘米？`, restW, numWrongs(restW, [a, b, a + b]),
+          { ok: `对！${a} − ${b} = ${restW} 厘米。`, no: `原来长 ${a} 厘米，剪掉 ${b} 厘米，剩下 ${restW} 厘米。` }),
+        S2(`剩下部分是一个长 ${restW} 厘米、宽 ${b} 厘米的长方形，周长该怎么算？`, `(${b} + ${restW}) × 2`,
+          [`${b} + ${restW}`, `${b} × ${restW}`, `${b} × 2 + ${restW}`],
+          { ok: `对！(${b} + ${restW}) × 2 = ${answer} 厘米。`, no: '剩下部分还是长方形，用长方形周长公式。' })
+      ],
+      answer, unit: '厘米',
+      praise: '你画一画、剪一剪，就找到剩下部分的长和宽了！',
+      wrongTip: `剩下的是 ${restW}×${b} 的长方形（${a}−${b}=${restW}），周长 =(${b}+${restW})×2=${answer} 厘米。`
+    };
+  }
+},
+
+/* 等边三角形与正方形周长相等 */
+{
+  unit: '周长', kp: '周长相等',
+  gen() {
+    const a = randInt(3, 24) * 3;
+    const sqPer = a * 4;
+    const answer = sqPer / 3;
+    return {
+      tag: '四上 · 周长相等',
+      text: `一个等边三角形和一个正方形的周长相等。已知正方形的边长是 ${a} 厘米，等边三角形的边长是多少厘米？`,
+      facts: [`正方形边长 ${a} 厘米`, '两个图形的周长相等'],
+      steps: [
+        S2(`正方形的周长是多少厘米？`, sqPer, numWrongs(sqPer, [a * 3, a * 2, a]),
+          { ok: `对！${a} × 4 = ${sqPer} 厘米。`, no: `正方形有 4 条边，${a} × 4。` }),
+        S2('等边三角形的三条边有什么关系？', '三条边长度相等',
+          ['三条边长度各不相同', '两条腰相等、底边不同', '三条边之和等于 3 厘米'],
+          { ok: '对！「等边」就是三条边一样长。', no: '等边三角形三条边都相等。' }),
+        S2(`等边三角形的周长也是 ${sqPer} 厘米，求它的边长该用哪个算式？`, `${sqPer} ÷ 3`,
+          [`${sqPer} × 3`, `${sqPer} ÷ 4`, `${sqPer} − 3`],
+          { ok: `对！用 ${sqPer} ÷ 3。算出来填进下面的框吧！`, no: '三条边一样长，把周长平均分成 3 份。' })
+      ],
+      answer, unit: '厘米',
+      praise: '你抓住了「周长相等」这个桥梁，把两个图形连起来了！',
+      wrongTip: `正方形周长 ${a}×4=${sqPer}，等边三角形边长 = ${sqPer}÷3=${answer} 厘米。`
+    };
+  }
+},
+
+/* 和倍问题：长是宽的 k 倍 */
+{
+  unit: '周长', kp: '和倍问题',
+  gen() {
+    const w = randInt(5, 25);
+    const k = randInt(2, 4);
+    const P = 2 * w * (k + 1);
+    const half = P / 2;
+    return {
+      tag: '四上 · 和倍问题',
+      text: `一个长方形菜园的周长是 ${P} 米，长是宽的 ${k} 倍。这个菜园的宽是多少米？`,
+      facts: [`周长 ${P} 米`, `长是宽的 ${k} 倍`],
+      steps: [
+        S2('根据周长，先能求出什么？', '长 + 宽',
+          ['长', '宽', '长 × 宽'],
+          { ok: '对！周长 ÷ 2 = 长 + 宽。', no: '周长 = (长 + 宽) × 2，所以先求「长 + 宽」。' }),
+        S2(`长 + 宽 等于多少米？`, half, numWrongs(half, [P, P * 2, w * k]),
+          { ok: `对！${P} ÷ 2 = ${half} 米。`, no: `用 ${P} ÷ 2 = ${half}。` }),
+        S2(`长是宽的 ${k} 倍，那么「长 + 宽」相当于几个宽？求宽该怎么算？`, `${half} ÷ ${k + 1}`,
+          [`${half} ÷ ${k}`, `${half} × ${k + 1}`, `${half} − ${k}`],
+          { ok: `对！「长 + 宽」是 ${k + 1} 个宽，所以用 ${half} ÷ ${k + 1}。`, no: `长是宽的 ${k} 倍，所以「长+宽」一共是 ${k}+1 = ${k + 1} 个宽。` })
+      ],
+      answer: w, unit: '米',
+      praise: '你会用「把长看成几份宽」的办法求宽！',
+      wrongTip: `${P}÷2=${half}；「长+宽」是 ${k}+1=${k + 1} 个宽，所以宽 = ${half}÷${k + 1} = ${w} 米。`
+    };
+  }
+},
+
+/* 单位陷阱：分米 → 米 */
+{
+  unit: '周长', kp: '单位换算陷阱',
+  gen() {
+    const k = randInt(2, 6);
+    const len = 10 * k, wid = 5 * k;
+    const perDm = (len + wid) * 2;
+    const answer = perDm / 10;
+    return {
+      tag: '四上 · 周长的单位陷阱',
+      text: `一块长方形招牌，长 ${len} 分米，宽是长的一半。这块招牌的周长是多少米？`,
+      facts: [`长 ${len} 分米`, '宽是长的一半', '最后要求的是「米」'],
+      steps: [
+        S2('宽是多少分米？', wid, numWrongs(wid, [len * 2, len, k]),
+          { ok: `对！${len} ÷ 2 = ${wid} 分米。`, no: `${len} 的一半就是 ${len} ÷ 2。` }),
+        S2(`这个招牌的周长是多少分米？`, perDm, numWrongs(perDm, [(len + wid), len + wid * 2, perDm * 10]),
+          { ok: `对！(${len} + ${wid}) × 2 = ${perDm} 分米。`, no: '用 (长 + 宽) × 2，先按分米算。' }),
+        S2(`注意题目问的是多少「米」！${perDm} 分米合多少米？`, answer, numWrongs(answer, [perDm, perDm * 10, perDm / 100]),
+          { ok: `对！${perDm} 分米 = ${answer} 米。`, no: '1 米 = 10 分米，分米化米要除以 10。' })
+      ],
+      answer, unit: '米',
+      praise: '你注意到单位不一样，先统一再换算，太细心了！',
+      wrongTip: `宽 ${len}÷2=${wid} 分米，周长 (${len}+${wid})×2=${perDm} 分米，再除以 10 得 ${answer} 米。`
+    };
+  }
+},
+
+/* 等腰三角形周长逆运算 */
+{
+  unit: '周长', kp: '等腰三角形周长',
+  gen() {
+    const w = randInt(8, 35);
+    const b = randInt(6, 40);
+    const P = 2 * w + b;
+    return {
+      tag: '四上 · 等腰三角形周长',
+      text: `一个等腰三角形的周长是 ${P} 厘米，一条腰长 ${w} 厘米。它的底边长多少厘米？`,
+      facts: [`周长 ${P} 厘米`, `一条腰长 ${w} 厘米`],
+      steps: [
+        S2('等腰三角形的两条腰有什么关系？', '两条腰长度相等',
+          ['两条腰相差 5 厘米', '两条腰的和等于底边', '两条腰长度不同'],
+          { ok: '对！等腰三角形两条腰一样长。', no: '「等腰」就是两条腰相等。' }),
+        S2(`两条腰一共是多少厘米？`, 2 * w, numWrongs(2 * w, [w, 3 * w, P]),
+          { ok: `对！${w} × 2 = ${2 * w} 厘米。`, no: `两条腰都是 ${w} 厘米，一共 ${w} × 2。` }),
+        S2('从周长里去掉两条腰，就是底边。算式是哪一个？', `${P} − ${w} × 2`,
+          [`${P} − ${w}`, `${P} + ${w} × 2`, `${w} × 2 − ${P}`],
+          { ok: `对！用 ${P} − ${w} × 2。`, no: '周长减去两条腰的长度，剩下就是底边。' })
+      ],
+      answer: b, unit: '厘米',
+      praise: '你会用周长反过来求底边！',
+      wrongTip: `底边 = 周长 − 两条腰 = ${P} − ${w}×2 = ${b} 厘米。`
+    };
+  }
+},
+
+/* ================= 第五单元 · 平均数 ================= */
+
+/* 平均数正向：身高 */
+{
+  unit: '平均数', kp: '求平均数',
+  gen() {
+    const n = 5, A = randInt(128, 146);
+    const total = A * n;
+    const hs = []; let rem = total;
+    for (let i = 0; i < n - 1; i++) {
+      const lo = A - 10, hi = A + 10;
+      const v = randInt(lo, hi);
+      hs.push(v); rem -= v;
+    }
+    hs.push(rem);
+    return {
+      tag: '四上 · 求平均数',
+      text: `四（1）班第一小组 ${n} 位同学的身高分别是 ${hs.join(' 厘米、')} 厘米。这个小组同学的平均身高是多少厘米？`,
+      facts: [`一共 ${n} 位同学`, `身高分别是 ${hs.join('、')} 厘米`],
+      steps: [
+        S2('「平均身高」是什么意思？', '把身高总和平均分给每个人',
+          ['身高最高的那个人', '身高最矮的那个人', '身高的总和'],
+          { ok: '对！平均数就是把总数平均分。', no: '平均身高 = 身高总和 ÷ 人数。' }),
+        S2('要求平均身高，必须知道什么？', '身高的总和与总人数',
+          ['最高的身高', '最矮的身高', '排第几高'],
+          { ok: '对！平均数 = 总数 ÷ 总份数。', no: '回忆一下：平均数 = 总数 ÷ 总份数。' }),
+        S2('身高总和是多少厘米？该用哪个算式？', hs.join(' + '),
+          [`${A} × ${n}`, `${Math.max(...hs)} − ${Math.min(...hs)}`, `${hs[0]} + ${hs[1]}`],
+          { ok: `对！${hs.join(' + ')} = ${total} 厘米。`, no: '求总和就是把每个人的身高都加起来。' }),
+        S2(`身高总和 ${total} 厘米，一共 ${n} 人，求平均身高该用哪个算式？`, `${total} ÷ ${n}`,
+          [`${total} × ${n}`, `${total} − ${n}`, `${total} + ${n}`],
+          { ok: `对！用 ${total} ÷ ${n}。算出来填进下面的框吧！`, no: '平均数 = 总数 ÷ 总份数。' })
+      ],
+      answer: A, unit: '厘米',
+      praise: '你掌握了「总数 ÷ 份数 = 平均数」！',
+      wrongTip: `先求身高总和 ${total} 厘米，再除以人数 ${n}，得 ${A} 厘米。`
+    };
+  }
+},
+
+/* 加权平均：前 m 分钟 + 后 n 分钟 */
+{
+  unit: '平均数', kp: '平均数（分段）',
+  gen() {
+    let t1, t2, A, total, n1, n2;
+    do {
+      t1 = randInt(2, 5); t2 = randInt(2, 6);
+      A = randInt(45, 85);
+      total = A * (t1 + t2);
+      n1 = randInt(Math.max(20, A - 10), A + 10) * t1;
+      n2 = total - n1;
+    } while (n2 <= 0 || n2 > 400 || n2 / t2 > 120);
+    const act = pick(['跳短绳', '拍皮球', '原地高抬腿']);
+    return {
+      tag: '四上 · 平均数（分段）',
+      text: `贝贝练习${act}，前 ${t1} 分钟做了 ${n1} 下，后 ${t2} 分钟做了 ${n2} 下。她平均每分钟做多少下？`,
+      facts: [`前 ${t1} 分钟 ${n1} 下`, `后 ${t2} 分钟 ${n2} 下`],
+      steps: [
+        S2('求「平均每分钟多少下」，要先知道什么？', '一共做了多少下、一共做了多少分钟',
+          ['前一分钟做了多少下', '后一分钟做了多少下', '哪一段时间做得快'],
+          { ok: '对！平均数 = 总数量 ÷ 总时间。', no: '要先求出「总数量」和「总时间」。' }),
+        S2('一共做了多少下？', n1 + n2, numWrongs(n1 + n2, [n2 - n1 > 0 ? n2 - n1 : n1 - n2, n1, n2]),
+          { ok: `对！${n1} + ${n2} = ${n1 + n2} 下。`, no: `把两段时间的数量加起来：${n1} + ${n2}。` }),
+        S2('一共做了多少分钟？', t1 + t2, numWrongs(t1 + t2, [t2, t1, Math.abs(t2 - t1)]),
+          { ok: `对！${t1} + ${t2} = ${t1 + t2} 分钟。`, no: `两段时间加起来：${t1} + ${t2}。` }),
+        S2('求平均每分钟多少下，该用哪个算式？', `(${n1} + ${n2}) ÷ (${t1} + ${t2})`,
+          [`${n1} ÷ ${t1} + ${n2} ÷ ${t2}`, `(${n1} + ${n2}) × (${t1} + ${t2})`, `${n1} − ${n2}`],
+          { ok: `对！用总数 ÷ 总时间。算出来填进下面的框吧！`, no: '要用「总数量 ÷ 总时间」，不能把两次的速度简单相加。' })
+      ],
+      answer: A, unit: '下',
+      praise: '你知道要拿总数除以总时间，而不是把速度平均！',
+      wrongTip: `总数量 ${n1}+${n2}=${n1 + n2} 下，总时间 ${t1}+${t2}=${t1 + t2} 分钟，${n1 + n2}÷${t1 + t2}=${A} 下。`
+    };
+  }
+},
+
+/* 平均数逆向：求其中某个数 */
+{
+  unit: '平均数', kp: '平均数逆向',
+  gen() {
+    let n = 3, A, total, x, y, answer;
+    do {
+      A = randInt(12, 32);
+      total = A * n;
+      x = A + randInt(-4, 6);
+      y = A + randInt(-4, 6);
+      answer = total - x - y;
+    } while (answer <= 0 || answer > 70);
+    const names = pick([
+      { p: ['甲', '乙', '丙'], thing: '张画片' },
+      { p: ['小红', '小刚', '小丽'], thing: '张贴纸' },
+      { p: ['明明', '亮亮', '兰兰'], thing: '本课外书' }
+    ]);
+    return {
+      tag: '四上 · 平均数逆向',
+      text: `${names.p[0]}、${names.p[1]}、${names.p[2]}三人平均每人有 ${A} ${names.thing}。${names.p[0]}有 ${x} ${names.thing}，${names.p[2]}有 ${y} ${names.thing}，${names.p[1]}有多少${names.thing}？`,
+      facts: [`三人平均每人 ${A} ${names.thing}`, `${names.p[0]}有 ${x}，${names.p[2]}有 ${y}`],
+      steps: [
+        S2(`要求${names.p[1]}有多少，先要知道什么？`, '三个人一共有多少',
+          ['平均每人有多少', `${names.p[0]}有多少`, '谁的最多'],
+          { ok: '对！先求总数，再减掉已知的两个。', no: '总数减去已知的两个人的数量，就得到第三个人的。' }),
+        S2(`三个人一共有多少${names.thing}？`, total, numWrongs(total, [A, A * 2, total * 2]),
+          { ok: `对！${A} × 3 = ${total}。`, no: `平均每人 ${A}，三个人就是 ${A} × 3。` }),
+        S2(`求${names.p[1]}有多少，该用哪个算式？`, `${total} − ${x} − ${y}`,
+          [`${total} + ${x} + ${y}`, `${total} − ${x} + ${y}`, `${x} + ${y} − ${total}`],
+          { ok: `对！用 ${total} − ${x} − ${y}。算出来填进下面的框吧！`, no: '从总数里分别减掉两个人，剩下的就是第三个人的。' })
+      ],
+      answer, unit: names.thing.replace('张', '').replace('本', '本'),
+      praise: '你会用「总数 − 已知的」求出平均数里的未知数！',
+      wrongTip: `总数 ${A}×3=${total}，再减掉 ${x} 和 ${y}，得 ${answer}。`
+    };
+  }
+},
+
+/* 连续自然数的平均数 */
+{
+  unit: '平均数', kp: '连续自然数',
+  gen() {
+    const n = pick([3, 5, 7]);
+    const A = randInt(20, 60);
+    const half = (n - 1) / 2;
+    const answer = A - half;
+    const mid = (n + 1) / 2;
+    return {
+      tag: '四上 · 连续自然数',
+      text: `${n} 个连续自然数的平均数是 ${A}。其中最小的数是多少？`,
+      facts: [`一共 ${n} 个连续自然数`, `平均数是 ${A}`],
+      steps: [
+        S2('几个连续自然数的平均数，正好等于哪一个数？', '正中间的那一个数',
+          ['最小的那一个数', '最大的那一个数', '排第一的那一个数'],
+          { ok: '对！连续自然数是对称的，平均数正好是正中间的数。', no: '连续自然数两两相差 1，所以平均数落在最中间。' }),
+        S2(`${n} 个连续自然数，正中间的是第几个？`, mid, numWrongs(mid, [n, half, mid + 1]),
+          { ok: `对！是第 ${mid} 个，它的值就是 ${A}。`, no: `${n} 个数的正中间是第 ${mid} 个。` }),
+        S2(`正中间的数是 ${A}，最小的比它小 ${half}。求最小数该用哪个算式？`, `${A} − ${half}`,
+          [`${A} + ${half}`, `${A} × ${half}`, `${A} ÷ ${half}`],
+          { ok: `对！用 ${A} − ${half}。算出来填进下面的框吧！`, no: `最小的数在中间数的左边 ${half} 个位置，所以要减 ${half}。` })
+      ],
+      answer, unit: '',
+      praise: '你发现了连续自然数的平均数就是正中间那个数！',
+      wrongTip: `正中间是 ${A}，最小数 = ${A} − ${half} = ${answer}。`
+    };
+  }
+},
+
+/* 平均数变化：改一个数 */
+{
+  unit: '平均数', kp: '平均数的变化',
+  gen() {
+    const n = randInt(5, 9);
+    const A1 = randInt(14, 32);
+    const diff = randInt(1, 4);
+    const A2 = A1 - diff;
+    const newVal = randInt(1, 6);
+    const drop = n * diff;
+    const orig = newVal + drop;
+    return {
+      tag: '四上 · 平均数的变化',
+      text: `${n} 个数的平均数是 ${A1}。如果把其中一个数改成 ${newVal}，这时这 ${n} 个数的平均数就变成了 ${A2}。这个被改动的数原来是多少？`,
+      facts: [`原来 ${n} 个数的平均数是 ${A1}`, `改过之后平均数是 ${A2}`],
+      steps: [
+        S2('平均数从 ' + A1 + ' 变成 ' + A2 + '，说明总数怎么样了？', '总数变小了',
+          ['总数变大了', '总数没有变', '总数变成了 ' + newVal],
+          { ok: '对！平均数小了，总数一定也小了。', no: '平均数变小，说明总和也变小了。' }),
+        S2(`原来的总数是多少？`, n * A1, numWrongs(n * A1, [A1, n * A2, n * A1 * 2]),
+          { ok: `对！${A1} × ${n} = ${n * A1}。`, no: `平均数乘个数：${A1} × ${n}。` }),
+        S2(`现在的总数是多少？`, n * A2, numWrongs(n * A2, [A2, n * A1, n * A2 * 2]),
+          { ok: `对！${A2} × ${n} = ${n * A2}。`, no: `现在的平均数 ${A2} 乘 ${n}。` }),
+        S2(`总数少了 ${n * A1} − ${n * A2} = ${drop}，而被改后的数是 ${newVal}。求原来的数该用哪个算式？`, `${newVal} + ${drop}`,
+          [`${newVal} − ${drop}`, `${drop} − ${newVal}`, `${newVal} × ${drop}`],
+          { ok: `对！用 ${newVal} + ${drop}。算出来填进下面的框吧！`, no: `改小了多少，就要加回去多少。` })
+      ],
+      answer: orig, unit: '',
+      praise: '你抓住了「平均数变了，其实是总数变了」！',
+      wrongTip: `原总数 ${n * A1}，新总数 ${n * A2}，少了 ${drop}。原来那个数 = ${newVal} + ${drop} = ${orig}。`
+    };
+  }
+},
+/* ================= 第六单元 · 探索乐园 ================= */
+
+/* 植树问题：两端都种 */
+{
+  unit: '探索', kp: '植树问题',
+  gen() {
+    const gap = randInt(4, 10), segs = randInt(10, 25);
+    const length = gap * segs;
+    const answer = segs + 1;
+    return {
+      tag: '四上 · 植树问题',
+      text: `一条小路长 ${length} 米，在小路的一边每隔 ${gap} 米种一棵树，两端都种。一共要种多少棵树？`,
+      facts: [`小路长 ${length} 米`, `每隔 ${gap} 米种一棵`, '两端都种'],
+      steps: [
+        S2('要求种几棵树，先要知道什么？', '小路被分成了几段',
+          ['每棵树多高', '一共几个人种', '小路有多宽'],
+          { ok: '对！先算段数，再根据「两端都种」调整。', no: '先把小路按间隔分一分，看分成几段。' }),
+        S2(`小路被分成了几段？该用哪个算式？`, `${length} ÷ ${gap}`,
+          [`${length} + ${gap}`, `${length} − ${gap}`, `${length} × ${gap}`],
+          { ok: `对！${length} ÷ ${gap} = ${segs} 段。`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
+        S2(`${segs} 段，两端都种树，一共要种多少棵？`, answer,
+          numWrongs(answer, [segs, segs - 1, segs + 2]),
+          { ok: `对！两端都种，棵数 = 段数 + 1 = ${answer} 棵。`, no: '两端都种，棵数比段数多 1。' })
+      ],
+      answer, unit: '棵',
+      praise: '你掌握了植树问题的核心：两端都种，棵数 = 段数 + 1！',
+      wrongTip: `段数 ${length}÷${gap}=${segs}，两端都种要加 1，所以是 ${answer} 棵。`
+    };
+  }
+},
+
+/* 封闭图形（圆形）打桩 */
+{
+  unit: '探索', kp: '封闭图形植树',
+  gen() {
+    const gap = randInt(4, 10), segs = randInt(8, 24);
+    const length = gap * segs;
+    const answer = segs;
+    const scene = pick([
+      { what: '一个圆形花坛', act: '打桩' },
+      { what: '一个圆形水池', act: '装彩灯' },
+      { what: '一条环形跑道', act: '插彩旗' }
+    ]);
+    return {
+      tag: '四上 · 封闭图形植树',
+      text: `${scene.what}的周长是 ${length} 米，现在要沿着它每隔 ${gap} 米${scene.act}（首尾相接）。一共要${scene.act}多少处？`,
+      facts: [`周长 ${length} 米`, `每隔 ${gap} 米一处`, '首尾相接（封闭图形）'],
+      steps: [
+        S2('圆形是首尾相接的，如果硬把它拉直，被分成了几段？该用哪个算式？', `${length} ÷ ${gap}`,
+          [`${length} + ${gap}`, `${length} × ${gap}`, `${gap} ÷ ${length}`],
+          { ok: `对！${length} ÷ ${gap} = ${segs} 段。`, no: `求 ${length} 里面有几个 ${gap}，用除法。` }),
+        S2('在封闭图形上，处数和段数是什么关系？', '处数和段数一样多',
+          ['处数比段数多 1', '处数比段数少 1', '处数是段数的 2 倍'],
+          { ok: '对！首尾相接，最后一处和第一处重合，所以不用加 1。', no: '封闭图形首尾相连，处数正好等于段数。' }),
+        S2(`所以一共要${scene.act}多少处？`, answer, numWrongs(answer, [segs + 1, segs - 1, segs * 2]),
+          { ok: `对！一共 ${answer} 处。`, no: `和开头的「两端都种」比一比：封闭图形不要 +1，就是 ${segs} 处。` })
+      ],
+      answer, unit: '处',
+      praise: '你分清了「两端都种」和「封闭图形」，差的就是那 1！',
+      wrongTip: `${length}÷${gap}=${segs} 段。封闭图形处数 = 段数 = ${segs}（不加 1）。`
+    };
+  }
+},
+
+/* 锯木头 */
+{
+  unit: '探索', kp: '锯木头',
+  gen() {
+    const perCut = randInt(3, 6);
+    const times = randInt(2, 8);
+    const totalTime = perCut * times;
+    const segLen = randInt(20, 50);
+    const segs = times + 1;
+    const answer = segs * segLen;
+    return {
+      tag: '四上 · 锯木头',
+      text: `把一根木料锯成若干段长 ${segLen} 厘米的小段，一共花了 ${totalTime} 分钟。已知每锯一次需要 ${perCut} 分钟，这根木料长多少厘米？`,
+      facts: [`每段长 ${segLen} 厘米`, `一共花了 ${totalTime} 分钟`, `每锯一次 ${perCut} 分钟`],
+      steps: [
+        S2('一共锯了几次？该用哪个算式？', `${totalTime} ÷ ${perCut}`,
+          [`${totalTime} × ${perCut}`, `${totalTime} − ${perCut}`, `${perCut} ÷ ${totalTime}`],
+          { ok: `对！${totalTime} ÷ ${perCut} = ${times} 次。`, no: '总时间除以每次用的时间，就是次数。' }),
+        S2(`锯了 ${times} 次，能得到几段？`, segs, numWrongs(segs, [times, times - 1, times + 2]),
+          { ok: `对！锯 ${times} 次得到 ${segs} 段。`, no: '一根木料锯 1 次得 2 段、锯 2 次得 3 段……段数比次数多 1。' }),
+        S2(`每段长 ${segLen} 厘米，一共 ${segs} 段，求木料全长该用哪个算式？`, `${segs} × ${segLen}`,
+          [`${segs} + ${segLen}`, `${times} × ${segLen}`, `${segs} ÷ ${segLen}`],
+          { ok: `对！用 ${segs} × ${segLen}。算出来填进下面的框吧！`, no: `${segs} 段，每段 ${segLen} 厘米，用乘法。` })
+      ],
+      answer, unit: '厘米',
+      praise: '你记住了锯木头里「段数 = 次数 + 1」这个关键！',
+      wrongTip: `次数 ${totalTime}÷${perCut}=${times}，段数 ${times}+1=${segs}，全长 ${segs}×${segLen}=${answer} 厘米。`
+    };
+  }
+},
+
+/* 找规律：摆正方形 */
+{
+  unit: '探索', kp: '找规律',
+  gen() {
+    const n = randInt(6, 20);
+    const answer = 3 * n + 1;
+    const extra = n - 1;
+    return {
+      tag: '四上 · 找规律',
+      text: `用小棒摆正方形，排成一排：摆 1 个需要 4 根，摆 2 个需要 7 根，摆 3 个需要 10 根……照这样的规律，摆 ${n} 个正方形需要多少根小棒？`,
+      facts: ['摆 1 个用 4 根', '摆 2 个用 7 根', '摆 3 个用 10 根'],
+      steps: [
+        S2('每多摆 1 个正方形，要多用几根小棒？', 3,
+          numWrongs(3, [4, 2, 7]),
+          { ok: '对！7−4=3，10−7=3，每次多 3 根。', no: '比一比：4→7 多了 3，7→10 也多了 3。' }),
+        S2(`摆 1 个用 4 根。摆 ${n} 个，比第 1 个多摆了 ${extra} 个，要再多用多少根？`, 3 * extra,
+          numWrongs(3 * extra, [3 * n, extra, 3 * extra + 3]),
+          { ok: `对！每多一个多 3 根，${extra} 个就多 ${3 * extra} 根。`, no: `${extra} 个，每个多 3 根，${extra} × 3 = ${3 * extra}。` }),
+        S2('求摆 ' + n + ' 个用多少根，该用哪个算式？', `4 + (${n} − 1) × 3`,
+          [`4 × ${n}`, `4 + ${n} × 3`, `${n} × 3`],
+          { ok: `对！用 4 + (${n} − 1) × 3。算出来填进下面的框吧！`, no: '第 1 个的 4 根，加上后面多出来的部分。' })
+      ],
+      answer, unit: '根',
+      praise: '你找到了「每多一个多 3 根」的规律，还会用它算第 n 个！',
+      wrongTip: `规律是小棒数 = 3×个数 + 1。3×${n}+1 = ${answer} 根。`
+    };
+  }
+},
+
+/* 晒毛巾：夹子数 */
+{
+  unit: '探索', kp: '间隔与数量',
+  gen() {
+    const n = randInt(4, 12);
+    const answer = n + 1;
+    const scene = pick([
+      { what: '毛巾', by: '夹子', verb: '晒' },
+      { what: '手帕', by: '夹子', verb: '晾' }
+    ]);
+    return {
+      tag: '四上 · 间隔与数量',
+      text: `在一条绳子上${scene.verb}${scene.what}，每两${scene.what}之间共用 1 个${scene.by}，两端各用 1 个。照这样${scene.verb} ${n} 块${scene.what}，一共需要多少个${scene.by}？`,
+      facts: [`相邻两${scene.what}共用一个${scene.by}`, '两端各用 1 个'],
+      steps: [
+        S2(`先把 ${n} 块${scene.what}依次挂在绳子上。第 1 块需要几个${scene.by}？`, 2,
+          numWrongs(2, [1, 3, 4]),
+          { ok: '对！第 1 块左右各 1 个，共 2 个。', no: '第 1 块的两端都要夹住，所以是 2 个。' }),
+        S2('以后每多挂 1 块，只要再添几个？', 1,
+          numWrongs(1, [2, 3, 0]),
+          { ok: '对！后一块和前面共用 1 个，所以每次只添 1 个。', no: '相邻两块共用 1 个夹子，所以每多一块只添 1 个。' }),
+        S2(`第 1 块用了 2 个，后面还有 ${n - 1} 块、每块添 1 个。求一共几个${scene.by}，该用哪个算式？`, `2 + ${n - 1}`,
+          [`2 × ${n}`, `2 + ${n}`, `${n} × 2 − 1`],
+          { ok: `对！2 + ${n - 1} = ${answer} 个。`, no: '第 1 块的 2 个，加上后面每块多的 1 个。' })
+      ],
+      answer, unit: '个',
+      praise: '你发现了「共用」会让数量比想象的少 1！',
+      wrongTip: `第 1 块 2 个夹子，之后每块再加 1 个：2 + ${n - 1} = ${answer} 个。`
+    };
+  }
+},
+
+/* 搭配问题 */
+{
+  unit: '探索', kp: '搭配问题',
+  gen() {
+    const a = randInt(3, 6), b = randInt(3, 6);
+    const answer = a * b;
+    const scene = pick([
+      { x: '件上衣', y: '条裤子' },
+      { x: '个汉堡', y: '杯饮料' },
+      { x: '本笔记本', y: '支笔' }
+    ]);
+    return {
+      tag: '四上 · 搭配问题',
+      text: `小丽有 ${a} ${scene.x}和 ${b} ${scene.y}。每次${scene.x.replace('件', '').replace('个', '').replace('本', '')}选 1 件、${scene.y.replace('条', '').replace('杯', '').replace('支', '')}选 1 件，一共有多少种不同的搭配？`,
+      facts: [`有 ${a} ${scene.x}`, `有 ${b} ${scene.y}`],
+      steps: [
+        S2(`先固定 1 ${scene.x}，它可以和几${scene.y.slice(0, 1)}${scene.y.slice(1)}分别搭配？`, b,
+          numWrongs(b, [a, a + b, a * b]),
+          { ok: `对！每 1 ${scene.x}都能配 ${b} ${scene.y}，有 ${b} 种。`, no: `拿 1 ${scene.x}去配，${b} ${scene.y}都能配，所以有 ${b} 种。` }),
+        S2(`一共有 ${a} ${scene.x}，每一种都有 ${b} 种搭配，用什么方法算总数？`, '乘法',
+          ['加法', '除法', '减法'],
+          { ok: `对！${a} 个 ${b} 相加，用乘法最快。`, no: `${a} 个相同的 ${b} 相加，用乘法最方便。` }),
+        S2('算式应该是哪一个？', `${a} × ${b}`,
+          [`${a} + ${b}`, `${b} ÷ ${a}`, `${a} × ${b} × 2`],
+          { ok: `对！用 ${a} × ${b}。算出来填进下面的框吧！`, no: `每一件都有 ${b} 种，共 ${a} 件，用乘法。` })
+      ],
+      answer, unit: '种',
+      praise: '你会用「一件配几条，再乘件数」来数搭配！',
+      wrongTip: `每 ${scene.x}有 ${b} 种搭配，共 ${a} ${scene.x}，所以 ${a}×${b}=${answer} 种。`
+    };
+  }
+}
+
 ];
+
+
+
 
 /* =========================================================
    状态
    ========================================================= */
 let score = 0, combo = 0, perfectCount = 0;
 let scoreVisible = true;
-let currentDiff = 1;
 let currentTab = 'practice';
 let timerEnabled = false;
 const TIME_LIMIT = 90;
-let timerRemaining = 0;
-let timerInterval = null;
+let timerRemaining = 0, timerInterval = null;
 
-const instances = [];
-let visibleInstances = [];
+const SESSION_GOAL = 10;
+let doneCount = 0;
+let goalCelebrated = false;
+
+let selectedUnits = [];
+let questions = [];       /* [{tpl, problem, state}] */
 let current = 0;
+let tplQueue = [];
+const seenFingerprints = new Set();
 
-let wrongBook = tryLoad('mathWrongBook', []);
-let history = tryLoad('mathHistory', []);
+let wrongBook = LS.get('wrongBook', []);
+let history = LS.get('history', []);
 
-const $ = id => document.getElementById(id);
-const hl = t => String(t).replace(/(\d+(?:\.\d+)?)/g, '<b>$1</b>');
-const LETTER = 'ABCD';
+const plain = t => String(t).replace(/<[^>]*>/g, '');
 
 /* =========================================================
-   初始化
+   出题：按所选单元取模板 → 轮转不扎堆 → 指纹去重
    ========================================================= */
-function makeState() {
+function poolTemplates() {
+  if (selectedUnits.length === 0) return [];
+  return problemTemplates.filter(t => selectedUnits.indexOf(t.unit) >= 0);
+}
+
+function nextTemplate(pool) {
+  tplQueue = tplQueue.filter(t => pool.indexOf(t) >= 0);
+  if (tplQueue.length === 0) tplQueue = shuffleAll(pool);
+  return tplQueue.pop();
+}
+
+function makeProblem(tpl) {
+  let p = null, key = '';
+  for (let i = 0; i < 16; i++) {
+    p = tpl.gen();
+    key = tpl.unit + '|' + tpl.kp + '|' + p.text;
+    if (!seenFingerprints.has(key)) break;
+  }
+  if (seenFingerprints.size > 900) seenFingerprints.clear();
+  seenFingerprints.add(key);
+  return p;
+}
+
+function makeState(problem) {
   return {
     stepIdx: 0,
-    chosen: [],
-    tried: [],
-    expanded: [],
+    chosen: problem.steps.map(() => null),
+    tried: problem.steps.map(() => []),
+    expanded: problem.steps.map(() => false),
     solved: false,
     hadWrong: false,
     timedOut: false,
@@ -997,37 +2189,102 @@ function makeState() {
   };
 }
 
-function initAll() {
-  instances.length = 0;
-  problemTemplates.forEach(tpl => {
-    try {
-      const problem = tpl.generate();
-      const st = makeState();
-      st.chosen = problem.steps.map(() => null);
-      st.tried = problem.steps.map(() => []);
-      st.expanded = problem.steps.map(() => false);
-      instances.push({ template: tpl, problem, state: st });
-    } catch (e) { console.error('生成失败', tpl.tag, e); }
+function newQuestion(tpl) {
+  const problem = makeProblem(tpl);
+  return { tpl, problem, state: makeState(problem) };
+}
+
+function appendQuestion() {
+  const pool = poolTemplates();
+  if (pool.length === 0) return false;
+  questions.push(newQuestion(nextTemplate(pool)));
+  return true;
+}
+
+function buildSession() {
+  questions = []; tplQueue = []; current = 0;
+  const pool = poolTemplates();
+  if (pool.length === 0) return;
+  const n = Math.min(6, pool.length);
+  for (let i = 0; i < n; i++) appendQuestion();
+  while (questions.length < 6) appendQuestion();
+}
+
+/* =========================================================
+   分单元选择
+   ========================================================= */
+function loadUnits() {
+  const saved = LS.get('units', null);
+  if (saved === null) {
+    /* 只在首次打开给一次默认值：全部选中。之后一律听用户自己的 */
+    selectedUnits = UNITS.map(u => u.key);
+    LS.set('units', selectedUnits);
+  } else {
+    selectedUnits = UNITS.map(u => u.key).filter(k => saved.indexOf(k) >= 0);
+  }
+}
+function saveUnits() { LS.set('units', selectedUnits); }
+function countByUnit(key) { return problemTemplates.filter(t => t.unit === key).length; }
+
+function renderUnitChips() {
+  const wrap = $('unitChips');
+  wrap.innerHTML = UNITS.map(u => {
+    const on = selectedUnits.indexOf(u.key) >= 0;
+    return `<button class="unit-chip${on ? ' on' : ''}" data-unit="${u.key}"
+      aria-pressed="${on ? 'true' : 'false'}">
+      <span class="chip-tick">${on ? '✓' : '○'}</span>
+      <span>${u.icon} ${u.name}<span class="chip-sub">${u.sub} · ${countByUnit(u.key)} 类题</span></span>
+    </button>`;
+  }).join('');
+  wrap.querySelectorAll('[data-unit]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.unit;
+      const i = selectedUnits.indexOf(k);
+      if (i >= 0) selectedUnits.splice(i, 1);
+      else selectedUnits.push(k);
+      selectedUnits = UNITS.map(u => u.key).filter(x => selectedUnits.indexOf(x) >= 0);
+      saveUnits();
+      SFX.click();
+      buildSession();
+      renderAll();
+    });
   });
-  visibleInstances = instances.slice();
-  current = 0;
 }
 
-function resetInstanceState(inst) {
-  const st = makeState();
-  st.chosen = inst.problem.steps.map(() => null);
-  st.tried = inst.problem.steps.map(() => []);
-  st.expanded = inst.problem.steps.map(() => false);
-  inst.state = st;
-}
+/* 三处状态一起同步：按钮文案 / 单元标签 / 练习区空状态 */
+function syncUnitUI() {
+  const total = selectedUnits.length;
+  let label;
+  if (total === 0) label = '选择单元';
+  else if (total === UNITS.length) label = '全部单元';
+  else if (total === 1) label = UNIT_MAP[selectedUnits[0]].name.replace(/^第[一二三四五六七八九]单元 · /, '');
+  else label = `已选 ${total} 个单元`;
+  $('unitLabel').textContent = label;
 
-function regenerate(idx) {
-  const inst = instances[idx];
-  if (!inst) return;
-  try {
-    inst.problem = inst.template.generate();
-    resetInstanceState(inst);
-  } catch (e) { console.error(e); }
+  document.querySelectorAll('#unitChips [data-unit]').forEach(btn => {
+    const on = selectedUnits.indexOf(btn.dataset.unit) >= 0;
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    const tick = btn.querySelector('.chip-tick');
+    if (tick) tick.textContent = on ? '✓' : '○';
+  });
+
+  const sum = $('unitSummary');
+  if (total === 0) {
+    sum.className = 'unit-summary warn';
+    sum.innerHTML = '还没有选单元。点上面的单元按钮选一个，就会出现题目啦（可以多选）。';
+  } else {
+    sum.className = 'unit-summary';
+    const kinds = poolTemplates().length;
+    const names = selectedUnits.map(k => UNIT_MAP[k].name.replace(/^第[一二三四五六七八九]单元 · /, '')).join('、');
+    sum.innerHTML = `已选 <b>${total}</b> 个单元 · 共 <b>${kinds}</b> 类题目` +
+      (total === UNITS.length ? '（全部单元）' : `：${names}`);
+  }
+
+  const empty = total === 0;
+  $('practiceEmpty').style.display = empty ? 'block' : 'none';
+  $('practiceBody').style.display = empty ? 'none' : 'block';
+  $('goalBar').style.display = empty ? 'none' : 'block';
 }
 
 /* =========================================================
@@ -1039,9 +2296,7 @@ function addScore(p, bonus) {
   const el = $('scoreValue');
   if (el) {
     el.textContent = score;
-    el.classList.remove('pulse');
-    void el.offsetWidth;
-    el.classList.add('pulse');
+    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
   }
   floatScore('+' + p, bonus);
 }
@@ -1052,18 +2307,12 @@ function resetCombo() {
 function incCombo() {
   combo += 1;
   const el = $('comboValue');
-  if (el) {
-    el.textContent = combo;
-    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
-  }
+  if (el) { el.textContent = combo; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 function incPerfect() {
   perfectCount += 1;
   const el = $('perfectValue');
-  if (el) {
-    el.textContent = perfectCount;
-    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
-  }
+  if (el) { el.textContent = perfectCount; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 function floatScore(text, bonus) {
   const t = $('scoreValue'); if (!t) return;
@@ -1077,31 +2326,43 @@ function floatScore(text, bonus) {
   setTimeout(() => el.remove(), 1500);
 }
 
+function renderGoal() {
+  const pct = Math.min(100, Math.round(doneCount / SESSION_GOAL * 100));
+  $('goalFill').style.width = pct + '%';
+  $('goalNum').textContent = doneCount >= SESSION_GOAL ? `已完成 ${doneCount} 题 🎉` : `${doneCount} / ${SESSION_GOAL} 题`;
+  const bar = $('goalBar');
+  if (doneCount >= SESSION_GOAL) {
+    bar.classList.add('reached');
+    if (!goalCelebrated) {
+      goalCelebrated = true;
+      SFX.levelup();
+      floatScore('🎉 目标达成', true);
+    }
+  } else {
+    bar.classList.remove('reached');
+    goalCelebrated = false;
+  }
+}
+
 /* =========================================================
    计时
    ========================================================= */
 function startTimer() {
   stopTimer();
-  if (!timerEnabled || currentTab !== 'practice') {
-    const b = $('timerBar'); if (b) b.style.display = 'none';
-    return;
-  }
-  const inst = visibleInstances[current];
-  if (!inst || inst.state.solved) {
-    const b = $('timerBar'); if (b) b.style.display = 'none';
-    return;
-  }
   const bar = $('timerBar');
+  if (!bar) return;
+  const q = questions[current];
+  if (!timerEnabled || currentTab !== 'practice' || !q || q.state.solved) {
+    bar.style.display = 'none';
+    return;
+  }
   bar.style.display = 'flex';
   timerRemaining = TIME_LIMIT;
   updateTimerDisplay();
   timerInterval = setInterval(() => {
     timerRemaining--;
     updateTimerDisplay();
-    if (timerRemaining <= 0) {
-      clearInterval(timerInterval); timerInterval = null;
-      handleTimeout();
-    }
+    if (timerRemaining <= 0) { stopTimer(); handleTimeout(); }
   }, 1000);
 }
 function stopTimer() {
@@ -1115,127 +2376,124 @@ function updateTimerDisplay() {
   bar.classList.toggle('urgent', timerRemaining <= 15);
 }
 function handleTimeout() {
-  const inst = visibleInstances[current];
-  if (!inst || inst.state.solved) return;
-  const st = inst.state;
+  const q = questions[current];
+  if (!q || q.state.solved) return;
+  const st = q.state;
   st.timedOut = true; st.solved = true; st.timeUsed = TIME_LIMIT;
+  doneCount++;
   SFX.timeout();
-  addWrongRecord(inst, {
+  addWrongRecord(q, {
     stepIdx: st.stepIdx + 1,
     stepQ: '超时未完成',
     wrongChoice: '（超时）',
-    correctChoice: '正确答案 ' + inst.problem.answer + ' ' + inst.problem.unit
+    correctChoice: q.problem.answer + (q.problem.unit ? ' ' + q.problem.unit : '')
   });
-  addHistoryRecord(inst, 0, false, TIME_LIMIT);
+  addHistoryRecord(q, 0, false, TIME_LIMIT);
   render();
   renderWrongBadge();
 }
 
 /* =========================================================
-   错题/历史记录
+   错题 / 历史
    ========================================================= */
-function addWrongRecord(inst, info) {
-  const p = inst.problem;
+function addWrongRecord(q, info) {
+  const p = q.problem;
   wrongBook.unshift({
     id: uid(),
-    qtext: p.text, qtag: p.tag, difficulty: currentDiff,
-    wrongStep: info.stepIdx, wrongStepQ: info.stepQ,
-    wrongChoice: info.wrongChoice, correctChoice: info.correctChoice,
-    correctAnswer: p.answer, unit: p.unit,
+    qtext: plain(p.text), qtag: p.tag, kp: q.tpl.kp, topic: q.tpl.unit,
+    wrongStep: info.stepIdx, wrongStepQ: plain(info.stepQ),
+    wrongChoice: plain(info.wrongChoice), correctChoice: plain(info.correctChoice),
+    correctAnswer: p.answer, ansUnit: p.unit,
     timestamp: Date.now()
   });
   if (wrongBook.length > 60) wrongBook = wrongBook.slice(0, 60);
-  trySave('mathWrongBook', wrongBook);
+  LS.set('wrongBook', wrongBook);
   renderWrongBadge();
 }
-function addHistoryRecord(inst, pts, perfect, timeUsed) {
-  const p = inst.problem;
+function addHistoryRecord(q, pts, perfect, timeUsed) {
+  const p = q.problem;
   history.unshift({
     id: uid(),
-    qtext: p.text.slice(0, 42) + (p.text.length > 42 ? '…' : ''),
-    qtag: p.tag, difficulty: currentDiff,
+    qtext: plain(p.text).slice(0, 46) + (plain(p.text).length > 46 ? '…' : ''),
+    qtag: p.tag, kp: q.tpl.kp, topic: q.tpl.unit,
     score: pts, perfect, timeUsed,
     timestamp: Date.now()
   });
   if (history.length > 80) history = history.slice(0, 80);
-  trySave('mathHistory', history);
+  LS.set('history', history);
+}
+function renderWrongBadge() {
+  const b = $('wrongBadge');
+  if (b) b.textContent = wrongBook.length;
 }
 
 /* =========================================================
-   题目渲染
+   渲染
    ========================================================= */
-function render() {
-  if (visibleInstances.length === 0) return;
-  if (current >= visibleInstances.length) current = visibleInstances.length - 1;
+function renderAll() {
+  syncUnitUI();
+  if (poolTemplates().length === 0) { stopTimer(); renderGoal(); return; }
+  if (questions.length === 0) buildSession();
+  if (current >= questions.length) current = questions.length - 1;
   if (current < 0) current = 0;
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const p = inst.problem;
+  render();
+}
 
+function render() {
+  const q = questions[current];
+  if (!q) return;
+  const p = q.problem;
   $('tag').textContent = p.tag;
-  $('counter').textContent = `第 ${current + 1} / ${visibleInstances.length} 题`;
+  $('counter').textContent = `第 ${current + 1} / ${questions.length} 题`;
   $('qtext').innerHTML = hl(p.text);
-
   renderFacts();
   renderSteps();
   renderAnswer();
-  renderDots();
-  $('prevBtn').disabled = current === 0;
-  $('nextBtn').disabled = current === visibleInstances.length - 1;
+  renderNav();
+  renderGoal();
   updateBackBtn();
   startTimer();
 }
 
 function renderFacts() {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const p = inst.problem, st = inst.state;
-  const cfg = DIFF_CONFIG[currentDiff];
-  const revealed = new Set();
+  const q = questions[current]; if (!q) return;
+  const p = q.problem, st = q.state;
+  const box = $('factsBox');
 
-  if (cfg.revealAll) {
-    p.facts.forEach((_, i) => revealed.add(i));
-  } else {
+  if (!p.facts || p.facts.length === 0) { box.style.display = 'none'; return; }
+  box.style.display = '';
+
+  const revealed = new Set();
+  const useReveals = p.steps.some(s => s.reveals && s.reveals.length);
+  if (useReveals) {
     p.steps.forEach((s, i) => {
-      if (st.stepIdx > i && s.reveals && s.reveals.length) {
-        s.reveals.forEach(f => revealed.add(f));
-      }
+      if (st.stepIdx > i && s.reveals) s.reveals.forEach(f => revealed.add(f));
     });
+  } else {
+    for (let i = 0; i < Math.min(st.stepIdx, p.facts.length); i++) revealed.add(i);
   }
 
-  const list = $('factsList');
-  const countEl = $('factsCount');
-  const subEl = $('factsSub');
-
+  const list = $('factsList'), countEl = $('factsCount'), subEl = $('factsSub');
   if (revealed.size === 0) {
     countEl.style.display = 'none';
     subEl.textContent = '完成思考步骤，条件会逐步出现';
     list.innerHTML = `<div class="facts-empty">还没有找到已知条件<br>先完成下面的思考步骤吧 👇</div>`;
     return;
   }
-
   countEl.style.display = 'inline-block';
   countEl.textContent = `${revealed.size} / ${p.facts.length}`;
   subEl.textContent = revealed.size === p.facts.length
-    ? (cfg.revealAll ? '挑战模式：条件已全部给出，自己梳理思路吧' : '条件已全部找到，可以开始整理思路了')
+    ? '条件已经全部找到，可以用它们列式了'
     : '已经找到部分条件，继续往下想';
-
-  list.innerHTML = p.facts.map((f, i) => {
-    if (revealed.has(i)) {
-      return `<div class="fact"><span class="fact-no">${i + 1}</span><span>${hl(f)}</span></div>`;
-    }
-    return `<div class="fact locked"><span class="fact-no">?</span><span class="fact-hidden">待解锁的条件</span></div>`;
-  }).join('');
+  list.innerHTML = p.facts.map((f, i) => revealed.has(i)
+    ? `<div class="fact"><span class="fact-no">${i + 1}</span><span>${hl(f)}</span></div>`
+    : `<div class="fact locked"><span class="fact-no">?</span><span class="fact-hidden">待解锁的条件</span></div>`
+  ).join('');
 }
 
-/* =========================================================
-   步骤渲染 —— 关键：难度决定选项数量、折叠状态
-   ========================================================= */
 function renderSteps() {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const p = inst.problem, st = inst.state;
-  const cfg = DIFF_CONFIG[currentDiff];
+  const q = questions[current]; if (!q) return;
+  const p = q.problem, st = q.state;
   const wrap = $('steps');
   wrap.innerHTML = '';
 
@@ -1244,13 +2502,9 @@ function renderSteps() {
     el.dataset.step = i;
 
     if (i < st.stepIdx) {
-      // 已完成：折叠/展开
-      const isExpanded = !!st.expanded[i];
-      el.className = 'step done' + (isExpanded ? ' expanded' : '');
-      const pick = st.chosen[i];
-      const pickText = (pick !== null && pick !== undefined) ? s.options[pick] : '—';
-      const fbClass = cfg.detail === 'full' ? 'ok' : 'brief';
-      const fbText = cfg.detail === 'full' ? s.correct : '答对啦！继续下一步。';
+      el.className = 'step done' + (st.expanded[i] ? ' expanded' : '');
+      const pickIdx = st.chosen[i];
+      const pickText = (pickIdx !== null && pickIdx !== undefined) ? s.options[pickIdx] : '—';
       el.innerHTML = `
         <div class="step-head">
           <span class="step-num">✓</span>
@@ -1259,8 +2513,8 @@ function renderSteps() {
         </div>
         <div class="step-body-wrap">
           <div class="step-body">
-            <div class="chosen-line">你的选择：<b>${pick !== null ? LETTER[pick] + '. ' + pickText : '—'}</b></div>
-            <div class="fb-inline ${fbClass}">✔ ${fbText}</div>
+            <div class="chosen-line">你的选择：<b>${pickIdx !== null ? LETTER[pickIdx] + '. ' + pickText : '—'}</b></div>
+            <div class="fb-inline ok">✔ ${s.correct}</div>
           </div>
         </div>`;
       el.querySelector('.step-head').addEventListener('click', () => {
@@ -1269,20 +2523,16 @@ function renderSteps() {
         SFX.click();
       });
     } else if (i === st.stepIdx && !st.solved) {
-      // 当前步骤
       el.className = 'step active';
-      const visibleOpts = buildVisibleOptions(s, cfg.options, i + current * 100);
-      const optsHtml = visibleOpts.map((vo, dispIdx) => {
-        const isWrong = st.tried[i].includes(vo.original);
-        return `<button class="opt${isWrong ? ' wrong' : ''}"
-                  data-step="${i}" data-orig="${vo.original}"
+      const optsHtml = s.options.map((text, idx) => {
+        const isWrong = st.tried[i].indexOf(idx) >= 0;
+        return `<button class="opt${isWrong ? ' wrong' : ''}" data-step="${i}" data-opt="${idx}"
                   ${isWrong ? 'disabled' : ''}>
-                  <span class="opt-key">${LETTER[dispIdx]}</span>
-                  <span class="opt-text">${vo.text}</span>
+                  <span class="opt-key">${LETTER[idx]}</span>
+                  <span class="opt-text">${text}</span>
                 </button>`;
       }).join('');
-      const fb = st.tried[i].length
-        ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
+      const fb = st.tried[i].length ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
       el.innerHTML = `
         <div class="step-head">
           <span class="step-num">${i + 1}</span>
@@ -1304,113 +2554,70 @@ function renderSteps() {
   });
 }
 
-/* 根据难度生成可见选项（含显示顺序的确定性洗牌） */
-function buildVisibleOptions(step, count, seed) {
-  const correctIdx = step.answer;
-  const wrongIdxs = step.options
-    .map((_, i) => i)
-    .filter(i => i !== correctIdx);
-  const keepWrong = count - 1;
-  const shuffledWrong = seededShuffle(wrongIdxs, seed + 17);
-  const keep = [correctIdx, ...shuffledWrong.slice(0, keepWrong)];
-  const shuffled = seededShuffle(keep, seed + 99);
-  return shuffled.map(orig => ({
-    original: orig,
-    text: step.options[orig]
-  }));
+/* 底部导航：题目可以一直往下出，所以用「第 N 题 + 已完成」代替固定圆点 */
+function renderNav() {
+  $('navInfo').innerHTML = `第 <b>${current + 1}</b> / ${questions.length} 题 · 本轮已完成 <b>${doneCount}</b> 题`;
+  $('prevBtn').disabled = current === 0;
+  $('nextBtn').disabled = false;
 }
 
 /* =========================================================
-   事件委托：选项点击
+   答题区（含大的「下一题」按钮）
    ========================================================= */
-document.getElementById('steps').addEventListener('click', e => {
-  const btn = e.target.closest('.opt');
-  if (!btn || btn.disabled) return;
-  const stepIdx = +btn.dataset.step;
-  const origIdx = +btn.dataset.orig;
-  handleChoose(stepIdx, origIdx);
-});
+function nextBtnHtml() {
+  const isLast = current >= questions.length - 1;
+  return {
+    html: `<button class="next-big" id="nextBig">
+             <span>下一题</span><span class="nb-arrow">→</span>
+           </button>
+           <div class="next-hint">${isLast ? '这是本批最后一题，点一下会自动出新题' : '后面还有 ' + (questions.length - 1 - current) + ' 题'}</div>`,
+    isLast
+  };
+}
 
-function handleChoose(stepIdx, origIdx) {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const p = inst.problem, st = inst.state;
-  if (stepIdx !== st.stepIdx) return;
-  if (st.solved) return;
-  const s = p.steps[stepIdx];
+function mountNext() {
+  const inner = $('answerInner');
+  if (!inner || $('nextBig')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'next-wrap';
+  wrap.innerHTML = nextBtnHtml().html;
+  inner.appendChild(wrap);
+  const b = $('nextBig');
+  if (b) b.addEventListener('click', goNext);
+}
 
-  if (origIdx === s.answer) {
-    st.chosen[stepIdx] = origIdx;
-    st.stepIdx++;
-    // 折叠：答对后立即折叠，让下个步骤露出来
-    st.expanded[stepIdx] = false;
-    SFX.correct();
-    addScore(10, false);
-    incCombo();
-
-    renderFacts();
-    renderSteps();
-    renderAnswer();
-    renderDots();
-
-    // 平滑滚动到下一步
-    if (st.stepIdx < p.steps.length) {
-      requestAnimationFrame(() => {
-        const nodes = document.querySelectorAll('.step');
-        const next = nodes[st.stepIdx];
-        if (next) {
-          const y = next.getBoundingClientRect().top + window.scrollY - 100;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-      });
-    } else {
-      requestAnimationFrame(() => {
-        const input = $('ansInput');
-        if (input) {
-          input.focus({ preventScroll: true });
-          const y = input.getBoundingClientRect().top + window.scrollY - 200;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-      });
-    }
+function goNext() {
+  SFX.click();
+  if (current < questions.length - 1) {
+    current++;
   } else {
-    if (!st.tried[stepIdx].includes(origIdx)) st.tried[stepIdx].push(origIdx);
-    st.hadWrong = true;
-    resetCombo();
-    SFX.wrong();
-    renderSteps();
-    if (st.tried[stepIdx].length === 1) {
-      addWrongRecord(inst, {
-        stepIdx: stepIdx + 1,
-        stepQ: s.q,
-        wrongChoice: LETTER[origIdx] + '. ' + s.options[origIdx],
-        correctChoice: LETTER[s.answer] + '. ' + s.options[s.answer]
-      });
-    }
+    if (!appendQuestion()) return;
+    current = questions.length - 1;
   }
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* =========================================================
-   答题区
-   ========================================================= */
 function renderAnswer() {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const p = inst.problem, st = inst.state;
+  const q = questions[current]; if (!q) return;
+  const p = q.problem, st = q.state;
   const card = $('answerCard'), inner = $('answerInner');
+  const unitHtml = p.unit ? `<span class="unit">${p.unit}</span>` : '';
 
   if (st.timedOut) {
     card.classList.remove('locked');
     inner.innerHTML = `
-      <div class="answer-hint" style="color:#E63A3A;">⏰ 时间到了！正确答案是 <b>${p.answer} ${p.unit}</b></div>
-      <div class="feedback show no">这道题没有按时完成，已经记录到错题本啦。<br>
-        <span class="fb-sub">点"🔄 换一题"再来一道，或去错题本复习一下。</span></div>`;
+      <div class="answer-hint" style="color:#E63A3A;">⏰ 时间到了！正确答案是 <b>${p.answer}${p.unit ? ' ' + p.unit : ''}</b></div>
+      <div class="feedback show no">这道题没能在规定时间内完成，已经记到错题本啦。<br>
+        <span class="fb-sub">没关系，我们换一道继续练 👇</span></div>`;
+    mountNext();
     return;
   }
 
   if (st.stepIdx < p.steps.length) {
     card.classList.add('locked');
-    inner.innerHTML = `<div class="lock-msg">🔒 完成上面 ${p.steps.length} 个思考步骤后，<br>就可以在这里填写最终答案啦</div>`;
+    const leave = p.steps.length - st.stepIdx;
+    inner.innerHTML = `<div class="lock-msg">🔒 完成上面 ${p.steps.length} 个思考步骤后，<br>就可以在这里填写最终答案啦<br><span style="font-size:12.5px;">（还剩 ${leave} 步）</span></div>`;
     return;
   }
 
@@ -1420,7 +2627,7 @@ function renderAnswer() {
     <div class="answer-row">
       <span class="answer-label">我的答案：</span>
       <input id="ansInput" type="text" inputmode="decimal" placeholder="?">
-      <span class="unit">${p.unit}</span>
+      ${unitHtml}
       <button class="btn btn-primary" id="checkBtn">检 查</button>
     </div>
     <div class="feedback" id="feedback"></div>`;
@@ -1432,7 +2639,8 @@ function renderAnswer() {
     const input = $('ansInput');
     input.value = p.answer;
     input.disabled = true;
-    showFb('ok', `✔ 完全正确！答案是 <b>${p.answer} ${p.unit}</b>。<br><span class="fb-sub">${p.praise}</span>`);
+    showFb('ok', `✔ 完全正确！答案是 <b>${p.answer}${p.unit ? ' ' + p.unit : ''}</b>。<br><span class="fb-sub">${p.praise}</span>`);
+    mountNext();
   }
 }
 
@@ -1443,10 +2651,74 @@ function showFb(type, html) {
   fb.innerHTML = html;
 }
 
+/* =========================================================
+   选项点击
+   ========================================================= */
+document.getElementById('steps').addEventListener('click', e => {
+  const btn = e.target.closest('.opt');
+  if (!btn || btn.disabled) return;
+  handleChoose(+btn.dataset.step, +btn.dataset.opt);
+});
+
+function handleChoose(stepIdx, optIdx) {
+  const q = questions[current];
+  if (!q) return;
+  const p = q.problem, st = q.state;
+  if (stepIdx !== st.stepIdx || st.solved) return;
+  const s = p.steps[stepIdx];
+
+  if (optIdx === s.answer) {
+    st.chosen[stepIdx] = optIdx;
+    st.stepIdx++;
+    st.expanded[stepIdx] = false;
+    SFX.correct();
+    addScore(10, false);
+    incCombo();
+    renderFacts(); renderSteps(); renderAnswer(); renderNav();
+    if (st.stepIdx < p.steps.length) {
+      requestAnimationFrame(() => {
+        const nodes = document.querySelectorAll('#steps .step');
+        const next = nodes[st.stepIdx];
+        if (next) {
+          const y = next.getBoundingClientRect().top + window.scrollY - 110;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      });
+    } else {
+      requestAnimationFrame(() => {
+        const input = $('ansInput');
+        if (input) {
+          input.focus({ preventScroll: true });
+          const y = input.getBoundingClientRect().top + window.scrollY - 220;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      });
+    }
+  } else {
+    if (st.tried[stepIdx].indexOf(optIdx) < 0) st.tried[stepIdx].push(optIdx);
+    st.hadWrong = true;
+    resetCombo();
+    SFX.wrong();
+    /* 先让反馈活下来，再重建选项（同帧内重建会看不到红色反馈） */
+    renderSteps();
+    if (st.tried[stepIdx].length === 1) {
+      addWrongRecord(q, {
+        stepIdx: stepIdx + 1,
+        stepQ: s.q,
+        wrongChoice: LETTER[optIdx] + '. ' + s.options[optIdx],
+        correctChoice: LETTER[s.answer] + '. ' + s.options[s.answer]
+      });
+    }
+  }
+}
+
+/* =========================================================
+   检查最终答案
+   ========================================================= */
 function check() {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const p = inst.problem, st = inst.state;
+  const q = questions[current];
+  if (!q) return;
+  const p = q.problem, st = q.state;
   if (st.solved) return;
   const raw = $('ansInput').value.trim();
 
@@ -1454,34 +2726,40 @@ function check() {
   const num = Number(raw);
   if (isNaN(num)) { showFb('warn', '请输入一个数字哦。'); return; }
 
+  const shown = `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
+
   if (Math.abs(num - p.answer) < 1e-6) {
     st.solved = true;
     st.timeUsed = timerEnabled ? (TIME_LIMIT - timerRemaining) : 0;
-    $('ansInput').disabled = true;
     stopTimer();
     $('timerBar').style.display = 'none';
-    showFb('ok', `✔ 完全正确！答案是 <b>${p.answer} ${p.unit}</b>。<br><span class="fb-sub">${p.praise}</span>`);
-    renderDots();
-
+    $('ansInput').disabled = true;
+    showFb('ok', `✔ 完全正确！答案是 <b>${shown}</b>。<br><span class="fb-sub">${p.praise}</span>`);
     addScore(30, false);
     incCombo();
+    doneCount++;
+    renderGoal();
 
     if (!st.hadWrong) {
       incPerfect();
-      setTimeout(() => {
-        addScore(20, true);
-        SFX.perfect();
-        floatScore('完美通关', true);
-      }, 400);
+      addScore(20, true);
+      SFX.perfect();
+      floatScore('完美通关', true);
     } else {
       SFX.success();
     }
-
     if (!st.recorded) {
       st.recorded = true;
-      const pts = scoreVisible ? 30 + (st.hadWrong ? 0 : 20) : 0;
-      addHistoryRecord(inst, pts, !st.hadWrong, st.timeUsed);
+      addHistoryRecord(q, scoreVisible ? (st.hadWrong ? 30 : 50) : 0, !st.hadWrong, st.timeUsed);
     }
+    mountNext();
+    renderNav();
+    requestAnimationFrame(() => {
+      const b = $('nextBig');
+      if (!b) return;
+      const y = b.getBoundingClientRect().top + window.scrollY - 280;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
   } else {
     st.hadWrong = true;
     resetCombo();
@@ -1489,53 +2767,35 @@ function check() {
     showFb('no', `✘ 还差一点，再想一想。<br><span class="fb-sub">${p.wrongTip}</span>`);
     if (!st.wrongAnswerRecorded) {
       st.wrongAnswerRecorded = true;
-      addWrongRecord(inst, {
+      addWrongRecord(q, {
         stepIdx: 'answer',
         stepQ: '最终答案',
         wrongChoice: raw,
-        correctChoice: p.answer + ' ' + p.unit
+        correctChoice: shown
       });
     }
   }
 }
 
-function renderDots() {
-  const wrap = $('dots');
-  wrap.innerHTML = '';
-  visibleInstances.forEach((inst, i) => {
-    const d = document.createElement('div');
-    d.className = 'dot-i'
-      + (inst.state.solved ? ' done' : '')
-      + (i === current ? ' active' : '');
-    d.addEventListener('click', () => {
-      if (i !== current) {
-        current = i;
-        render();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
-    wrap.appendChild(d);
-  });
-}
-
 /* =========================================================
-   悬浮按钮
+   悬浮按钮：回到已知信息
    ========================================================= */
 const backBtn = $('backToFacts');
 const factsBox = $('factsBox');
-
 let rafPending = false;
+
 function updateBackBtn() {
   if (rafPending) return;
   rafPending = true;
   requestAnimationFrame(() => {
     rafPending = false;
-    if (!backBtn || !factsBox || currentTab !== 'practice') {
+    const q = questions[current];
+    const hidden = !factsBox || (q && q.problem.facts && q.problem.facts.length === 0);
+    if (!backBtn || hidden || currentTab !== 'practice' || selectedUnits.length === 0) {
       if (backBtn) backBtn.classList.remove('show');
       return;
     }
-    const rect = factsBox.getBoundingClientRect();
-    backBtn.classList.toggle('show', rect.bottom < 60);
+    backBtn.classList.toggle('show', factsBox.getBoundingClientRect().bottom < 60);
   });
 }
 
@@ -1554,7 +2814,7 @@ window.addEventListener('scroll', updateBackBtn, { passive: true });
 window.addEventListener('resize', updateBackBtn);
 
 /* =========================================================
-   分数/音效开关
+   开关与导航
    ========================================================= */
 $('scoreToggle').addEventListener('click', () => {
   scoreVisible = !scoreVisible;
@@ -1562,6 +2822,7 @@ $('scoreToggle').addEventListener('click', () => {
   $('scoreToggle').textContent = scoreVisible ? '隐藏分数' : '显示分数 ⭐';
   SFX.click();
 });
+
 $('soundToggle').addEventListener('click', () => {
   soundEnabled = !soundEnabled;
   const btn = $('soundToggle');
@@ -1570,27 +2831,6 @@ $('soundToggle').addEventListener('click', () => {
   if (soundEnabled) { ensureAudio(); SFX.click(); }
 });
 
-/* =========================================================
-   难度切换
-   ========================================================= */
-$('diffFilter').addEventListener('click', e => {
-  const btn = e.target.closest('.diff-btn');
-  if (!btn) return;
-  const diff = +btn.dataset.diff;
-  if (diff === currentDiff) return;
-  document.querySelectorAll('.diff-btn').forEach(b => b.classList.toggle('active', b === btn));
-  currentDiff = diff;
-  // 切换难度：重置所有题目状态（因为选项数量变了）
-  instances.forEach(inst => resetInstanceState(inst));
-  current = 0;
-  SFX.click();
-  render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-/* =========================================================
-   计时开关
-   ========================================================= */
 $('timerToggle').addEventListener('click', () => {
   timerEnabled = !timerEnabled;
   const btn = $('timerToggle');
@@ -1598,34 +2838,51 @@ $('timerToggle').addEventListener('click', () => {
   btn.textContent = timerEnabled ? '⏱ 开' : '⏱';
   SFX.click();
   if (timerEnabled) startTimer();
-  else {
-    stopTimer();
-    const b = $('timerBar'); if (b) b.style.display = 'none';
-  }
+  else { stopTimer(); $('timerBar').style.display = 'none'; }
 });
 
-/* =========================================================
-   导航
-   ========================================================= */
+/* ---- 单元面板 ---- */
+const unitPanel = $('unitPanel');
+function toggleUnitPanel(force) {
+  const open = typeof force === 'boolean' ? force : !unitPanel.classList.contains('open');
+  unitPanel.classList.toggle('open', open);
+  $('unitToggle').classList.toggle('open', open);
+  $('unitToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+$('unitToggle').addEventListener('click', () => { SFX.click(); toggleUnitPanel(); });
+$('unitAll').addEventListener('click', () => {
+  selectedUnits = UNITS.map(u => u.key);
+  saveUnits(); SFX.click(); buildSession(); renderAll();
+});
+$('unitNone').addEventListener('click', () => {
+  selectedUnits = [];
+  saveUnits(); SFX.click(); buildSession(); renderAll();
+});
+$('emptyPick').addEventListener('click', () => {
+  SFX.click();
+  toggleUnitPanel(true);
+  unitPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* ---- 上一题 / 下一题 ---- */
 $('prevBtn').addEventListener('click', () => {
   if (current > 0) { current--; SFX.click(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 });
-$('nextBtn').addEventListener('click', () => {
-  if (current < visibleInstances.length - 1) { current++; SFX.click(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-});
+$('nextBtn').addEventListener('click', goNext);
+
 $('resetBtn').addEventListener('click', () => {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  resetInstanceState(inst);
+  const q = questions[current];
+  if (!q) return;
+  q.state = makeState(q.problem);
   SFX.click();
   render();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
 $('changeBtn').addEventListener('click', () => {
-  const inst = visibleInstances[current];
-  if (!inst) return;
-  const idx = instances.indexOf(inst);
-  if (idx >= 0) regenerate(idx);
+  const pool = poolTemplates();
+  if (pool.length === 0) return;
+  questions[current] = newQuestion(nextTemplate(pool));
   SFX.click();
   render();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1658,11 +2915,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 /* =========================================================
    错题本
    ========================================================= */
-function renderWrongBadge() {
-  const b = $('wrongBadge');
-  if (b) b.textContent = wrongBook.length;
-}
-
 function renderWrongBook() {
   const list = $('wrongList');
   if (!list) return;
@@ -1672,11 +2924,10 @@ function renderWrongBook() {
     return;
   }
   list.innerHTML = wrongBook.map(r => {
-    const diffName = DIFF_CONFIG[r.difficulty] ? DIFF_CONFIG[r.difficulty].name : '';
     const stepLabel = r.wrongStep === 'answer' ? '最终答案' : `第 ${r.wrongStep} 步`;
     return `<div class="record-card wrong">
       <div class="record-head">
-        <span class="record-tag">${r.qtag} · ${diffName}</span>
+        <span class="record-tag">${r.qtag}</span>
         <span class="record-time">${fmtTime(r.timestamp)}</span>
       </div>
       <div class="record-q">${hl(r.qtext)}</div>
@@ -1689,21 +2940,44 @@ function renderWrongBook() {
         <span>${r.wrongStep === 'answer' ? '答案 ' + r.correctChoice : stepLabel + ' · ' + r.correctChoice}</span>
       </div>
       <div class="record-actions">
+        <button class="practice" data-topic="${r.topic || ''}">🔄 练这个单元</button>
         <button data-remove="${r.id}">🗑 删除</button>
       </div>
     </div>`;
   }).join('');
+
   list.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id = btn.dataset.remove;
-      wrongBook = wrongBook.filter(x => x.id !== id);
-      trySave('mathWrongBook', wrongBook);
+      wrongBook = wrongBook.filter(x => x.id !== btn.dataset.remove);
+      LS.set('wrongBook', wrongBook);
       renderWrongBadge();
       renderWrongBook();
       SFX.click();
     });
   });
+  list.querySelectorAll('[data-topic]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.topic;
+      if (!k || !UNIT_MAP[k]) return;
+      selectedUnits = [k];
+      saveUnits();
+      buildSession();
+      SFX.click();
+      document.querySelector('.tab-btn[data-tab="practice"]').click();
+    });
+  });
 }
+
+$('clearWrong').addEventListener('click', () => {
+  if (wrongBook.length === 0) return;
+  if (confirm('确定要清空错题本吗？清空后不能恢复。')) {
+    wrongBook = [];
+    LS.set('wrongBook', wrongBook);
+    renderWrongBadge();
+    renderWrongBook();
+    SFX.click();
+  }
+});
 
 /* =========================================================
    历史
@@ -1724,11 +2998,10 @@ function renderHistory() {
     <div class="stat-box"><span class="num">${totalScore}</span><span class="lbl">累计得分</span></div>
     <div class="stat-box"><span class="num">${perfectTotal}</span><span class="lbl">完美通关</span></div>`;
   list.innerHTML = history.map(r => {
-    const diffName = DIFF_CONFIG[r.difficulty] ? DIFF_CONFIG[r.difficulty].name : '';
     const t = r.timeUsed > 0 ? `${r.timeUsed}s` : '—';
     return `<div class="record-card ok">
       <div class="record-head">
-        <span class="record-tag">${r.qtag} · ${diffName}</span>
+        <span class="record-tag">${r.qtag}</span>
         <span class="record-time">${fmtTime(r.timestamp)} · 用时 ${t}</span>
       </div>
       <div class="record-q">${hl(r.qtext)}</div>
@@ -1740,21 +3013,11 @@ function renderHistory() {
   }).join('');
 }
 
-$('clearWrong').addEventListener('click', () => {
-  if (wrongBook.length === 0) return;
-  if (confirm('确定要清空错题本吗？')) {
-    wrongBook = [];
-    trySave('mathWrongBook', wrongBook);
-    renderWrongBadge();
-    renderWrongBook();
-    SFX.click();
-  }
-});
 $('clearHistory').addEventListener('click', () => {
   if (history.length === 0) return;
-  if (confirm('确定要清空练习历史吗？')) {
+  if (confirm('确定要清空练习历史吗？清空后不能恢复。')) {
     history = [];
-    trySave('mathHistory', history);
+    LS.set('history', history);
     renderHistory();
     SFX.click();
   }
@@ -1763,29 +3026,12 @@ $('clearHistory').addEventListener('click', () => {
 /* =========================================================
    启动
    ========================================================= */
-function boot() {
-  try {
-    initAll();
-    render();
-    renderWrongBadge();
-    requestAnimationFrame(updateBackBtn);
-  } catch (e) {
-    console.error('初始化失败:', e);
-    const hero = document.querySelector('.hero');
-    if (hero) {
-      const err = document.createElement('div');
-      err.style.cssText = 'background:#FFF3E0;color:#B26A00;padding:14px 18px;border-radius:14px;margin:16px 0;font-size:13px;line-height:1.7;';
-      err.innerHTML = '<b>页面初始化出错：</b>' + e.message + '<br>请刷新重试。';
-      hero.after(err);
-    }
-  }
-}
+loadUnits();
+renderUnitChips();
+buildSession();
+renderAll();
+renderWrongBadge();
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
 </script>
 </body>
 </html>
