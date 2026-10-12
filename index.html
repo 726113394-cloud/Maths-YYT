@@ -256,8 +256,21 @@ body{
   color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
 .mini-btn.danger{color:#C2410C;}
 .mini-btn.danger:hover{background:#FFF4EC;}
-.mini-btn.arming{background:#FFF4EC;color:#9A3412;
-  box-shadow:0 3px 0 rgba(194,65,12,.2);}
+
+/* 管理员密码弹窗 */
+.admin-card{padding:24px 22px 20px;}
+.admin-card .admin-input{width:100%;min-height:52px;margin:6px 0 0;padding:12px 16px;
+  font-family:inherit;font-size:20px;font-weight:800;letter-spacing:6px;text-align:center;
+  border:2.5px solid var(--line-2);border-radius:14px;outline:none;background:#FBF9FF;
+  color:var(--ink);transition:border-color .2s,box-shadow .2s;}
+.admin-card .admin-input:focus{border-color:#A78BFA;background:#fff;
+  box-shadow:0 0 0 5px rgba(167,139,250,.16);}
+.admin-card .admin-err{min-height:20px;margin:6px 0 10px;font-size:13px;
+  font-weight:800;color:#E63A3A;}
+@keyframes adminShake{0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);}40%{transform:translateX(8px);}
+  60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+.admin-card.shake{animation:adminShake .4s ease;}
 
 /* ============ 步骤卡 ============ */
 .step{background:#fff;border-radius:20px;margin-bottom:12px;
@@ -643,7 +656,6 @@ body{
 .pk-again:hover{transform:translateY(-2px);}
 .pk-exit{background:#fff;color:#C2410C;box-shadow:0 3px 0 rgba(194,65,12,.18);}
 .pk-exit:hover{background:#FFF4EC;}
-.pk-exit.arming{background:#FFF4EC;color:#9A3412;}
 .record-tag.tag-tw{background:linear-gradient(135deg,#C4B5FD,#8B6BFF);color:#fff;}
 .record-tag.tag-rt{background:linear-gradient(135deg,#FFB3C8,#FF6B9D);color:#fff;}
 .record-tag.tag-cc{background:linear-gradient(135deg,#9EE7FF,#3BA9DD);color:#fff;}
@@ -840,6 +852,17 @@ body{
 
 <div class="pk-toast" id="pkToast"></div>
 <div class="pk-modal" id="pkModal"><div class="pk-modal-card" id="pkModalCard"></div></div>
+<div class="pk-modal" id="adminModal"><div class="pk-modal-card admin-card" id="adminCard">
+  <h2>需要管理员密码</h2>
+  <div class="pk-win">删除错题属于管理操作</div>
+  <input class="admin-input" id="adminInput" type="password" autocomplete="off"
+         spellcheck="false" aria-label="管理员密码">
+  <div class="admin-err" id="adminErr"></div>
+  <div class="pk-modal-actions">
+    <button class="pk-again" id="adminOk">确 定</button>
+    <button class="pk-exit" id="adminCancel">取消</button>
+  </div>
+</div></div>
 <script>
 /* =========================================================
    音效（Web Audio 合成，零外链）
@@ -4215,6 +4238,7 @@ function renderWrongBook() {
       </div>
       <div class="record-actions">
         <button class="redo" data-redo="${r.id}">🔁 重做这道题</button>
+        <button data-del="${r.id}">🗑 删除</button>
       </div>
     </div>`;
   }).join('');
@@ -4222,31 +4246,77 @@ function renderWrongBook() {
   list.querySelectorAll('[data-redo]').forEach(btn => {
     btn.addEventListener('click', () => startRedo(btn.dataset.redo));
   });
+  /* 删除属于管理操作：要管理员密码，学生随手点不动 */
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.del;
+      askAdmin(() => {
+        wrongBook = wrongBook.filter(x => x.id !== id);
+        LS.set('wrongBook', wrongBook);
+        renderWrongBadge();
+        renderWrongBook();
+        toastMsg('已删除这条错题');
+      });
+    });
+  });
 }
 
-/* 破坏性操作要「点两次」：第一次只是上膛，5 秒内不确认自动复原 */
-function armConfirm(btn, action) {
-  if (!btn) return;
-  if (btn.dataset.armed === '1') { disarmConfirm(btn); action(); return; }
-  btn.dataset.armed = '1';
-  btn.dataset.label = btn.textContent;
-  btn.classList.add('arming');
-  btn.textContent = '⚠️ 再点一次';
-  clearTimeout(btn._armTimer);
-  btn._armTimer = setTimeout(() => disarmConfirm(btn), 5000);
+/* =========================================================
+   管理员密码：删除错题、清空记录都要先过这一关
+   ⚠️ 这是静态页面里的前端口令，只挡得住随手乱点的学生；
+      会看源码或用开发者工具的人绕得过去。源码里也不写明文，只存哈希。
+   ========================================================= */
+const ADMIN_HASH = 1758877277;
+function fnv1a(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
 }
-function disarmConfirm(btn) {
-  if (!btn || btn.dataset.armed !== '1') return;
-  btn.dataset.armed = '0';
-  btn.classList.remove('arming');
-  btn.textContent = btn.dataset.label || '';
-  clearTimeout(btn._armTimer);
+let adminThen = null;
+function askAdmin(then) {
+  adminThen = then;
+  const m = $('adminModal'), inp = $('adminInput');
+  if (!m || !inp) { return; }
+  $('adminErr').textContent = '';
+  inp.value = '';
+  m.classList.add('on');
+  setTimeout(() => { try { inp.focus(); } catch (e) {} }, 60);
 }
+function closeAdmin() {
+  const m = $('adminModal');
+  if (m) m.classList.remove('on');
+  adminThen = null;
+}
+function submitAdmin() {
+  const inp = $('adminInput'), card = $('adminCard');
+  if (!inp) return;
+  if (fnv1a(inp.value) === ADMIN_HASH) {
+    const fn = adminThen;
+    closeAdmin();
+    SFX.click();
+    if (fn) fn();
+  } else {
+    $('adminErr').textContent = '密码不正确';
+    inp.value = '';
+    if (card) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
+    SFX.wrong();
+    try { inp.focus(); } catch (e) {}
+  }
+}
+$('adminOk').addEventListener('click', submitAdmin);
+$('adminCancel').addEventListener('click', () => { closeAdmin(); SFX.click(); });
+$('adminInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitAdmin(); });
+$('adminModal').addEventListener('click', e => { if (e.target === $('adminModal')) closeAdmin(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('adminModal').classList.contains('on')) closeAdmin();
+});
 
 $('clearWrong').addEventListener('click', () => {
-  SFX.click();
   if (wrongBook.length === 0) { toastMsg('错题本已经是空的'); return; }
-  armConfirm($('clearWrong'), () => {
+  askAdmin(() => {
     wrongBook = [];
     LS.set('wrongBook', wrongBook);
     renderWrongBadge();
@@ -4290,9 +4360,8 @@ function renderHistory() {
 }
 
 $('clearHistory').addEventListener('click', () => {
-  SFX.click();
   if (history.length === 0) { toastMsg('还没有练习记录'); return; }
-  armConfirm($('clearHistory'), () => {
+  askAdmin(() => {
     history = [];
     LS.set('history', history);
     renderHistory();
