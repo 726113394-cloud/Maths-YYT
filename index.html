@@ -256,6 +256,8 @@ body{
   color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
 .mini-btn.danger{color:#C2410C;}
 .mini-btn.danger:hover{background:#FFF4EC;}
+.mini-btn.arming{background:#FFF4EC;color:#9A3412;
+  box-shadow:0 3px 0 rgba(194,65,12,.2);}
 
 /* ============ 步骤卡 ============ */
 .step{background:#fff;border-radius:20px;margin-bottom:12px;
@@ -4158,27 +4160,18 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
    只做错的那一道（原样重现，连引导步骤和选项顺序都一样），
    做对了就把它从错题本里移出去。
    ========================================================= */
-let redoState = null;                  /* { id, kp, done }；id 为空表示老记录只能重做同类题 */
+let redoState = null;                  /* { id, kp, done } */
 function redoActive() { return !!redoState; }
 
 function startRedo(id) {
   const rec = wrongBook.find(r => r.id === id);
-  if (!rec) return;
-  if (!rec.problem) { startRedoByKp(rec.kp); return; }   /* 老记录没存题目，退而重做同类题 */
+  if (!rec || !rec.problem) return;      /* 旧记录已在启动时清掉，这里兜个底 */
   redoState = { id: rec.id, kp: rec.kp, done: false };
   questions = [{
     tpl: { kp: rec.kp || '错题重做', unit: rec.topic || '' },
     problem: rec.problem,
     state: makeState(rec.problem)
   }];
-  current = 0;
-  gotoPractice();
-}
-function startRedoByKp(kp) {
-  const tpl = problemTemplates.find(t => t.kp === kp);
-  if (!tpl) return;
-  redoState = { id: null, kp, done: false };
-  questions = [newQuestion(tpl)];
   current = 0;
   gotoPractice();
 }
@@ -4221,40 +4214,45 @@ function renderWrongBook() {
         <span>${r.wrongStep === 'answer' ? '答案 ' + r.correctChoice : stepLabel + ' · ' + r.correctChoice}</span>
       </div>
       <div class="record-actions">
-        ${r.problem
-          ? `<button class="redo" data-redo="${r.id}">🔁 重做这道题</button>`
-          : `<button class="redo" data-redokp="${r.kp || ''}">🔁 重做同类题</button>`}
-        <button data-remove="${r.id}">🗑 删除</button>
+        <button class="redo" data-redo="${r.id}">🔁 重做这道题</button>
       </div>
     </div>`;
   }).join('');
 
-  list.querySelectorAll('[data-remove]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      wrongBook = wrongBook.filter(x => x.id !== btn.dataset.remove);
-      LS.set('wrongBook', wrongBook);
-      renderWrongBadge();
-      renderWrongBook();
-      SFX.click();
-    });
-  });
   list.querySelectorAll('[data-redo]').forEach(btn => {
     btn.addEventListener('click', () => startRedo(btn.dataset.redo));
   });
-  list.querySelectorAll('[data-redokp]').forEach(btn => {
-    btn.addEventListener('click', () => startRedoByKp(btn.dataset.redokp));
-  });
+}
+
+/* 破坏性操作要「点两次」：第一次只是上膛，5 秒内不确认自动复原 */
+function armConfirm(btn, action) {
+  if (!btn) return;
+  if (btn.dataset.armed === '1') { disarmConfirm(btn); action(); return; }
+  btn.dataset.armed = '1';
+  btn.dataset.label = btn.textContent;
+  btn.classList.add('arming');
+  btn.textContent = '⚠️ 再点一次';
+  clearTimeout(btn._armTimer);
+  btn._armTimer = setTimeout(() => disarmConfirm(btn), 5000);
+}
+function disarmConfirm(btn) {
+  if (!btn || btn.dataset.armed !== '1') return;
+  btn.dataset.armed = '0';
+  btn.classList.remove('arming');
+  btn.textContent = btn.dataset.label || '';
+  clearTimeout(btn._armTimer);
 }
 
 $('clearWrong').addEventListener('click', () => {
-  if (wrongBook.length === 0) return;
-  if (confirm('确定要清空错题本吗？清空后不能恢复。')) {
+  SFX.click();
+  if (wrongBook.length === 0) { toastMsg('错题本已经是空的'); return; }
+  armConfirm($('clearWrong'), () => {
     wrongBook = [];
     LS.set('wrongBook', wrongBook);
     renderWrongBadge();
     renderWrongBook();
-    SFX.click();
-  }
+    toastMsg('错题本已清空');
+  });
 });
 
 /* =========================================================
@@ -4292,13 +4290,14 @@ function renderHistory() {
 }
 
 $('clearHistory').addEventListener('click', () => {
-  if (history.length === 0) return;
-  if (confirm('确定要清空练习历史吗？清空后不能恢复。')) {
+  SFX.click();
+  if (history.length === 0) { toastMsg('还没有练习记录'); return; }
+  armConfirm($('clearHistory'), () => {
     history = [];
     LS.set('history', history);
     renderHistory();
-    SFX.click();
-  }
+    toastMsg('练习历史已清空');
+  });
 });
 
 /* =========================================================
@@ -4728,6 +4727,18 @@ renderUnitChips();
 buildSession();
 renderAll();
 renderWrongBadge();
+
+/* 旧版错题记录里没有存题目，无法原样重做，留着只会显示成「重做同类题」。
+   既然每道错题都该能原样重做，就在这里一次性清掉，并如实告知。 */
+(function dropLegacyWrongRecords() {
+  const before = wrongBook.length;
+  if (!before) return;
+  wrongBook = wrongBook.filter(r => r && r.problem && r.problem.steps);
+  if (wrongBook.length === before) return;
+  LS.set('wrongBook', wrongBook);
+  renderWrongBadge();
+  setTimeout(() => toastMsg('已清理 ' + (before - wrongBook.length) + ' 条旧版错题记录'), 900);
+})();
 
 </script>
 </body>
