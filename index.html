@@ -449,8 +449,20 @@ body{
   padding:8px 14px;border-radius:10px;font-family:inherit;font-size:14.5px;
   font-weight:800;cursor:pointer;transition:.18s;min-height:44px;}
 .record-actions button:hover{background:#F1ECFF;color:var(--purple);}
-.record-actions button.practice{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+.record-actions button.redo{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
   color:#fff;box-shadow:0 3px 0 var(--purple-deep);}
+
+/* 错题重做提示条 */
+.redo-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px 16px;margin-bottom:14px;border-radius:18px;
+  background:linear-gradient(135deg,#FFF1F6,#F3EEFF);
+  border:2.5px solid #FFC9DC;box-shadow:0 4px 0 rgba(255,107,157,.14);}
+.redo-bar.on{display:flex;}
+.redo-bar .redo-ico{font-size:17px;flex:none;}
+.redo-bar .redo-txt{font-size:14px;font-weight:800;color:var(--pink-deep);
+  flex:1;min-width:150px;line-height:1.5;}
+.redo-bar .mini-btn{background:#fff;color:var(--pink-deep);
+  box-shadow:0 3px 0 rgba(184,48,96,.16);flex:none;}
 
 .stats-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .stat-box{flex:1;min-width:90px;padding:14px;background:#fff;border-radius:16px;
@@ -744,6 +756,11 @@ body{
     </div>
 
     <div id="practiceBody">
+      <div class="redo-bar" id="redoBar">
+        <span class="redo-ico">🔁</span>
+        <span class="redo-txt">正在重做错题 · 答对后它就会从错题本里消失</span>
+        <button class="mini-btn" id="redoExit">结束重做</button>
+      </div>
       <div class="card problem">
         <div class="meta">
           <span class="tag" id="tag"></span>
@@ -1401,6 +1418,112 @@ const problemTemplates = [
       answer, unit: scene.box.replace('个', ''),
       praise: '你记住了「有余数时，要再多准备一个」！',
       wrongTip: `${total}÷${per}=${q}……${r}，还剩 ${r} 要装，所以需要 ${q}+1=${answer} 个。`
+    };
+  }
+},
+
+/* 归一问题：先求单价，再求总价 */
+{
+  unit: '除法', kp: '归一问题',
+  gen() {
+    const sc = pick([
+      { goods: '水杯', q: '个', lo: 12, hi: 45 },
+      { goods: '笔记本', q: '本', lo: 4, hi: 16 },
+      { goods: '故事书', q: '本', lo: 9, hi: 28 },
+      { goods: '羽毛球', q: '个', lo: 3, hi: 12 },
+      { goods: '水彩笔', q: '盒', lo: 6, hi: 22 },
+      { goods: '跳绳', q: '根', lo: 5, hi: 18 },
+      { goods: '苹果', q: '千克', lo: 4, hi: 14 },
+      { goods: '作文本', q: '本', lo: 2, hi: 9 }
+    ]);
+    const n1 = randInt(3, 8);
+    const price = randInt(sc.lo, sc.hi);
+    const total1 = price * n1;
+    const n2 = randInt(12, 45);
+    const answer = price * n2;
+    const who = pick(['王老师', '李老师', '张老师', '陈老师', '学校', '家委会']);
+    const g = sc.goods, q = sc.q;
+    const text = pick([
+      `${who}为班级买来 ${n1} ${q}${g}，一共花了 ${total1} 元。照这样计算，再买 ${n2} ${q}${g}还要花多少钱？`,
+      `${who}买了 ${n1} ${q}${g}，花了 ${total1} 元。同样价钱的${g}再买 ${n2} ${q}，需要多少元？`,
+      `买 ${n1} ${q}${g}要 ${total1} 元。照这个价钱，买 ${n2} ${q}${g}要多少元？`,
+      `${who}先买了 ${n1} ${q}${g}，用去 ${total1} 元；接着又按同样的价钱买了 ${n2} ${q}。第二次花了多少元？`
+    ]);
+    return {
+      tag: '四上 · 归一问题',
+      text,
+      facts: [`买了 ${n1} ${q}${g}`, `花了 ${total1} 元`, `还要买 ${n2} ${q}`],
+      steps: [
+        S2('这道题最后要求我们求什么？', `再买 ${n2} ${q}要花多少钱`,
+          [`${n1} ${q}一共花了多少钱`, `每${q}${g}多少钱`, `一共买了多少${q}${g}`],
+          { ok: `对！题目问的是「再买 ${n2} ${q}，还要花多少钱」。`, no: '再读一遍题目的最后一句——「还要花多少钱？」' }),
+        S2(`要求「再买 ${n2} ${q}要花多少钱」，必须先知道什么？`, `每${q}${g}多少元`,
+          [`一共要买多少${q}`, `${n1} ${q}一共多少钱`, `每${q}${g}有多重`],
+          { ok: `没错！要求 ${n2} ${q}的总价，必须先知道每${q}多少元。`, no: `要求「${n2} ${q}的总价」，得先知道「1 ${q}多少钱」。`, reveals: [0, 1] }),
+        S2(`每${q}${g}多少元？该用哪个算式？`, `${total1} ÷ ${n1}`,
+          [`${total1} × ${n1}`, `${total1} − ${n1}`, `${n2} ÷ ${n1}`],
+          { ok: `对！${total1} ÷ ${n1} = ${price} 元。`, no: `「${n1} ${q}一共 ${total1} 元」求每${q}的价钱，用除法。`, reveals: [2] }),
+        S2(`每${q} ${price} 元，再买 ${n2} ${q}要花多少钱？该用哪个算式？`, `${price} × ${n2}`,
+          [`${price} + ${n2}`, `${total1} × ${n2}`, `${total1} ÷ ${n2}`],
+          { ok: `对！用 ${price} × ${n2}。<br>算出来填进下面的框里吧！`, no: `每${q} ${price} 元，买 ${n2} ${q}，就是求 ${n2} 个 ${price}，用乘法。` })
+      ],
+      answer, unit: '元',
+      praise: '你抓住了「先求单价，再求总价」的归一问题核心思路！',
+      wrongTip: `每${q} ${price} 元，再买 ${n2} ${q}：${price} × ${n2} = ${answer} 元。`
+    };
+  }
+},
+
+/* 归总问题：先求总量，再求份数 */
+{
+  unit: '除法', kp: '归总问题',
+  gen() {
+    const sc = pick([
+      { task: '修一条水渠', verb: '修', per: '米', who: '工程队' },
+      { task: '铺一段小路', verb: '铺', per: '米' },
+      { task: '看一本书', verb: '看', per: '页', who: '小明' },
+      { task: '做一批零件', verb: '做', per: '个', who: '张师傅' },
+      { task: '运一批货物', verb: '运', per: '吨', who: '车队' },
+      { task: '抄一份稿子', verb: '抄', per: '字', who: '小丽' }
+    ]);
+    const k = randInt(2, 3);
+    let d2, r1, r2;
+    do {
+      d2 = randInt(8, 20);
+      r1 = randInt(6, 12);
+      r2 = r1 * k;
+      /* 答案是天数，别让题面里的数字和它撞上 */
+    } while (r1 === d2 || r2 === d2);
+    const d1 = d2 * k;
+    const total = r1 * d1;
+    const v = sc.verb, per = sc.per;
+    const who = sc.who ? sc.who + '要' : '要';
+    const text = pick([
+      `${who}${v}一批${per === '页' ? '书' : per === '字' ? '稿子' : '东西'}，如果每天${v} ${r1} ${per}，${d1} 天能完成。实际每天${v} ${r2} ${per}，多少天能完成？`,
+      `${sc.task}，原计划每天${v} ${r1} ${per}，要 ${d1} 天；实际每天${v} ${r2} ${per}。实际多少天能完成？`,
+      `按计划每天${v} ${r1} ${per}，${d1} 天正好完成；实际每天${v} ${r2} ${per}，实际需要多少天？`
+    ]);
+    return {
+      tag: '四上 · 归总问题',
+      text,
+      facts: [`每天${v} ${r1} ${per}，${d1} 天完成`, `实际每天${v} ${r2} ${per}`],
+      steps: [
+        S2('这道题最后要求什么？', '实际多少天能完成',
+          ['一共要完成多少', `原计划每天${v}多少`, `实际每天比计划多${v}多少`],
+          { ok: '对！题目问的是「实际多少天能完成」。', no: '看题目最后一句话——「多少天能完成？」' }),
+        S2('要求「实际多少天完成」，必须先知道什么？', '一共要完成多少',
+          [`原计划每天${v}多少`, `实际每天${v}多少`, '原计划用了多少天'],
+          { ok: `对！天数 = 总量 ÷ 每天的量。`, no: '要算「几天完成」，需要知道总量一共是多少。' , reveals: [0] }),
+        S2('一共要完成多少？该用哪个算式？', `${r1} × ${d1}`,
+          [`${r1} + ${d1}`, `${d1} ÷ ${r1}`, `${r1} × ${r2}`],
+          { ok: `对！${r1} × ${d1} = ${total} ${per}。`, no: `每天 ${r1} ${per}，做了 ${d1} 天，用乘法。`, reveals: [1] }),
+        S2(`总量 ${total} ${per}，实际每天${v} ${r2} ${per}，多少天完成？该用哪个算式？`, `${total} ÷ ${r2}`,
+          [`${total} + ${r2}`, `${total} − ${r2}`, `${total} × ${r2}`],
+          { ok: `对！用 ${total} ÷ ${r2}。算出来填进下面的框里吧！`, no: `求「${total} 里有多少个 ${r2}」，用除法。` })
+      ],
+      answer: d2, unit: '天',
+      praise: '你理解了「先求总量，再求天数」的归总思路！',
+      wrongTip: `总量 ${r1}×${d1}=${total} ${per}，实际每天 ${r2} ${per}，所以 ${total}÷${r2}=${d2} 天。`
     };
   }
 },
@@ -3243,6 +3366,7 @@ function appendQuestion() {
 }
 
 function buildSession() {
+  redoState = null;                 /* 只要重新生成正常题集，就退出错题重做 */
   questions = []; tplQueue = []; current = 0;
   const pool = poolTemplates();
   if (pool.length === 0) return;
@@ -3325,10 +3449,11 @@ function syncUnitUI() {
       (total === UNITS.length ? '（全部单元）' : `：${names}`);
   }
 
-  const empty = total === 0;
-  $('practiceEmpty').style.display = empty ? 'block' : 'none';
-  $('practiceBody').style.display = empty ? 'none' : 'block';
-  $('goalBar').style.display = (empty || pkMode) ? 'none' : 'block';
+  const noUnit = total === 0;
+  const show = !noUnit || redoActive();      /* 错题重做时，即使一个单元没选也要显示练习区 */
+  $('practiceEmpty').style.display = show ? 'none' : 'block';
+  $('practiceBody').style.display = show ? 'block' : 'none';
+  $('goalBar').style.display = (show && !pkMode) ? 'block' : 'none';
 }
 
 /* =========================================================
@@ -3442,6 +3567,7 @@ function handleTimeout() {
    错题 / 历史
    ========================================================= */
 function addWrongRecord(q, info) {
+  if (redoState) return;          /* 错题重做过程中不再重复记同一道题 */
   const p = q.problem;
   wrongBook.unshift({
     id: uid(),
@@ -3449,6 +3575,7 @@ function addWrongRecord(q, info) {
     wrongStep: info.stepIdx, wrongStepQ: plain(info.stepQ),
     wrongChoice: plain(info.wrongChoice), correctChoice: plain(info.correctChoice),
     correctAnswer: p.answer, ansUnit: p.unit,
+    problem: p,                   /* 整道题原样存下来，这样「重做这道题」能一字不差地重现 */
     timestamp: Date.now()
   });
   if (wrongBook.length > 60) wrongBook = wrongBook.slice(0, 60);
@@ -3477,6 +3604,7 @@ function renderWrongBadge() {
    ========================================================= */
 function renderAll() {
   syncUnitUI();
+  if (redoActive() && questions.length) { render(); return; }   /* 错题重做时只做这一道 */
   if (poolTemplates().length === 0) { stopTimer(); renderGoal(); return; }
   if (questions.length === 0) buildSession();
   if (current >= questions.length) current = questions.length - 1;
@@ -3493,6 +3621,11 @@ function render() {
   $('qtext').innerHTML = hl(p.text);
   renderFacts();
   renderPkRace();                 /* PK 显示竞速区，单人自动隐藏 */
+  /* 错题重做：显示提示条，并藏掉「换一题」（否则会绕过重做把错题删掉） */
+  const rb = $('redoBar');
+  if (rb) rb.classList.toggle('on', redoActive());
+  const cb = $('changeBtn');
+  if (cb) cb.style.display = redoActive() ? 'none' : '';
   if (pkMode) {
     renderPkBar();
     renderNav();
@@ -3632,7 +3765,10 @@ function renderNav() {
 function nextBtnHtml() {
   const isLast = current >= questions.length - 1;
   let label = '下一题 →', hint;
-  if (pkMode) {
+  if (redoActive()) {
+    label = '继续练习 →';
+    hint = redoState.done ? '这道错题已经移出错题本' : '答对这道题，它就会从错题本里消失';
+  } else if (pkMode) {
     const last = pkRound >= PK_ROUNDS;
     label = last ? '看结果 🏆' : '下一题 →';
     hint = last ? `${PK_ROUNDS} 题都答完啦，看看谁赢了` : `还剩 ${PK_ROUNDS - pkRound} 题`;
@@ -3662,6 +3798,7 @@ function mountNext() {
 function goNext() {
   if (pkMode) { pkNextRound(); return; }   /* PK 的推进交给竞速流程 */
   SFX.click();
+  if (redoActive()) { if (redoState.done) exitRedo(); return; }
   if (current < questions.length - 1) {
     current++;
   } else {
@@ -3814,6 +3951,19 @@ function finalizeCorrect(q) {
     st.recorded = true;
     addHistoryRecord(q, scoreVisible ? (st.hadWrong ? 30 : 50) : 0, !st.hadWrong, st.timeUsed);
   }
+  /* 错题重做答对了 → 把这道题从错题本里移出去 */
+  if (redoActive() && !redoState.done) {
+    redoState.done = true;
+    if (redoState.id) {
+      const had = wrongBook.some(r => r.id === redoState.id);
+      wrongBook = wrongBook.filter(r => r.id !== redoState.id);
+      LS.set('wrongBook', wrongBook);
+      renderWrongBadge();
+      if (had) setTimeout(() => toastMsg('🎉 这道错题已经移出错题本！'), 420);
+    } else {
+      setTimeout(() => toastMsg('🎉 同类题做对了，继续加油！'), 420);
+    }
+  }
   mountNext();
   renderNav();
   requestAnimationFrame(() => {
@@ -3874,7 +4024,7 @@ function updateBackBtn() {
     rafPending = false;
     const q = questions[current];
     const hidden = !factsBox || (q && q.problem.facts && q.problem.facts.length === 0);
-    if (!backBtn || hidden || currentTab !== 'practice' || selectedUnits.length === 0) {
+    if (!backBtn || hidden || currentTab !== 'practice' || (selectedUnits.length === 0 && !redoActive())) {
       if (backBtn) backBtn.classList.remove('show');
       return;
     }
@@ -3950,6 +4100,7 @@ $('emptyAll').addEventListener('click', () => {
   selectedUnits = UNITS.map(u => u.key);
   saveUnits(); SFX.click(); buildSession(); renderAll();
 });
+$('redoExit').addEventListener('click', () => { SFX.click(); exitRedo(); });
 
 /* ---- 上一题 / 下一题 ---- */
 $('prevBtn').addEventListener('click', () => {
@@ -4002,6 +4153,49 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 /* =========================================================
    错题本
    ========================================================= */
+/* =========================================================
+   错题重做
+   只做错的那一道（原样重现，连引导步骤和选项顺序都一样），
+   做对了就把它从错题本里移出去。
+   ========================================================= */
+let redoState = null;                  /* { id, kp, done }；id 为空表示老记录只能重做同类题 */
+function redoActive() { return !!redoState; }
+
+function startRedo(id) {
+  const rec = wrongBook.find(r => r.id === id);
+  if (!rec) return;
+  if (!rec.problem) { startRedoByKp(rec.kp); return; }   /* 老记录没存题目，退而重做同类题 */
+  redoState = { id: rec.id, kp: rec.kp, done: false };
+  questions = [{
+    tpl: { kp: rec.kp || '错题重做', unit: rec.topic || '' },
+    problem: rec.problem,
+    state: makeState(rec.problem)
+  }];
+  current = 0;
+  gotoPractice();
+}
+function startRedoByKp(kp) {
+  const tpl = problemTemplates.find(t => t.kp === kp);
+  if (!tpl) return;
+  redoState = { id: null, kp, done: false };
+  questions = [newQuestion(tpl)];
+  current = 0;
+  gotoPractice();
+}
+function gotoPractice() {
+  const btn = document.querySelector('.tab-btn[data-tab="practice"]');
+  if (btn) btn.click();
+  syncUnitUI();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function exitRedo() {
+  redoState = null;
+  buildSession();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function renderWrongBook() {
   const list = $('wrongList');
   if (!list) return;
@@ -4027,7 +4221,9 @@ function renderWrongBook() {
         <span>${r.wrongStep === 'answer' ? '答案 ' + r.correctChoice : stepLabel + ' · ' + r.correctChoice}</span>
       </div>
       <div class="record-actions">
-        <button class="practice" data-topic="${r.topic || ''}">🔄 练这个单元</button>
+        ${r.problem
+          ? `<button class="redo" data-redo="${r.id}">🔁 重做这道题</button>`
+          : `<button class="redo" data-redokp="${r.kp || ''}">🔁 重做同类题</button>`}
         <button data-remove="${r.id}">🗑 删除</button>
       </div>
     </div>`;
@@ -4042,16 +4238,11 @@ function renderWrongBook() {
       SFX.click();
     });
   });
-  list.querySelectorAll('[data-topic]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const k = btn.dataset.topic;
-      if (!k || !UNIT_MAP[k]) return;
-      selectedUnits = [k];
-      saveUnits();
-      buildSession();
-      SFX.click();
-      document.querySelector('.tab-btn[data-tab="practice"]').click();
-    });
+  list.querySelectorAll('[data-redo]').forEach(btn => {
+    btn.addEventListener('click', () => startRedo(btn.dataset.redo));
+  });
+  list.querySelectorAll('[data-redokp]').forEach(btn => {
+    btn.addEventListener('click', () => startRedoByKp(btn.dataset.redokp));
   });
 }
 
@@ -4260,8 +4451,8 @@ function pkCountdown() {
   let n = 3;
   const step = () => {
     if (!pkRace || pkRace.resolved) return;
-    if (n > 0) { pkToastMsg(String(n)); n--; setTimeout(step, 650); return; }
-    pkToastMsg('开始！');
+    if (n > 0) { toastMsg(String(n)); n--; setTimeout(step, 650); return; }
+    toastMsg('开始！');
     pkRace.live = true;
     pkRace.startedAt = Date.now();
     pkRace.endsAt = pkRace.startedAt + PK_LIMIT * 1000;
@@ -4410,7 +4601,7 @@ function renderPkStatus() {
     }
   });
 }
-function pkToastMsg(text) {
+function toastMsg(text) {
   const t = $('pkToast');
   if (!t) return;
   t.textContent = text;
