@@ -478,6 +478,11 @@ body{
   flex:1;min-width:150px;line-height:1.5;}
 .redo-bar .mini-btn{background:#fff;color:var(--pink-deep);
   box-shadow:0 3px 0 rgba(184,48,96,.16);flex:none;}
+/* 整卷提示条：同样的骨架，换个颜色跟「错题重做」区分开 */
+.paper-bar{background:linear-gradient(135deg,#EEF3FF,#F5EEFF);border-color:#C9D6F7;
+  box-shadow:0 4px 0 rgba(88,74,150,.14);}
+.paper-bar .redo-txt{color:#4B3A6B;}
+.paper-bar .mini-btn{color:#4B3A6B;box-shadow:0 3px 0 rgba(75,58,107,.16);}
 
 .stats-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .stat-box{flex:1;min-width:90px;padding:14px;background:#fff;border-radius:16px;
@@ -837,6 +842,11 @@ body{
         <span class="redo-txt">正在重做错题 · 答对后它就会从错题本里消失</span>
         <button class="mini-btn" id="redoExit">结束重做</button>
       </div>
+      <div class="redo-bar paper-bar" id="paperBar">
+        <span class="redo-ico">📄</span>
+        <span class="redo-txt" id="paperBarTxt">正在做整卷</span>
+        <button class="mini-btn" id="paperBarExit">退出整卷</button>
+      </div>
       <div class="card problem">
         <div class="meta">
           <span class="tag" id="tag"></span>
@@ -1085,14 +1095,15 @@ function S(q, correct, wrongs, extra) {
    单元（依据《小学学霸冲A卷·冀教版四年级上册》实测结构）
    ========================================================= */
 const UNITS = [
-  { key: '度量衡', name: '度量衡的故事', sub: '单位换算 · 古代计量', icon: '⚖️' },
-  { key: '除法', name: '第一单元 · 三位数除以两位数', sub: '试商 · 商的位数 · 余数', icon: '➗' },
-  { key: '图形', name: '第二单元 · 图形与几何', sub: '三角形 · 平行四边形 · 梯形', icon: '🔺' },
-  { key: '大数', name: '第三单元 · 认识更大的数', sub: '读写 · 改写 · 近似数', icon: '🔢' },
-  { key: '周长', name: '第四单元 · 周长', sub: '长方形 · 正方形 · 剪拼', icon: '📐' },
-  { key: '平均数', name: '第五单元 · 平均数', sub: '求平均 · 逆向 · 总量', icon: '📊' },
-  { key: '探索', name: '第六单元 · 探索乐园', sub: '植树 · 锯木 · 找规律', icon: '🧩' },
-  { key: '拓展', name: '拓展学习 · 指南针与方向', sub: '方向辨认 · 钟面方位 · 时间推算', icon: '🧭' }
+  /* short = 选择单元按钮上的短名，太长会把按钮撑开 */
+  { key: '度量衡', name: '度量衡的故事', short: '度量衡', sub: '单位换算 · 古代计量', icon: '⚖️' },
+  { key: '除法', name: '第一单元 · 三位数除以两位数', short: '第一单元', sub: '试商 · 商的位数 · 余数', icon: '➗' },
+  { key: '图形', name: '第二单元 · 图形与几何', short: '第二单元', sub: '三角形 · 平行四边形 · 梯形', icon: '🔺' },
+  { key: '大数', name: '第三单元 · 认识更大的数', short: '第三单元', sub: '读写 · 改写 · 近似数', icon: '🔢' },
+  { key: '周长', name: '第四单元 · 周长', short: '第四单元', sub: '长方形 · 正方形 · 剪拼', icon: '📐' },
+  { key: '平均数', name: '第五单元 · 平均数', short: '第五单元', sub: '求平均 · 逆向 · 总量', icon: '📊' },
+  { key: '探索', name: '第六单元 · 探索乐园', short: '第六单元', sub: '植树 · 锯木 · 找规律', icon: '🧩' },
+  { key: '拓展', name: '拓展学习 · 指南针与方向', short: '指南针', sub: '方向辨认 · 钟面方位 · 时间推算', icon: '🧭' }
 ];
 const UNIT_MAP = {};
 UNITS.forEach(u => { UNIT_MAP[u.key] = u; });
@@ -3881,6 +3892,7 @@ function renderUnitChips() {
   }).join('');
   wrap.querySelectorAll('[data-unit]').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (paperMode) exitPaper();          /* 去选单元就说明不做这套卷了 */
       const k = btn.dataset.unit;
       const i = selectedUnits.indexOf(k);
       if (i >= 0) selectedUnits.splice(i, 1);
@@ -3900,8 +3912,11 @@ function syncUnitUI() {
   let label;
   if (total === 0) label = '选择单元';
   else if (total === UNITS.length) label = '全部单元';
-  else if (total === 1) label = UNIT_MAP[selectedUnits[0]].name.replace(/^第[一二三四五六七八九]单元 · /, '');
-  else label = `已选 ${total} 个单元`;
+  else {
+    /* 短名，别把按钮撑开：第一单元 / 度量衡 / 指南针 */
+    const joined = selectedUnits.map(k => UNIT_MAP[k].short || UNIT_MAP[k].name).join('、');
+    label = joined.length <= 16 ? joined : `已选 ${total} 个单元`;
+  }
   $('unitLabel').textContent = label;
 
   document.querySelectorAll('#unitChips [data-unit]').forEach(btn => {
@@ -4089,6 +4104,18 @@ function renderWrongBadge() {
 /* =========================================================
    渲染
    ========================================================= */
+/* 整卷提示条：整卷中途要有出口，不能只在交卷面板上给退出。
+   单独抽出来是因为 renderAll() 在「没选单元」时会提前 return，那次 render() 不会跑。 */
+function syncPaperBar() {
+  const pb = $('paperBar');
+  if (!pb) return;
+  pb.classList.toggle('on', !!paperMode);
+  const pt = $('paperBarTxt');
+  if (pt && paperMode) {
+    pt.textContent = `正在做整卷：${paperMode.name} · 共 ${paperMode.total} 题，做完自动交卷`;
+  }
+}
+
 function renderAll() {
   syncUnitUI();
   if (redoActive() && questions.length) { render(); return; }   /* 错题重做时只做这一道 */
@@ -4111,6 +4138,7 @@ function render() {
   /* 错题重做：显示提示条，并藏掉「换一题」（否则会绕过重做把错题删掉） */
   const rb = $('redoBar');
   if (rb) rb.classList.toggle('on', redoActive());
+  syncPaperBar();
   const cb = $('changeBtn');
   if (cb) cb.style.display = (redoActive() || paperMode) ? 'none' : '';   /* 整卷不能换题 */
   if (pkMode) {
@@ -4572,10 +4600,12 @@ function toggleUnitPanel(force) {
 }
 $('unitToggle').addEventListener('click', () => { SFX.click(); toggleUnitPanel(); });
 $('unitAll').addEventListener('click', () => {
+    if (paperMode) exitPaper();
   selectedUnits = UNITS.map(u => u.key);
   saveUnits(); SFX.click(); buildSession(); renderAll();
 });
 $('unitNone').addEventListener('click', () => {
+  if (paperMode) exitPaper();
   selectedUnits = [];
   saveUnits(); SFX.click(); buildSession(); renderAll();
 });
@@ -5324,6 +5354,7 @@ function startPaper(spec) {
   $('paperResultMask').classList.remove('on');
   goPracticeTab();
   renderUnitChips();
+  syncPaperBar();
   buildSession();
   renderAll();
   toastMsg(`开始做「${spec.name}」，一共 ${spec.total} 道题`);
@@ -5336,6 +5367,7 @@ function exitPaper() {
   score = 0; combo = 0; perfectCount = 0;
   ['scoreValue', 'comboValue', 'perfectValue'].forEach(id => { const el = $(id); if (el) el.textContent = '0'; });
   $('paperResultMask').classList.remove('on');
+  syncPaperBar();
   buildSession();
   renderAll();
   toastMsg('已退出整卷，回到单元练习');
@@ -5368,6 +5400,7 @@ $('paperClose').addEventListener('click', closePaperPicker);
 $('paperMask').addEventListener('click', e => { if (e.target === $('paperMask')) closePaperPicker(); });
 $('paperAgain').addEventListener('click', () => startPaper(paperLastSpec || PAPER_SPECS[0]));
 $('paperExit').addEventListener('click', exitPaper);
+$('paperBarExit').addEventListener('click', () => { SFX.click(); exitPaper(); });
 
 /* =========================================================
    启动
