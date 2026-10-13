@@ -66,6 +66,30 @@ body{
   padding:0 5px;margin-left:3px;background:var(--pink);color:#fff;
   font-size:11px;font-weight:900;border-radius:10px;line-height:19px;text-align:center;}
 .tab-btn.active .badge{background:#fff;color:var(--purple);}
+/* 蓝角标 = 历史累计错过（永久记录，和待重做的红角标区分开） */
+.tab-btn .badge.blue{background:linear-gradient(135deg,#7FB8F5,#4A87D8);}
+.tab-btn.active .badge.blue{background:#DCEBFF;color:#2A6CB0;}
+
+/* ============ 历史错题（默认收起，不抢待重做列表的位置） ============ */
+.hist-card{margin-top:16px;border-radius:18px;background:#F6F8FF;border:2px solid #D9E2F7;}
+.hist-head{display:flex;align-items:center;gap:8px;width:100%;min-height:48px;
+  padding:10px 14px;border:none;background:transparent;cursor:pointer;font-family:inherit;text-align:left;}
+.hist-title{font-size:15px;font-weight:900;color:#3F5590;flex:none;}
+.hist-sum{font-size:12.5px;font-weight:700;color:#6B7FB0;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hist-caret{color:#6B7FB0;font-weight:900;flex:none;transition:transform .2s;}
+.hist-card.open .hist-caret{transform:rotate(180deg);}
+.hist-body{display:none;padding:0 14px 10px;}
+.hist-card.open .hist-body{display:block;}
+.hist-row{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-top:1px dashed #DDE5F5;}
+.hist-row:first-child{border-top:none;}
+.hist-kp{flex:none;font-size:12px;font-weight:800;color:#3F5590;background:#E6EDFF;
+  border-radius:99px;padding:2px 8px;}
+.hist-q{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13px;font-weight:700;color:#5A6584;}
+.hist-q b{color:#3F5590;}
+.hist-times{flex:none;font-size:12px;font-weight:700;color:#8592B5;}
+.hist-more{padding:8px 0 0;font-size:12px;font-weight:700;color:#8592B5;}
 
 /* ============ 计分条 ============ */
 .score-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;
@@ -727,7 +751,7 @@ body{
 
   <div class="tab-nav">
     <button class="tab-btn active" data-tab="practice">📚 练习</button>
-    <button class="tab-btn" data-tab="wrong">📕 错题本 <span class="badge" id="wrongBadge">0</span></button>
+    <button class="tab-btn" data-tab="wrong">📕 错题本<span class="badge" id="wrongBadge" title="待重做：答对就会消掉">0</span><span class="badge blue" id="wrongLogBadge" title="历史累计错过：不会消失">0</span></button>
     <button class="tab-btn" data-tab="history">📊 历史</button>
   </div>
 
@@ -905,6 +929,14 @@ body{
       <button class="mini-btn danger" id="clearWrong">🗑 清空</button>
     </div>
     <div id="wrongList"></div>
+    <div class="hist-card" id="histCard">
+      <button class="hist-head" id="histHead">
+        <span class="hist-title">🗂 历史错题</span>
+        <span class="hist-sum" id="histSum"></span>
+        <span class="hist-caret">▾</span>
+      </button>
+      <div class="hist-body" id="histBody"></div>
+    </div>
   </div>
 
   <div id="page-history" style="display:none">
@@ -3781,6 +3813,9 @@ let tplQueue = [];
 const seenFingerprints = new Set();
 
 let wrongBook = LS.get('wrongBook', []);
+/* 历史错题：题目粒度、永久保留。删错题 / 清空错题本都动不到它，
+   所以「这孩子哪些地方错过」这件事不会因为答对重做就丢掉。 */
+let wrongLog = LS.get('wrongLog', []);
 let history = LS.get('history', []);
 
 const plain = t => String(t).replace(/<[^>]*>/g, '');
@@ -3824,7 +3859,8 @@ function makeState(problem) {
     timedOut: false,
     recorded: false,
     timeUsed: 0,
-    wrongAnswerRecorded: false
+    wrongAnswerRecorded: false,
+    wrongLogged: false        /* 历史错题按「题目」粒度入账，一道题只记一次 */
   };
 }
 
@@ -4068,7 +4104,30 @@ function handleTimeout() {
 /* =========================================================
    错题 / 历史
    ========================================================= */
+/* 历史错题入账：一道题只记一次（不管错了哪一步、错了几次），永久保留 */
+function logWrongQuestion(q) {
+  const st = q.state;
+  if (st && st.wrongLogged) return;
+  if (st) st.wrongLogged = true;
+  const p = q.problem;
+  const qtext = plain(p.text);
+  const key = q.tpl.kp + '|' + qtext;
+  const now = Date.now();
+  const hit = wrongLog.find(r => r.key === key);
+  if (hit) { hit.count += 1; hit.last = now; }
+  else {
+    wrongLog.unshift({
+      key, kp: q.tpl.kp, topic: q.tpl.unit, qtag: p.tag,
+      qtext, count: 1, first: now, last: now
+    });
+  }
+  if (wrongLog.length > 200) wrongLog = wrongLog.slice(0, 200);
+  LS.set('wrongLog', wrongLog);
+  renderWrongBadge();
+}
+
 function addWrongRecord(q, info) {
+  logWrongQuestion(q);            /* 先入历史账，再做「待重做」那份 */
   if (redoState) return;          /* 错题重做过程中不再重复记同一道题 */
   const p = q.problem;
   wrongBook.unshift({
@@ -4098,7 +4157,15 @@ function addHistoryRecord(q, pts, perfect, timeUsed) {
 }
 function renderWrongBadge() {
   const b = $('wrongBadge');
-  if (b) b.textContent = wrongBook.length;
+  if (b) {
+    b.textContent = wrongBook.length;
+    b.title = `待重做 ${wrongBook.length} 题（答对就会消掉）`;
+  }
+  const lb = $('wrongLogBadge');
+  if (lb) {
+    lb.textContent = wrongLog.length;
+    lb.title = `历史累计错过 ${wrongLog.length} 题（不会消失）`;
+  }
 }
 
 /* =========================================================
@@ -4709,10 +4776,13 @@ function renderWrongBook() {
   const list = $('wrongList');
   if (!list) return;
   if (wrongBook.length === 0) {
-    list.innerHTML = `<div class="empty-state">
+    /* 待重做的清空了，但历史错题还在 —— 别写成「还没有错题」自相矛盾 */
+    list.innerHTML = wrongLog.length
+      ? `<div class="empty-state">
+      <span class="em-icon">🎉</span>待重做的错题已经清空啦<br>下面是累计错过的记录</div>`
+      : `<div class="empty-state">
       <span class="em-icon">🎉</span>还没有错题<br>继续加油，保持这个好状态！</div>`;
-    return;
-  }
+  } else {
   list.innerHTML = wrongBook.map(r => {
     const stepLabel = r.wrongStep === 'answer' ? '最终答案' : `第 ${r.wrongStep} 步`;
     return `<div class="record-card wrong">
@@ -4748,10 +4818,33 @@ function renderWrongBook() {
         LS.set('wrongBook', wrongBook);
         renderWrongBadge();
         renderWrongBook();
-        toastMsg('已删除这条错题');
+        toastMsg('已删除这条错题（历史错题里还留着记录）');
       });
     });
   });
+  }
+
+  renderWrongLog();
+}
+
+/* 历史错题卡片：只在有记录时显示，默认收起 */
+function renderWrongLog() {
+  const card = $('histCard'), sum = $('histSum'), body = $('histBody');
+  if (!card) return;
+  if (wrongLog.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const kps = new Set(wrongLog.map(r => r.kp));
+  const times = wrongLog.reduce((a, r) => a + r.count, 0);
+  sum.textContent = `累计错过 ${wrongLog.length} 题 · ${kps.size} 个知识点 · 共错 ${times} 次`;
+  const shown = wrongLog.slice(0, 12);
+  body.innerHTML = shown.map(r => `
+    <div class="hist-row">
+      <span class="hist-kp">${r.kp}</span>
+      <span class="hist-q">${hl(r.qtext)}</span>
+      <span class="hist-times">${r.count > 1 ? '错 ' + r.count + ' 次 · ' : ''}${fmtTime(r.last)}</span>
+    </div>`).join('') +
+    (wrongLog.length > shown.length
+      ? `<div class="hist-more">还有 ${wrongLog.length - shown.length} 条更早的记录…</div>` : '');
 }
 
 /* =========================================================
@@ -4807,6 +4900,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && $('adminModal').classList.contains('on')) closeAdmin();
 });
 
+$('histHead').addEventListener('click', () => {
+  SFX.click();
+  $('histCard').classList.toggle('open');
+});
+
 $('clearWrong').addEventListener('click', () => {
   if (wrongBook.length === 0) { toastMsg('错题本已经是空的'); return; }
   askAdmin(() => {
@@ -4814,7 +4912,7 @@ $('clearWrong').addEventListener('click', () => {
     LS.set('wrongBook', wrongBook);
     renderWrongBadge();
     renderWrongBook();
-    toastMsg('错题本已清空');
+    toastMsg(wrongLog.length ? `错题本已清空（历史错题里的 ${wrongLog.length} 题记录还留着）` : '错题本已清空');
   });
 });
 
