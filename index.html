@@ -670,6 +670,46 @@ body{
 [data-perf="low"] .record-card{box-shadow:0 3px 0 rgba(124,92,255,.07);}
 [data-perf="low"] .problem::before{background:#A78BFA;}
 </style>
+<style>
+    /* ===== 整卷模式 ===== */
+    .paper-mask {
+      position: fixed; inset: 0; z-index: 900; display: none;
+      align-items: center; justify-content: center; padding: 16px;
+      background: rgba(58, 44, 88, .48);
+    }
+    .paper-mask.on { display: flex; }
+    .paper-card {
+      width: min(560px, 100%); max-height: 88vh; display: flex; flex-direction: column;
+      overflow: hidden;
+      background: #fff; border-radius: 22px; padding: 20px 20px 16px;
+      box-shadow: 0 24px 60px rgba(58, 40, 88, .32);
+    }
+    .paper-card h3 { margin: 0 0 6px; font-size: 19px; font-weight: 900; color: #4B3A6B; }
+    .paper-sub { margin: 0 0 14px; font-size: 13px; line-height: 1.75; font-weight: 600; color: #7A6E92; }
+    /* 卷型列表自己滚动：标题和「关闭」始终留在视野里，不用先滚到底才能关 */
+    .paper-list {
+      display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px;
+      flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+    .paper-item {
+      display: flex; flex-direction: column; gap: 3px; text-align: left; cursor: pointer;
+      min-height: 52px; padding: 10px 14px; border-radius: 14px; font-family: inherit;
+      background: #F7F4FE; border: 1.5px solid #E3DBF7; transition: background .16s, border-color .16s, transform .16s;
+    }
+    .paper-item:hover { background: #EFE8FE; border-color: #C9B8F0; transform: translateY(-1px); }
+    .paper-item-name { font-size: 15px; font-weight: 800; color: #4B3A6B; }
+    .paper-item-sub { font-size: 12px; font-weight: 600; color: #8B7FD0; }
+    .paper-big { font-size: 34px; font-weight: 900; color: #4B3A6B; text-align: center; margin: 8px 0 2px; }
+    .paper-pct { font-size: 16px; font-weight: 800; text-align: center; color: #7A5FC0; margin-bottom: 10px; }
+    .paper-pct b { font-size: 22px; color: #8B5FC0; }
+    .paper-note { font-size: 13px; line-height: 1.8; font-weight: 600; color: #7A6E92; text-align: center; }
+    .paper-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .paper-actions .mini-btn { flex: 1 1 0; min-height: 46px; }
+    @media (max-width: 480px) {
+      .paper-card { padding: 16px 14px 12px; }
+      .paper-item { min-height: 50px; }
+    }
+    </style>
 </head>
 <body data-perf="high">
 <div class="wrap">
@@ -715,6 +755,7 @@ body{
         <span class="unit-caret">▾</span>
       </button>
       <div class="tool-actions">
+        <button class="pk-btn" id="paperBtn" title="整卷练习">📄</button>
         <button class="pk-btn" id="pkToggle" title="双人PK">🎮</button>
         <button class="sound-btn" id="soundToggle" title="音效开关">🔊</button>
         <button class="timer-btn" id="timerToggle" title="计时开关">⏱</button>
@@ -730,6 +771,27 @@ body{
       </div>
       <div class="unit-chips" id="unitChips"></div>
       <div class="unit-summary" id="unitSummary"></div>
+    </div>
+
+    <!-- 整卷：选一套卷，做完再给分 -->
+    <div class="paper-mask" id="paperMask">
+      <div class="paper-card">
+        <h3>📄 整卷练习</h3>
+        <p class="paper-sub">照素养达标卷的题型配比组一套，一次做完再给分。做卷过程中不能换题，做错了可以一直改到对。</p>
+        <div class="paper-list" id="paperList"></div>
+        <button class="mini-btn ghost" id="paperClose">关闭</button>
+      </div>
+    </div>
+
+    <div class="paper-mask" id="paperResultMask">
+      <div class="paper-card">
+        <h3 id="paperResultTitle">📄 交卷啦</h3>
+        <div id="paperResultBody"></div>
+        <div class="paper-actions">
+          <button class="mini-btn primary" id="paperAgain">🔁 再来一套</button>
+          <button class="mini-btn ghost" id="paperExit">退出整卷</button>
+        </div>
+      </div>
     </div>
 
     <div class="pk-bar" id="pkBar">
@@ -748,7 +810,7 @@ body{
 
     <div class="goal-bar" id="goalBar">
       <div class="goal-line">
-        <span>🎯 本轮目标</span>
+        <span id="goalLabel">🎯 本轮目标</span>
         <span class="goal-num" id="goalNum">0 / 10 题</span>
       </div>
       <div class="goal-track"><div class="goal-fill" id="goalFill"></div></div>
@@ -1029,7 +1091,8 @@ const UNITS = [
   { key: '大数', name: '第三单元 · 认识更大的数', sub: '读写 · 改写 · 近似数', icon: '🔢' },
   { key: '周长', name: '第四单元 · 周长', sub: '长方形 · 正方形 · 剪拼', icon: '📐' },
   { key: '平均数', name: '第五单元 · 平均数', sub: '求平均 · 逆向 · 总量', icon: '📊' },
-  { key: '探索', name: '第六单元 · 探索乐园', sub: '植树 · 锯木 · 找规律', icon: '🧩' }
+  { key: '探索', name: '第六单元 · 探索乐园', sub: '植树 · 锯木 · 找规律', icon: '🧩' },
+  { key: '拓展', name: '拓展学习 · 指南针与方向', sub: '方向辨认 · 钟面方位 · 时间推算', icon: '🧭' }
 ];
 const UNIT_MAP = {};
 UNITS.forEach(u => { UNIT_MAP[u.key] = u; });
@@ -3306,6 +3369,377 @@ const problemTemplates = [
     };
   }
 }
+,
+
+/* =========================================================
+   2026 秋新课程 · 补齐课件有、工具缺的知识点
+   依据《新课程学习与测评·数学四年级上册（河北教育版）》2026 秋课件整理：
+     除法 · 除法验算（第 9 课时）
+     除法 · 把接近 25 的数看作 25 试商（第 5 课时）
+     图形 · 平行四边形的对边（第 5 课时）
+     图形 · 组合图形拼组（第 7、8 课时）
+     大数 · 数的大小比较（第 2 课时）
+     大数 · 计算器（第 6 课时）
+     度量衡 · 成语里的古代单位（第 3、4 课时）
+     平均数 · 去掉最高分和最低分（期末复习 · 解决问题）
+     拓展 · 指南针与钟面方位（拓展学习 第 1、2 课时）
+     拓展 · 假期实践·时间推算（拓展学习 第 2 课时）
+   写法沿用上面的约定：步骤只给「想什么、用哪个算式」，最终答案一律留给答题框；
+   步骤正确项是纯数字时，那个数不出现在本步题干，也不出现在上一步解析的「=」后面。
+   ========================================================= */
+
+/* 除法验算：被除数 = 商 × 除数 + 余数 */
+{
+  unit: '除法', kp: '除法验算',
+  gen() {
+    const b = pick([12, 13, 14, 15, 16, 17, 18, 21, 23, 24]);
+    const q = randInt(11, 39);
+    const r = randInt(1, b - 1);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 除法验算',
+      text: `${SC} 做一道除法，算出的商是 ${q}，除数是 ${b}，余数是 ${r}。做完要用「被除数 = 商 × 除数 + 余数」验算一遍。按这个关系算出来的被除数是多少？`,
+      facts: [`商 = ${q}`, `除数 = ${b}`, `余数 = ${r}`],
+      steps: [
+        S2('验算的时候，先用哪两个数相乘？', '商 × 除数',
+          ['商 ÷ 除数', '商 + 除数', '商 − 除数'],
+          { ok: '对！先算商乘除数。', no: '关系式是「被除数 = 商 × 除数 + 余数」，开头就是商乘除数。' }),
+        S2('乘完之后，还要再加上哪个数？', '余数',
+          ['除数', '商', '再乘一次商'],
+          { ok: '对！最后把余数加上。', no: '关系式最后是「+ 余数」，别把它漏掉。' }),
+        S2('把这两步写成一个算式，是哪一个？', `${q} × ${b} + ${r}`,
+          [`${q} × ${b} − ${r}`, `${q} + ${b} + ${r}`, `${b} × ${r} + ${q}`],
+          { ok: '对！就是它。算出结果填进下面的框吧！', no: '先乘后加，别把余数写成减。' })
+      ],
+      answer: q * b + r, unit: '',
+      praise: '你会用「商 × 除数 + 余数」验算除法了！',
+      wrongTip: `按「${q} × ${b} + ${r}」算：先乘出积，再把余数加上。`
+    };
+  }
+},
+
+/* 把接近 25 的数看作 25 试商 */
+{
+  unit: '除法', kp: '看作25试商',
+  gen() {
+    const b = pick([23, 24, 26, 27]);
+    const maxQ = Math.floor(999 / b);
+    let q = randInt(11, maxQ);
+    if (q === 25) q = 24;          /* 题干里会出现「25」，商不能撞上它 */
+    if (q === b) q = b - 1;
+    const a = b * q;               /* 正好除尽，三位数除以两位数 */
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 看作25试商',
+      text: `${SC} 要计算 ${a} ÷ ${b}，它正好能除尽。因为除数 ${b} 很接近 25，可以把它看作 25 来试商。请算出这道题的商。`,
+      facts: [`被除数 = ${a}`, `除数 = ${b}`, '除数接近 25，可以用 25 试商'],
+      steps: [
+        S2(`除数是 ${b}，为什么把它看作 25 来试商？`,
+          '因为 25 × 4 = 100，用 25 试商口算最方便',
+          ['因为 25 就是这道题的除数', '因为 25 比除数大', '因为 25 是最小的整十数'],
+          { ok: '对！试商要找乘起来好算的数，25 乘 4 正好是 100。', no: '试商就是找一个口算方便的数去乘，25 和 4 相乘正好凑成 100。' }),
+        S2('试出来的商，怎么判断合不合适？', '把商和除数相乘，再和被除数比一比',
+          ['看被除数的末尾是几', '数一数被除数有几位', '把商和除数加起来比一比'],
+          { ok: '对！商乘除数，和被除数比，大了调小、小了调大。', no: '试商就是「乘一乘、比一比」，大了调小、小了调大。' }),
+        S2('最后怎么检验答案对不对？', '商 × 除数，看是不是等于被除数',
+          ['商 + 除数，看是不是等于被除数', '商 ÷ 除数，看是不是等于被除数', '被除数 − 商，看是不是等于除数'],
+          { ok: '对！这道题正好除尽，商乘除数应该等于被除数。', no: '除尽的题，商乘除数就等于被除数。' })
+      ],
+      answer: q, unit: '',
+      praise: '你会用「看作 25」的办法试商，还会自己调商！',
+      wrongTip: '把除数看成 25 试出一个商，再用「商 × 除数」和被除数比一比，大了调小、小了调大。'
+    };
+  }
+},
+
+/* 平行四边形的对边：周长 ÷ 2 − 已知边 */
+{
+  unit: '图形', kp: '平行四边形的对边',
+  gen() {
+    const a = randInt(6, 15);
+    const b = randInt(3, 5);
+    const P = 2 * (a + b);
+    const SC = pick(SC_NAME);
+    const half = a + b;
+    return {
+      tag: '四上 · 平行四边形',
+      text: `${SC} 量的一个平行四边形花坛，周长是 ${P} 米，其中一条边长 ${a} 米。与它相邻的那条边长多少米？`,
+      facts: [`周长 = ${P} 米`, `一条边 = ${a} 米`, '平行四边形的对边相等'],
+      steps: [
+        S2('平行四边形的对边有什么关系？', '对边平行，而且长度相等',
+          ['四条边一样长', '只有一组对边相等', '对边互相垂直'],
+          { ok: '对！平行四边形的对边平行且相等。', no: '平行四边形两组对边分别平行，而且长度相等。' }),
+        S2('周长是四条边的和。相邻两条边的和是多少？', half, numWrongs(half),
+          { ok: '对！相邻两条边各有两条，正好是周长的一半。', no: '四条边里，相邻两条各出现两次，所以相邻两条的和是周长的一半。' }),
+        S2('已经知道相邻两条边的和，又知道其中一条，怎么求另一条？', '用和减去已知的那条边',
+          ['用和加上已知的那条边', '用和乘已知的那条边', '用已知的那条边减去和'],
+          { ok: '对！和减去一条，剩下的就是另一条。算出结果填进下面的框吧！', no: '两条边合起来是那个和，去掉已知的一条，剩下的就是要求的边。' })
+      ],
+      answer: b, unit: '米',
+      praise: '你用「对边相等」和周长，求出了不知道的那条边！',
+      wrongTip: `先算 ${P} ÷ 2 得到相邻两条边的和，再用它减去已知的那条边。`
+    };
+  }
+},
+
+/* 组合图形拼组：两个一样的长方形拼成大长方形，周长最长多少 */
+{
+  unit: '图形', kp: '组合图形拼组',
+  gen() {
+    const a = randInt(5, 9);          /* 长 */
+    const b = randInt(2, 4);          /* 宽，恒小于长 */
+    const pBig = 2 * (2 * a + b);     /* 两条长边拼在一起 → 周长最长 */
+    const pSmall = 2 * (a + 2 * b);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 组合图形',
+      text: `${SC} 用两个完全一样的长方形纸片拼图形，每个纸片长 ${a} 厘米、宽 ${b} 厘米。拼成大长方形后，周长最长是多少厘米？`,
+      facts: [`每个长方形：长 ${a} 厘米，宽 ${b} 厘米`, '两个完全一样的长方形'],
+      steps: [
+        S2('两个完全一样的长方形拼在一起，有几种拼法？', '两种：把两条长边拼在一起，或者把两条宽边拼在一起',
+          ['一种，只能把长边拼在一起', '三种，还能斜着拼成梯形', '四种，四个方向各拼一次'],
+          { ok: '对！两条长边拼在一起，或者两条宽边拼在一起，一共两种。', no: '完全一样的长方形只差一条边能对上，两条长边拼、两条宽边拼，就是两种。' }),
+        S2('要让拼成的大长方形周长最长，应该选哪种拼法？', '把两条宽边拼在一起，让大长方形的长变成两条长边的和',
+          ['把两条长边拼在一起，让宽变成两条宽边的和', '随便哪种都行，周长一样', '两种都拼一次，取平均'],
+          { ok: '对！短边拼在一起，长边才会变成两条长边那么长。', no: '周长要最长，就让大长方形的长尽量长，所以把两条短边拼在一起。' }),
+        S2('大长方形的周长怎么求？', '长是两条长边的和，宽不变，再用（长 + 宽）× 2',
+          ['长不变，宽是两条宽边的和，再用（长 + 宽）× 2', '把两个长方形的周长加起来', '把两个长方形的周长加起来再减 2'],
+          { ok: '对！先定长和宽，再用周长公式算。填进下面的框吧！', no: '先看拼完以后长和宽各是多少，再用长方形周长公式。' })
+      ],
+      answer: pBig, unit: '厘米',
+      praise: '你想清楚了拼法对周长的影响！',
+      wrongTip: `把两条宽边拼在一起，长就变成 ${a} + ${a}，宽还是 ${b}，再用（长 + 宽）× 2。`
+    };
+  }
+},
+
+/* 数的大小比较：□ 里最大 / 最小能填几 */
+{
+  unit: '大数', kp: '数的大小比较',
+  gen() {
+    const X = randInt(21, 89);            /* 两位前缀 */
+    const d = randInt(1, 8);              /* 要填的数字 */
+    const askMax = pick([true, false]);
+    const T = askMax ? X * 10 + d + 1 : X * 10 + d - 1;
+    const SC = pick(SC_NAME);
+    const rel = askMax ? '<' : '>';
+    const word = askMax ? '最大' : '最小';
+    return {
+      tag: '四上 · 数的大小比较',
+      text: `${SC} 在 ${X}□ 的方框里填一个数字，要使 ${X}□ ${rel} ${T} 成立。方框里${word}能填几？`,
+      facts: [`要比较的数是 ${X}□（方框是一个数字）`, `目标数 = ${T}`],
+      steps: [
+        S2('比较两个数的大小时，应该从哪一位开始比？', '从最高位比起',
+          ['从最低位比起', '从个位比起', '把每一位上的数加起来再比'],
+          { ok: '对！位数相同的两个数，从最高位一位一位比。', no: '位数相同，就从最高位开始比，谁的高位大谁就大。' }),
+        S2(`要让 ${X}□ 比目标数小，前面相同的那几位还用不用再比？`, '不用了，只要定最后一位',
+          ['还要一位一位重新比一遍', '要把每一位都改掉', '要把两个数都倒过来比'],
+          { ok: '对！前面几位已经一样了，就看最后一位。', no: '前面几位完全相同，大小的差别只落在最后一位上。' }),
+        S2('最后一位要怎么定？', '在能填的数字里挑最靠边的那个，同时还要让式子成立',
+          ['随便填一个数字都行', '填一个比目标数大的数字', '把方框空着不填'],
+          { ok: '对！先把能填的都试一遍，再挑最大或最小的那个。', no: '能填的数字有范围，找出范围里最靠边的那一个，就是答案。' })
+      ],
+      answer: d, unit: '',
+      praise: '你会从最高位比起，找准方框里能填的数！',
+      wrongTip: `前面几位跟目标数一样，只要让最后一位尽量${word}，同时保证 ${X}□ ${rel} ${T} 还成立。`
+    };
+  }
+},
+
+/* 计算器：连续按键时屏幕上接着算的是什么 */
+{
+  unit: '大数', kp: '计算器的连续运算',
+  gen() {
+    const a = randInt(120, 980);
+    const b = randInt(110, 890);
+    const s = a + b;
+    const c = pick([12, 15, 18, 21, 24, 25]);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 计算器',
+      text: `${SC} 用计算器算题：先依次按 ${a}、+、${b}、=，屏幕上出现一个数；接着不按清屏键，直接按 ×、${c}、=。最后屏幕上显示的数是多少？`,
+      facts: ['先算加法，屏幕上的数就变成了和', '接着不按清屏键，直接乘'],
+      steps: [
+        S2(`按完 ${a} + ${b} = 之后，屏幕上显示的是什么？`, s, numWrongs(s),
+          { ok: `对！${a} + ${b} = ${s}，屏幕上就是这个和。`, no: `把 ${a} 和 ${b} 加起来，就是屏幕上显示的数。` }),
+        S2(`接着按 × ${c} =，计算器会把屏幕上的数当成什么？`, '当成乘法的第一个数，再乘后面按进去的数',
+          ['当成加法的第一个数', '当成除法的除数', '当成减法的结果'],
+          { ok: '对！屏幕上的数会留在那里，作为下一步运算的第一个数。', no: '不按清屏键，屏幕上的数就一直留着，接着参与下一次运算。' }),
+        S2('连续按键的时候，最要注意什么？', '看清屏幕上现在是多少，再决定下一步按什么',
+          ['按得越快越好，不用看屏幕', '每一步都要先按清屏键', '把每个数都按两遍'],
+          { ok: '对！先看屏幕上的数，再想下一步要做什么。', no: '连续运算时屏幕上的数就是下一步要用的数，先看清再按。' })
+      ],
+      answer: s * c, unit: '',
+      praise: '你看懂了计算器的连续运算：屏幕上的数会接着参与下一步！',
+      wrongTip: `先按出 ${a} + ${b} 的和，再把屏幕上的这个和直接乘 ${c}。`
+    };
+  }
+},
+
+/* 度量衡：成语里的古代单位（两步单位链） */
+{
+  unit: '度量衡', kp: '成语里的古代单位',
+  gen() {
+    const which = randInt(0, 2);
+    const SC = pick(SC_NAME);
+    const k = randInt(2, 6);
+    let idiom, u1, u2, big, ask, answer, unit, tip, convAsk, convOk, convWrongs, convNo;
+    if (which === 0) {
+      idiom = '退避三舍'; u1 = '舍'; u2 = '里';
+      big = '千米';
+      ask = `行军时退让 ${k} 舍，一共是多少千米？`;
+      answer = k * 15; unit = '千米';
+      tip = `先算 1 舍 = 30 × 500 米，再乘 ${k}，最后换成千米。`;
+      convAsk = '算出来的单位是米，题目要的是千米，该怎么办？';
+      convOk = '把得数除以 1000'; convWrongs = ['把得数乘 1000', '把得数加上 1000', '米和千米读法一样，不用换'];
+      convNo = '米换千米，数字会变小，所以要除以 1000。';
+    } else if (which === 1) {
+      idiom = '千钧一发'; u1 = '钧'; u2 = '斤';
+      big = '千克';
+      ask = `${k} 钧合多少千克？`;
+      answer = k * 15; unit = '千克';
+      tip = `先算 1 钧 = 30 × 500 克，再乘 ${k}，最后换成千克。`;
+      convAsk = '算出来的单位是克，题目要的是千克，该怎么办？';
+      convOk = '把得数除以 1000'; convWrongs = ['把得数乘 1000', '把得数加上 1000', '克和千克读法一样，不用换'];
+      convNo = '克换千克，数字会变小，所以要除以 1000。';
+    } else {
+      idiom = '才高八斗'; u1 = '斗'; u2 = '升';
+      big = '毫升';
+      ask = `${k} 斗合多少毫升？`;
+      answer = k * 10000; unit = '毫升';
+      tip = `先算 1 斗 = 10 × 1000 毫升，再乘 ${k}。`;
+      convAsk = '算出来的单位是升，题目要的是毫升，该怎么办？';
+      convOk = '把得数乘 1000'; convWrongs = ['把得数除以 1000', '把得数加上 1000', '升和毫升读法一样，不用换'];
+      convNo = '升换毫升，数字会变大，所以要乘 1000。';
+    }
+    return {
+      tag: '四上 · 成语里的度量衡',
+      text: `“${idiom}”里藏着古代的单位：一${u1}里有几个${u2}、一个${u2}又是多少，都要算一遍。${SC} 想知道：${ask}`,
+      facts: [`古代用「${u1}」「${u2}」作单位`, '先把一层的换算算清楚，再乘个数'],
+      steps: [
+        S2(`要把「一${u1}」换成现在的单位，先做什么？`,
+          `先用「一${u1}」里的${u2}数，乘一个${u2}等于多少`,
+          [`把「一${u1}」里的数减去「${u2}」的数`, `把「一${u1}」里的数除以「${u2}」的数`, `直接把「一${u1}」的数当成答案`],
+          { ok: '对！先把两层单位合起来算，才知道一个古代单位等于多少。', no: `要换两次：先看一${u1}里有几个${u2}，再看一个${u2}等于多少。` }),
+        S2(convAsk, convOk, convWrongs,
+          { ok: '对！单位变小数字就变大，单位变大数字就变小。', no: convNo }),
+        S2('最后求好几个这样的量合起来，用什么方法？', '把一个单位的大小乘上个数',
+          ['把一个单位的大小除以个数', '把一个单位的大小加上个数', '把个数直接当答案'],
+          { ok: '对！先算一个单位有多少，再乘个数。算出结果填进下面的框吧！', no: '求几个相同的量合起来，用乘法。' })
+      ],
+      answer, unit,
+      praise: '你能把成语里的古代单位换算成现代单位！',
+      wrongTip: tip
+    };
+  }
+},
+
+/* 平均数：去掉一个最高分和一个最低分 */
+{
+  unit: '平均数', kp: '去掉最高最低分',
+  gen() {
+    const avg = randInt(80, 93);
+    const k = pick([4, 5, 6]);                  /* 剩下多少位评委 */
+    const offs = [];
+    if (k % 2 === 1) offs.push(0);
+    for (let i = 0; i < Math.floor(k / 2); i++) {
+      const d = randInt(1, 3);
+      offs.push(d, -d);
+    }
+    const rest = shuffleAll(offs).map(o => avg + o);
+    const lo = Math.min.apply(null, rest) - randInt(1, 3);
+    const hi = Math.max.apply(null, rest) + randInt(1, 3);
+    const all = shuffleAll(rest.concat([lo, hi]));
+    const sumRest = rest.reduce((x, y) => x + y, 0);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 平均数（去掉最高最低）',
+      text: `${SC} 参加诵读比赛，${all.length} 位评委打分：${all.join('、')}。按比赛规则，要去掉一个最高分和一个最低分，剩下的分数再算平均分。最后的平均分是多少分？`,
+      facts: [`评委打出的分数：${all.join('、')}`, '去掉一个最高分和一个最低分'],
+      steps: [
+        S2('比赛评分为什么要去掉一个最高分和一个最低分？', '减少极端分数的影响，让成绩更公平',
+          ['为了少算几位评委', '为了让平均分一定变高', '为了让平均分一定变低'],
+          { ok: '对！极端分数容易把平均分拉偏，去掉以后更能代表真实水平。', no: '个别评委给得特别高或特别低，会把平均分带偏，去掉就是为了更公平。' }),
+        S2(`去掉最高分和最低分以后，剩下 ${k} 位评委的总分是多少？`, sumRest, numWrongs(sumRest),
+          { ok: '对！把剩下的分数加起来就是总分。', no: '把去掉最高分、最低分以后剩下的那些分数加起来。' }),
+        S2('最后求平均分，用什么方法？', '用剩下的总分除以剩下的评委人数',
+          ['用剩下的总分乘上评委人数', '用所有评委的总分除以评委人数', '用最高的分数减去最低的分数'],
+          { ok: '对！总分除以人数，就是平均分。算出结果填进下面的框吧！', no: '平均分 = 总分 ÷ 人数，这里的总分和人数都要用去掉之后的。' })
+      ],
+      answer: avg, unit: '分',
+      praise: '你分清了「去掉最高最低」以后要怎么算平均分！',
+      wrongTip: `先划掉最高分和最低分，把剩下的分数加起来，再除以剩下的评委人数。`
+    };
+  }
+},
+
+/* 拓展 · 指南针与钟面方位 */
+{
+  unit: '拓展', kp: '指南针与钟面方位',
+  gen() {
+    const DIRS = ['北', '东', '南', '西'];
+    const iF = randInt(0, 3);
+    const facing = DIRS[iF];
+    const step = pick([1, 2, 3]);                 /* 顺时针走几个 90 度 */
+    const target = DIRS[(iF + step) % 4];
+    const hour = step * 3;                        /* 3 / 6 / 9 点方向 */
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 拓展学习',
+      text: `${SC} 拿着指南针站在操场上，面向${facing}方，并把${facing}方定为 12 点钟方向。那么${target}方是几点钟方向？`,
+      facts: [`面向${facing}方，${facing}方 = 12 点钟方向`, '钟面上每过 3 个小时，方向正好转过一个直角'],
+      steps: [
+        S2('指南针静止时，指针大致指向哪个方向？', '一端指北、一端指南，也就是南北方向',
+          ['只指东西方向', '只指上下的方向', '随便指哪个方向都有'],
+          { ok: '对！指南针就是用来认南北的，红色一端一般指北。', no: '指南针的指针沿南北方向，一头指北一头指南。' }),
+        S2('把面向的方向定为 12 点钟方向，钟面上每过三个小时，方向转过多少？', '正好转过一个直角',
+          ['转过半个直角', '转过两个直角', '一点都不转'],
+          { ok: '对！钟面上三个小时占四分之一圈，也就是一个直角。', no: '钟面一圈被分成四个直角，每个直角正好占三个小时。' }),
+        S2('从这个方向数到目标方向，是沿着钟面顺时针数还是逆时针数？', '顺时针数',
+          ['逆时针数', '两个方向随便数', '先逆时针再顺时针'],
+          { ok: '对！东、南、西、北按顺时针排，12 点往后就是顺时针。', no: '钟面上的数字是顺时针排的，从 12 点往后数就是顺时针。' })
+      ],
+      answer: hour, unit: '点钟方向',
+      praise: '你会用钟面来认方向了——12 点方向、3 点方向、6 点方向、9 点方向！',
+      wrongTip: `钟面上每三个小时转一个直角。从${facing}方的 12 点方向顺时针数到${target}方，每过一个方向就多三个小时。`
+    };
+  }
+},
+
+/* 拓展 · 假期实践：时间推算 */
+{
+  unit: '拓展', kp: '假期实践·时间推算',
+  gen() {
+    const h1 = randInt(7, 10);
+    const m1 = pick([0, 5, 10, 15, 20, 30, 40, 45, 50]);
+    const dh = randInt(1, 4);
+    const dm = pick([0, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+    let h2 = h1 + dh;
+    let m2 = m1 + dm;
+    if (m2 >= 60) { m2 -= 60; h2 += 1; }
+    const total = dh * 60 + dm;
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 拓展学习',
+      text: `${SC} 假期参加实践活动：${h1}:${m1 < 10 ? '0' + m1 : m1} 从家出发，${h2}:${m2 < 10 ? '0' + m2 : m2} 到达活动地点。路上用去的时间一共是多少分钟？`,
+      facts: [`出发时刻：${h1} 时 ${m1} 分`, `到达时刻：${h2} 时 ${m2} 分`],
+      steps: [
+        S2('求路上用去多长时间，用什么方法？', '用到达时刻减去出发时刻',
+          ['用出发时刻减去到达时刻', '把两个时刻加起来', '把两个时刻相乘'],
+          { ok: '对！经过的时间 = 结束时刻 − 开始时刻。', no: '要从开始走到结束，用结束的时刻减去开始的时刻。' }),
+        S2('时刻里带“时”和“分”两种单位，先把哪一种换成小的？', '把“时”换成“分”',
+          ['把“分”换成“时”', '两种都不用换', '把两个时刻都换成秒'],
+          { ok: '对！先把小时换成分钟，单位统一了才好加减。', no: '题目要的是分钟，所以先把小时换算成分钟。' }),
+        S2('换算和相减的时候要注意什么？', '一小时是六十分钟，借位的时候要按六十算',
+          ['一小时是一百分钟，借位按一百算', '一小时是十分钟，借位按十算', '直接相减，不用管单位'],
+          { ok: '对！时间是六十进制的，借位要按六十算。', no: '时间是六十进制：一小时六十分钟，借一位就是借六十。' })
+      ],
+      answer: total, unit: '分钟',
+      praise: '你会算经过的时间了，还知道时间是六十进制！',
+      wrongTip: `先算从 ${h1} 时到 ${h2} 时是几个整小时，再把它换成分钟，最后加上多出来的分钟。`
+    };
+  }
+}
 
 ];
 
@@ -3322,9 +3756,12 @@ let timerEnabled = false;
 const TIME_LIMIT = 90;
 let timerRemaining = 0, timerInterval = null;
 
-const SESSION_GOAL = 10;
+let SESSION_GOAL = 10;                /* 整卷模式下会改成这一套卷的题量 */
 let doneCount = 0;
 let goalCelebrated = false;
+let paperMode = null;                 /* 整卷模式：{name, specs:[{unit,n}], total} */
+let paperWrong = 0;                   /* 整卷里答错的题数 */
+let paperDone = false;                /* 整卷是否已经交卷结算 */
 
 let selectedUnits = [];
 let questions = [];       /* [{tpl, problem, state}] */
@@ -3341,6 +3778,8 @@ const plain = t => String(t).replace(/<[^>]*>/g, '');
    出题：按所选单元取模板 → 轮转不扎堆 → 指纹去重
    ========================================================= */
 function poolTemplates() {
+  /* 整卷模式：题源是这套卷指定的单元，和「选择单元」互不影响 */
+  if (paperMode) return problemTemplates.filter(t => paperMode.specs.some(sp => sp.unit === t.unit));
   if (selectedUnits.length === 0) return [];
   return problemTemplates.filter(t => selectedUnits.indexOf(t.unit) >= 0);
 }
@@ -3393,6 +3832,17 @@ function appendQuestion() {
 function buildSession() {
   redoState = null;                 /* 只要重新生成正常题集，就退出错题重做 */
   questions = []; tplQueue = []; current = 0;
+  if (paperMode) {
+    /* 整卷：按这套卷的单元配比凑够题量，再打乱顺序 */
+    const picked = [];
+    paperMode.specs.forEach(sp => {
+      const unitPool = shuffleAll(problemTemplates.filter(t => t.unit === sp.unit));
+      if (!unitPool.length) return;
+      for (let i = 0; i < sp.n; i++) picked.push(unitPool[i % unitPool.length]);
+    });
+    shuffleAll(picked).slice(0, paperMode.total).forEach(t => questions.push(newQuestion(t)));
+    return;
+  }
   const pool = poolTemplates();
   if (pool.length === 0) return;
   const n = Math.min(6, pool.length);
@@ -3463,7 +3913,12 @@ function syncUnitUI() {
   });
 
   const sum = $('unitSummary');
-  if (total === 0) {
+  if (paperMode) {
+    sum.className = 'unit-summary';
+    const names = paperMode.specs.map(sp => UNIT_MAP[sp.unit].name
+      .replace(/^第[一二三四五六七八九]单元 · /, '')).join('、');
+    sum.innerHTML = `正在做整卷：<b>${paperMode.name}</b> · 共 <b>${paperMode.total}</b> 题（题目来自：${names}）`;
+  } else if (total === 0) {
     sum.className = 'unit-summary warn';
     sum.innerHTML = '还没有选单元。点上面的单元按钮选一个，就会出现题目啦（可以多选）。';
   } else {
@@ -3475,7 +3930,7 @@ function syncUnitUI() {
   }
 
   const noUnit = total === 0;
-  const show = !noUnit || redoActive();      /* 错题重做时，即使一个单元没选也要显示练习区 */
+  const show = !noUnit || redoActive() || !!paperMode;   /* 错题重做 / 整卷：没选单元也要显示练习区 */
   $('practiceEmpty').style.display = show ? 'none' : 'block';
   $('practiceBody').style.display = show ? 'block' : 'none';
   $('goalBar').style.display = (show && !pkMode) ? 'block' : 'none';
@@ -3522,6 +3977,13 @@ function floatScore(text, bonus) {
 
 function renderGoal() {
   if (pkMode) return;                   /* PK 时用比分条代替本轮目标 */
+  const gl = $('goalLabel');
+  if (gl) gl.textContent = paperMode ? '📄 整卷进度' : '🎯 本轮目标';
+  /* 整卷做完 → 交卷结算（只结算一次） */
+  if (paperMode && doneCount >= paperMode.total && !paperDone) {
+    paperDone = true;
+    showPaperResult();
+  }
   const pct = Math.min(100, Math.round(doneCount / SESSION_GOAL * 100));
   $('goalFill').style.width = pct + '%';
   $('goalNum').textContent = doneCount >= SESSION_GOAL ? `已完成 ${doneCount} 题 🎉` : `${doneCount} / ${SESSION_GOAL} 题`;
@@ -3650,7 +4112,7 @@ function render() {
   const rb = $('redoBar');
   if (rb) rb.classList.toggle('on', redoActive());
   const cb = $('changeBtn');
-  if (cb) cb.style.display = redoActive() ? 'none' : '';
+  if (cb) cb.style.display = (redoActive() || paperMode) ? 'none' : '';   /* 整卷不能换题 */
   if (pkMode) {
     renderPkBar();
     renderNav();
@@ -4002,6 +4464,7 @@ function finalizeCorrect(q) {
 function finalizeWrong(q, raw) {
   const p = q.problem, st = q.state;
   st.hadWrong = true;
+  if (paperMode && !st.paperCounted) { st.paperCounted = true; paperWrong++; }
   resetCombo();
   SFX.wrong();
   showFb('no', `✘ 还差一点，再想一想。<br><span class="fb-sub">${p.wrongTip}</span>`);
@@ -4787,6 +5250,124 @@ function pigSet(which) {
   }
   requestAnimationFrame(sample);
 })();
+
+
+/* =========================================================
+   整卷模式
+   期末复习和素养达标卷不逐张照抄：那些题大量依赖插图，抄进来只会是残缺的文本。
+   改用现有题库按真实卷的题型配比组卷 —— 覆盖的知识点和卷子一致，
+   而且每次的数值都不一样，可以反复练。
+   ========================================================= */
+const PAPER_SPECS = [
+  { name: '期末综合评价', sub: '全册配比 · 20 题', total: 20,
+    specs: [{ unit: '度量衡', n: 2 }, { unit: '除法', n: 5 }, { unit: '图形', n: 4 },
+            { unit: '大数', n: 3 }, { unit: '周长', n: 2 }, { unit: '平均数', n: 2 }, { unit: '探索', n: 2 }] },
+  { name: '期中自主评价', sub: '前三单元 · 16 题', total: 16,
+    specs: [{ unit: '度量衡', n: 3 }, { unit: '除法', n: 6 }, { unit: '图形', n: 4 }, { unit: '大数', n: 3 }] },
+  { name: '第一单元 · 除数是两位数的除法', sub: '单元素养达标练 · 12 题', total: 12, specs: [{ unit: '除法', n: 12 }] },
+  { name: '第二单元 · 多边形的认识', sub: '单元素养达标练 · 12 题', total: 12, specs: [{ unit: '图形', n: 12 }] },
+  { name: '第三单元 · 认识更大的数', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '大数', n: 10 }] },
+  { name: '第四单元 · 周长', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '周长', n: 10 }] },
+  { name: '第五单元 · 平均数', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '平均数', n: 10 }] },
+  { name: '第六单元 · 探索乐园', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '探索', n: 10 }] },
+  { name: '度量衡的故事', sub: '素养达标练 · 8 题', total: 8, specs: [{ unit: '度量衡', n: 8 }] },
+  { name: '专题素养达标练（一）数与运算', sub: '除法 + 更大的数 · 14 题', total: 14,
+    specs: [{ unit: '除法', n: 8 }, { unit: '大数', n: 6 }] },
+  { name: '专题素养达标练（二）图形与几何 · 统计与概率 · 探索乐园', sub: '14 题', total: 14,
+    specs: [{ unit: '图形', n: 5 }, { unit: '周长', n: 4 }, { unit: '平均数', n: 2 }, { unit: '探索', n: 3 }] }
+];
+
+let paperLastSpec = null;      /* 「再来一套」用 */
+
+function renderPaperList() {
+  const box = $('paperList');
+  if (!box) return;
+  box.innerHTML = PAPER_SPECS.map((p, i) =>
+    `<button class="paper-item" data-paper="${i}">
+      <span class="paper-item-name">${p.name}</span>
+      <span class="paper-item-sub">${p.sub}</span>
+    </button>`).join('');
+  box.querySelectorAll('[data-paper]').forEach(btn => {
+    btn.addEventListener('click', () => startPaper(PAPER_SPECS[Number(btn.dataset.paper)]));
+  });
+}
+function openPaperPicker() {
+  if (pkMode) setPkMode(false);
+  renderPaperList();
+  $('paperMask').classList.add('on');
+}
+function closePaperPicker() { $('paperMask').classList.remove('on'); }
+
+function goPracticeTab() {
+  currentTab = 'practice';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'practice'));
+  $('page-practice').style.display = 'block';
+  $('page-wrong').style.display = 'none';
+  $('page-history').style.display = 'none';
+}
+
+function startPaper(spec) {
+  if (!spec) return;
+  if (pkMode) setPkMode(false);
+  SFX.click();
+  paperLastSpec = spec;
+  paperMode = spec;
+  paperWrong = 0;
+  paperDone = false;
+  SESSION_GOAL = spec.total;
+  doneCount = 0;
+  goalCelebrated = false;
+  score = 0; combo = 0; perfectCount = 0;
+  ['scoreValue', 'comboValue', 'perfectValue'].forEach(id => { const el = $(id); if (el) el.textContent = '0'; });
+  seenFingerprints.clear();
+  closePaperPicker();
+  $('paperResultMask').classList.remove('on');
+  goPracticeTab();
+  renderUnitChips();
+  buildSession();
+  renderAll();
+  toastMsg(`开始做「${spec.name}」，一共 ${spec.total} 道题`);
+}
+
+function exitPaper() {
+  paperMode = null; paperLastSpec = null;
+  paperWrong = 0; paperDone = false;
+  SESSION_GOAL = 10; doneCount = 0; goalCelebrated = false;
+  score = 0; combo = 0; perfectCount = 0;
+  ['scoreValue', 'comboValue', 'perfectValue'].forEach(id => { const el = $(id); if (el) el.textContent = '0'; });
+  $('paperResultMask').classList.remove('on');
+  buildSession();
+  renderAll();
+  toastMsg('已退出整卷，回到单元练习');
+}
+
+function showPaperResult() {
+  if (!paperMode) return;
+  const total = paperMode.total;
+  const right = Math.max(0, total - paperWrong);
+  const pct = Math.round(right / total * 100);
+  const t = $('paperResultTitle');
+  if (t) t.textContent = `📄 ${paperMode.name} · 交卷啦`;
+  const b = $('paperResultBody');
+  if (b) {
+    b.innerHTML =
+      `<div class="paper-big">${right} / ${total} 题</div>` +
+      `<div class="paper-pct">得分 <b>${pct}</b> 分</div>` +
+      `<div class="paper-note">` +
+      (paperWrong
+        ? `有 <b>${paperWrong}</b> 道题第一次没做对，已经收进错题本，可以回头重做。`
+        : '全部一次做对，太厉害了！') +
+      `</div>`;
+  }
+  $('paperResultMask').classList.add('on');
+  SFX.levelup();
+}
+
+$('paperBtn').addEventListener('click', openPaperPicker);
+$('paperClose').addEventListener('click', closePaperPicker);
+$('paperMask').addEventListener('click', e => { if (e.target === $('paperMask')) closePaperPicker(); });
+$('paperAgain').addEventListener('click', () => startPaper(paperLastSpec || PAPER_SPECS[0]));
+$('paperExit').addEventListener('click', exitPaper);
 
 /* =========================================================
    启动
