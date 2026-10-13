@@ -91,6 +91,21 @@ body{
 .hist-times{flex:none;font-size:12px;font-weight:700;color:#8592B5;}
 .hist-more{padding:8px 0 0;font-size:12px;font-weight:700;color:#8592B5;}
 
+/* ============ 大题（填空/选择/判断） ============ */
+.form-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.form-row-label{flex:none;font-size:13px;font-weight:900;color:#8B7FD0;
+  padding-top:9px;letter-spacing:.5px;}
+.form-chips{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:0;}
+.form-chip{display:flex;flex-direction:column;gap:1px;text-align:left;cursor:pointer;
+  min-height:46px;padding:7px 13px;border-radius:13px;font-family:inherit;
+  background:#FAF9FE;border:2px solid #EDEBF5;transition:.16s;}
+.form-chip b{font-size:13.5px;font-weight:800;color:#6B5FB0;}
+.form-chip span{font-size:11.5px;font-weight:600;color:#A29BC0;}
+.form-chip:hover{background:#F5F2FF;border-color:#DDD6F5;}
+.form-chip.on{background:linear-gradient(135deg,#EFE9FF,#F7F3FF);border-color:#B9A9F0;}
+.form-chip.on b{color:var(--purple);}
+.form-chip.on span{color:#8B7FD0;}
+
 /* ============ 计分条 ============ */
 .score-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;
   margin-bottom:14px;background:#fff;border-radius:18px;border:2.5px solid #FFE3A8;
@@ -797,6 +812,10 @@ body{
         <span class="spacer"></span>
         <button class="mini-btn" id="unitAll">全选</button>
         <button class="mini-btn" id="unitNone">全部取消</button>
+      </div>
+      <div class="form-row">
+        <span class="form-row-label">大题</span>
+        <div class="form-chips" id="formChips"></div>
       </div>
       <div class="unit-chips" id="unitChips"></div>
       <div class="unit-summary" id="unitSummary"></div>
@@ -3783,6 +3802,662 @@ const problemTemplates = [
     };
   }
 }
+,
+/* =========================================================
+   试卷其他大题（2026-10 新增）
+   一、计算类：口算、竖式试商、脱式运算顺序、找规律填数
+       —— 走现有「思路闯关 + 填答案」机制，每题都带三步思路解析
+   二、选择题：四选一，只作答一次，不填数字（noAnswer）
+   三、判断题并说理：题干是「别人的做法」，判断对错并选出理由（noAnswer）
+
+   noAnswer 的题型没有数字答案：answer 固定为 0、unit 为空，判定看选项。
+   它们只有一步，不存在「步骤泄漏最终答案」，所以两个泄漏扫描对它们不适用。
+   ========================================================= */
+
+/* ---------- 计算 1：口算除法（把被除数和除数都看成几个十） ---------- */
+{
+  unit: '除法', kp: '口算除法',
+  gen() {
+    const bt = pick([2, 3, 4, 5, 6, 7, 8, 9]);
+    let q = pick([2, 3, 4, 5, 6, 7, 8, 9]);
+    if (q === bt) q = (q === 9 ? 7 : q + 1);      /* 商不能和「几个十」撞上 */
+    const b = bt * 10, a = b * q, tens = bt * q;
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 口算除法',
+      text: `${SC} 口算 ${a} ÷ ${b}。思路是：把被除数和除数都看成「几个十」，再用乘法口诀求商。商是多少？`,
+      facts: [`被除数 = ${a}`, `除数 = ${b}`, '把两个数都看成「几个十」'],
+      steps: [
+        S2(`把 ${a} 看成几个十？`, tens, numWrongs(tens),
+          { ok: '对！末尾去掉一个零就是几个十。', no: '一个十是 10，数一数里面有几个。' }),
+        S2(`把 ${b} 看成几个十？`, bt, numWrongs(bt),
+          { ok: '对！', no: '一个十是 10，数一数里面有几个。' }),
+        S2('两个数都换成「几个十」以后，怎么求商？', '用乘法口诀直接算这两个数的商',
+          ['把两个数加起来', '把两个数相乘', '把两个数相减'],
+          { ok: '对！换成几个十以后，商就是这两个数用口诀算出来的结果。填进下面的框吧！', no: '都换成「几个十」以后，用口诀就能直接算出商。' })
+      ],
+      answer: q, unit: '',
+      praise: '你会用「看成几个十」的办法口算除法了！',
+      wrongTip: `把 ${a} 看成 ${tens} 个十、${b} 看成 ${bt} 个十，再用口诀算商。`
+    };
+  }
+},
+
+/* ---------- 计算 2：竖式试商（四舍五入看作整十数） ---------- */
+{
+  unit: '除法', kp: '竖式试商',
+  gen() {
+    const pairs = [{ b: 23, v: 20 }, { b: 24, v: 20 }, { b: 26, v: 30 }, { b: 27, v: 30 },
+                   { b: 33, v: 30 }, { b: 34, v: 30 }, { b: 36, v: 40 }, { b: 37, v: 40 }];
+    const { b, v } = pick(pairs);
+    const maxQ = Math.floor(999 / b);
+    let q = randInt(12, Math.min(29, maxQ));
+    if (q === v) q = (q === 12 ? 13 : q - 1);     /* 商不能和试商用的整十数撞上 */
+    let r = randInt(1, b - 1);
+    if (r === q) r = (r === 1 ? 2 : 1);
+    const a = b * q + r;
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 竖式试商',
+      text: `${SC} 用竖式计算 ${a} ÷ ${b}。把除数看作整十数来试商，商是多少？（有余数，这里只填商）`,
+      facts: [`被除数 = ${a}`, `除数 = ${b}`, '把除数看作接近的整十数试商'],
+      steps: [
+        S2(`把除数 ${b} 看作哪个整十数来试商？`, v, numWrongs(v),
+          { ok: '对！看除数最接近哪个整十数。', no: '四舍五入：看除数跟哪个整十数最接近。' }),
+        S2('商乘除数、再和被除数相减以后，要看什么？', '看余数是不是比除数小',
+          ['看商是不是整数', '看被除数是不是偶数', '看商和除数哪个大'],
+          { ok: '对！余数只要比除数大，就说明商试小了。', no: '竖式里最关键的一步是「余数要比除数小」。' }),
+        S2('如果余数比除数大，说明什么？', '商试小了，要把商调大',
+          ['商试大了，要把商调小', '算对了，可以直接写答案', '除数看错了，要重看'],
+          { ok: '对！余数比除数大就把商调大，再重新乘、减、比。', no: '余数比除数大，说明商还能再大一点，要把商调大。' })
+      ],
+      answer: q, unit: '',
+      praise: '你会照着「试商 → 乘 → 减 → 比余数」的顺序做竖式了！',
+      wrongTip: `把 ${b} 看作 ${v} 试商，再乘回去、相减、比余数；余数比除数大就调商。`
+    };
+  }
+},
+
+/* ---------- 计算 3：脱式运算顺序（含小括号） ---------- */
+{
+  unit: '除法', kp: '脱式运算顺序',
+  gen() {
+    const form = randInt(0, 3);
+    let expr = '', first = '', firstOk = '', firstNo = '', lastOk = '', answer = 0;
+    if (form === 0) {
+      const a = randInt(40, 300), b = randInt(2, 9), c = randInt(3, 9);
+      expr = `${a} + ${b} × ${c}`;
+      first = b * c; answer = a + b * c;
+      firstOk = '对！没有括号时，先算乘除，后算加减。';
+      firstNo = '没有括号的算式，先算乘除，后算加减。';
+      lastOk = '对！把前面的加数再加上刚算出的积。';
+    } else if (form === 1) {
+      const a = randInt(10, 60), b = randInt(10, 60), c = randInt(2, 9);
+      expr = `(${a} + ${b}) × ${c}`;
+      first = a + b; answer = (a + b) * c;
+      firstOk = '对！有小括号就先算括号里面的。';
+      firstNo = '算式里有小括号，要先算小括号里面的。';
+      lastOk = '对！括号里算完，再乘外面的数。';
+    } else if (form === 2) {
+      const a = randInt(4, 20), b = randInt(3, 9), d = pick([2, 4, 5]), c = 60 * d;
+      expr = `${a} × ${b} − ${c} ÷ ${d}`;
+      first = a * b; answer = a * b - c / d;
+      firstOk = '对！先算乘除，乘法和除法按从左往右的顺序算。';
+      firstNo = '没有括号时，乘除要先算，减法最后算。';
+      lastOk = '对！最后做减法。';
+    } else {
+      let x = randInt(3, 9), y = randInt(2, x - 1);
+      let a = pick([48, 64, 72, 96, 120]);
+      if (a === (x - y) * (x - y)) a = a + (x - y);   /* 避免第一步的结果就等于最终答案 */
+      expr = `${a} ÷ (${x} − ${y})`;
+      first = x - y; answer = a / (x - y);
+      firstOk = '对！有小括号就先算括号里面的差。';
+      firstNo = '有小括号先算括号里面，也就是先做减法。';
+      lastOk = '对！再用被除数除以括号里算出的差。';
+    }
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 脱式计算',
+      text: `${SC} 脱式计算：${expr}。先想清楚运算顺序，再算出最后的结果。`,
+      facts: [`算式：${expr}`, '有小括号先算括号里面；没有括号先算乘除、后算加减'],
+      steps: [
+        S2('这道题第一步应该算什么？',
+          form === 1 || form === 3 ? '先算小括号里面的' : '先算乘法或除法',
+          ['从左往右一步一步算', '先算加法或减法', '先算最大的那个数'],
+          { ok: firstOk, no: firstNo }),
+        S2('第一步算出来的结果是多少？', first, numWrongs(first),
+          { ok: '对！先算出这一步，写在等号后面。', no: '按刚才确定的顺序，把第一步算出来。' }),
+        S2('最后一步要做什么？',
+          form === 1 ? '用括号里的结果乘括号外面的数' :
+          form === 2 ? '把乘出来的积减去除出来的商' :
+          form === 3 ? '用被除数除以括号里算出的差' : '把加数再加上乘出来的积',
+          ['把两个数直接相加', '把两个数直接相乘', '重新从第一个数开始算'],
+          { ok: lastOk + '填进下面的框吧！', no: '第一步算完，剩下的就是最后一步了。' })
+      ],
+      answer, unit: '',
+      praise: '你按运算顺序一步步脱式计算，很稳！',
+      wrongTip: `先定运算顺序（有括号先算括号、没括号先乘除后加减），再一步一步算：${expr}。`
+    };
+  }
+},
+
+/* ---------- 计算 4：找规律填数 ---------- */
+{
+  unit: '探索', kp: '找规律填数',
+  gen() {
+    const mode = pick(['add', 'mul']);
+    const SC = pick(SC_NAME);
+    let seq = [], next = 0, diffAsk = '', diffAns = 0, ruleQ = '', ruleOk = '', method = '';
+    if (mode === 'add') {
+      const s = randInt(2, 20), d = randInt(3, 15);
+      seq = [s, s + d, s + 2 * d, s + 3 * d];
+      next = s + 4 * d;
+      diffAsk = '相邻两个数相差多少？';
+      diffAns = d;
+      ruleQ = '这是一列怎样的数？';
+      ruleOk = '相邻两个数的差都相同，是一列等差变化的数';
+      method = '用最后一个数再加上这个差';
+    } else {
+      const s = randInt(2, 5), k = randInt(2, 4);
+      seq = [s, s * k, s * k * k];
+      next = s * k * k * k;
+      diffAsk = '后一个数是前一个数的几倍？';
+      diffAns = k;
+      ruleQ = '这是一列怎样的数？';
+      ruleOk = '后一个数都是前一个数的相同倍数，是一列等比变化的数';
+      method = '用最后一个数再乘上这个倍数';
+    }
+    return {
+      tag: '四上 · 找规律',
+      text: `${SC} 观察这列数：${seq.join('、')}、□。先找出变化的规律，再想想 □ 里填多少。`,
+      facts: [`数列：${seq.join('、')}、□`],
+      steps: [
+        S2(diffAsk, diffAns, numWrongs(diffAns),
+          { ok: '对！就用相邻两个数算一算。', no: '拿相邻的两个数比一比，看它们相差多少或者成几倍。' }),
+        S2(ruleQ, ruleOk,
+          ['前后两个数之间没有规律', '每次变化的数都不一样', '看不出是什么规律'],
+          { ok: '对！规律就是「每次变化都一样」。', no: '相邻两项之间的变化一样，就是这列数的规律。' }),
+        S2('求 □ 里的数，用什么方法？', method,
+          ['用第一个数直接加上项数', '把前面所有的数加起来', '把最后一个数除以项数'],
+          { ok: '对！顺着规律再走一步就行。填进下面的框吧！', no: '已经知道每次怎么变了，顺着再变一次就是 □。' })
+      ],
+      answer: next, unit: '',
+      praise: '你会先找规律、再顺着规律往下推！',
+      wrongTip: `先看相邻两项每一次怎么变，再顺着这个变化推下一个数。`
+    };
+  }
+},
+
+
+/* ---------- 选择题（一题一个四选一，只作答一次、不填数字） ---------- */
+{
+  unit: '度量衡', kp: '选择题·单位换算', form: 'choice', noAnswer: true,
+  gen() {
+    const fams = [{ a: '升', b: '毫升', r: 1000 }, { a: '米', b: '厘米', r: 100 },
+                  { a: '千克', b: '克', r: 1000 }, { a: '吨', b: '千克', r: 1000 }];
+    const f = pick(fams);
+    const k = randInt(2, 9);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 在复习单位换算。下面四个换算里，只有一个是正确的。`,
+      facts: [`1 ${f.a} = ${f.r} ${f.b}`],
+      steps: [
+        S2('哪一个换算是正确的？', `${k} ${f.a} = ${k * f.r} ${f.b}`,
+          [`${k} ${f.a} = ${k + f.r} ${f.b}`, `${k} ${f.a} = ${k} ${f.b}`, `${k} ${f.a} = ${k * f.r * 10} ${f.b}`],
+          { ok: `对！大单位换小单位要乘进率：${k} × ${f.r}。`, no: `先把进率写出来：1 ${f.a} = ${f.r} ${f.b}，再看该乘还是该除。` })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用进率判断换算对不对了！',
+      wrongTip: `1 ${f.a} = ${f.r} ${f.b}，${k} ${f.a} 就是 ${k} 个 ${f.r} ${f.b}，用乘法。`
+    };
+  }
+},
+{
+  unit: '除法', kp: '选择题·试商辨析', form: 'choice', noAnswer: true,
+  gen() {
+    const b = pick([23, 34, 46, 57, 62, 73]);
+    const q = randInt(12, 29);
+    const a = b * q + randInt(1, b - 1);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 在算 ${a} ÷ ${b}。做到「余数比除数小」这一步时，出现了下面某种情况。哪一种说明商试大了、要把商调小？`,
+      facts: [`算式：${a} ÷ ${b}`],
+      steps: [
+        S2('哪一种情况说明商试大了？', '商乘除数，结果比被除数大',
+          ['余数比除数大', '商是一个两位数', '除数比被除数小'],
+          { ok: '对！商乘除数超过被除数，说明商大了，要调小再试。', no: '试完商以后要「乘一乘、比一比」：乘出来比被除数大，商就大了。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你能从「乘一乘、比一比」的结果判断商大了还是小了！',
+      wrongTip: '商乘除数比被除数大 → 商大了要调小；余数比除数大 → 商小了要调大。'
+    };
+  }
+},
+{
+  unit: '图形', kp: '选择题·三边关系', form: 'choice', noAnswer: true,
+  gen() {
+    const a = randInt(4, 9);
+    const b = randInt(a, 12);
+    const c = randInt(b, a + b - 1);          /* 正确组：任意两边之和大于第三边 */
+    const fmt = t => `${t[0]} 厘米、${t[1]} 厘米、${t[2]} 厘米`;
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 在用小棒围三角形。下面哪一组小棒能围成一个三角形？`,
+      facts: ['三角形任意两边长度的和大于第三边'],
+      steps: [
+        S2('哪一组小棒能围成三角形？', fmt([a, b, c]),
+          [fmt([a, b, a + b]), fmt([b, c, b + c]), fmt([a, c, a + c])],
+          { ok: '对！这一组里任意两边之和都大于第三边。', no: '要满足「任意两边之和大于第三边」：最短的两条加起来也要比最长的那条长。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用「两边之和大于第三边」判断能不能围成三角形！',
+      wrongTip: '把最短的两条边的长度加起来，跟最长的那条比：比它长才能围成。'
+    };
+  }
+},
+{
+  unit: '大数', kp: '选择题·近似数', form: 'choice', noAnswer: true,
+  gen() {
+    const w = randInt(1, 9);
+    const N = w * 10000 + randInt(1, 9999);
+    const approx = Math.round(N / 10000);
+    const w3 = (w !== approx) ? w : (approx > 1 ? approx - 1 : approx + 100);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 在练习求近似数。请你判断：${N} 省略万位后面的尾数，约是多少万？`,
+      facts: [`要取近似数的数 = ${N}`, '看千位上的数，四舍五入'],
+      steps: [
+        S2(`把 ${N} 省略万位后面的尾数，约是多少万？`, `${approx} 万`,
+          [`${approx + 1} 万`, `${approx + 10} 万`, `${w3} 万`],
+          { ok: '对！先看千位上的数，满 5 就进 1。', no: '省略万位后面的尾数，就是看千位上的数四舍五入。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会看千位上的数四舍五入求近似数了！',
+      wrongTip: `把 ${N} 写到万位，再看千位上的数：满 5 进 1，不满 5 就舍去。`
+    };
+  }
+},
+{
+  unit: '周长', kp: '选择题·剪拼辨析', form: 'choice', noAnswer: true,
+  gen() {
+    const a = randInt(6, 15), b = randInt(3, 5);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 把一张长 ${a} 厘米、宽 ${b} 厘米的长方形纸剪成两个小长方形。两个小长方形的周长加起来，和原来这张纸的周长比，怎么样？`,
+      facts: [`原来的长方形：长 ${a} 厘米，宽 ${b} 厘米`],
+      steps: [
+        S2('两个小长方形的周长和，跟原来的周长比怎么样？', '比原来大，因为剪开以后多出了两条边',
+          ['和原来一样，因为纸没有变', '比原来小，因为分成了两块', '说不准，要看怎么剪'],
+          { ok: '对！剪开的地方多出了两条边，所以周长和一定变大了。', no: '剪一刀会多出两条边，边多了，周长和自然比原来大。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你能想到「剪开会多出两条边」！',
+      wrongTip: '把图形剪开，剪口那里会多出两条边，所以小图形的周长和一定比原来大。'
+    };
+  }
+},
+{
+  unit: '平均数', kp: '选择题·平均数辨析', form: 'choice', noAnswer: true,
+  gen() {
+    const base = randInt(80, 92);
+    const hi = base + randInt(3, 8), lo = base - randInt(3, 8);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 参加比赛，评委给的分里有一个特别高、一个特别低。去掉一个最高分和一个最低分以后，剩下的平均分跟原来的平均分比，可能怎样？`,
+      facts: ['原来的分数里有特别高和特别低的', '去掉一个最高分和一个最低分'],
+      steps: [
+        S2('去掉最高分和最低分以后，平均分跟原来比会怎样？', '可能变高，也可能变低',
+          ['一定变高', '一定变低', '一定和原来一样'],
+          { ok: '对！去掉的那两个数在平均分哪一边，就往哪边变。', no: '去掉的那两个数如果都在平均分上面，平均分就变低；都在下面，就变高。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你想清楚了「去掉极端分数」会怎样影响平均分！',
+      wrongTip: '平均分被极端分数拉偏；去掉以后会往中间靠，所以可能变高也可能变低。'
+    };
+  }
+},
+{
+  unit: '探索', kp: '选择题·植树辨析', form: 'choice', noAnswer: true,
+  gen() {
+    const L = randInt(20, 90), d = randInt(2, 9);
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 在一条长 ${L} 米的小路一边栽树，每隔 ${d} 米栽一棵，两端都栽。树的棵数和间隔数比，怎么样？`,
+      facts: [`小路长 ${L} 米`, `每隔 ${d} 米栽一棵`, '两端都栽'],
+      steps: [
+        S2('两端都栽的时候，树的棵数和间隔数有什么关系？', '棵数比间隔数多 1',
+          ['棵数和间隔数一样多', '棵数比间隔数少 1', '棵数比间隔数多 2'],
+          { ok: '对！两端都栽，棵数 = 间隔数 + 1。', no: '画一画就看得出来：两端都栽的时候，两头各多出一棵。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你分清了「两端都栽」时棵数和间隔数的关系！',
+      wrongTip: '两端都栽：棵数 = 间隔数 + 1；只栽一端棵数 = 间隔数；两端都不栽棵数 = 间隔数 − 1。'
+    };
+  }
+},
+{
+  unit: '拓展', kp: '选择题·方向辨析', form: 'choice', noAnswer: true,
+  gen() {
+    const DIRS = ['北', '东', '南', '西'];
+    const iF = randInt(0, 3);
+    const facing = DIRS[iF];
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 站在操场上，面向${facing}方，并把${facing}方定为 12 点钟方向。那么 3 点钟方向在他身体的哪一边？`,
+      facts: [`面向${facing}方 = 12 点钟方向`, '钟面上每过 3 个小时转一个直角'],
+      steps: [
+        S2('3 点钟方向在他身体的哪一边？', '右手边',
+          ['左手边', '正后方', '正前方'],
+          { ok: '对！钟面上从 12 点到 3 点是顺时针，就是右手边。', no: '钟面上的数字是顺时针排的，12 点往 3 点转，就是往右手边转。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用钟面来判断左右方向了！',
+      wrongTip: '12 点钟方向是正前方，往后转 3 个小时就是右手边，转 6 个小时是正后方，9 个小时是左手边。'
+    };
+  }
+},
+
+
+/* ---------- 判断题并说理（题干是「别人的说法」，四个选项各自是完整的判断+理由） ----------
+   每个单元一个小题库，里面既有站得住的说法、也有错的说法，
+   免得学生养成「判断题一律答错」的习惯。 */
+{
+  unit: '除法', kp: '判断题·试商', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const b = pick([23, 24, 32, 34, 42, 43]);
+    const q = randInt(3, 9);
+    const a = b * (q - 1) + randInt(0, b - 1);      /* 商试大了，真正的商是 q−1 */
+    const mode = randInt(0, 1);
+    if (mode === 0) {
+      return {
+        tag: '四上 · 判断题',
+        text: `${SC} 在算 ${a} ÷ ${b}。试商的时候他把商试成了 ${q}，也没再检查，就把 ${q} 写在了商的位置上。`,
+        facts: [`算式：${a} ÷ ${b}`, `他试的商：${q}`],
+        steps: [
+          S2('他这么做对吗？为什么？', `不对。${b} × ${q} = ${b * q} 比被除数大，商试大了，要调小`,
+            ['对。试商只要差不多就行，不用检查', '不对。余数比除数大，商要调大', '对。' + q + ' 是最接近被除数的数'],
+            { ok: '对！试完商一定要「乘一乘、比一比」。', no: '试商以后要乘回去跟被除数比：乘出来比被除数大，商就大了。' })
+        ],
+        answer: 0, unit: '',
+        praise: '你抓住了试商最关键的一步：乘回去比一比！',
+        wrongTip: `先算 ${b} × ${q}，跟 ${a} 比：比它大就把商调小。`
+      };
+    }
+    const r = b + randInt(1, 9);
+    const a2 = b * q + r;
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在算 ${a2} ÷ ${b}，算出来商是 ${q}，余数是 ${r}。他说：「余数比除数大没关系，这样就算完了。」`,
+      facts: [`算式：${a2} ÷ ${b}`, `他算出的商：${q}，余数：${r}`],
+      steps: [
+        S2('他这么说对吗？为什么？', '不对。余数比除数大，说明商还小了，要把商调大',
+          ['对。余数大说明除得干净', '不对。商太大了，要把商调小', '对。只要余数不是 0 就算完了'],
+          { ok: '对！竖式里余数必须比除数小，这是检验的标准。', no: '竖式算完要看余数：余数比除数小才是对的。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你记住了「余数一定要比除数小」这条标准！',
+      wrongTip: '余数比除数大 → 商小了要调大；余数比除数小 → 才能算完。'
+    };
+  }
+},
+{
+  unit: '图形', kp: '判断题·图形特征', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const items = [
+      {
+        claim: '「一个三角形里可以有两个直角。」',
+        ok: '不对。两个直角加起来正好是 180 度，第三个角就没有了',
+        bad: ['对。只要画得出来就行', '不对。三角形里只能有一个锐角', '对。直角三角形可以有两个直角']
+      },
+      {
+        claim: '「平行四边形的四条边都一样长。」',
+        ok: '不对。平行四边形是两组对边分别相等，相邻的两条边不一定一样长',
+        bad: ['对。四条边一样长才叫平行四边形', '不对。平行四边形的四条边都不一样长', '对。对边相等就是四条边都相等']
+      },
+      {
+        claim: '「等腰三角形的两个底角相等。」',
+        ok: '对。等腰三角形的两腰相等，两个底角也相等',
+        bad: ['不对。等腰三角形只有两条边相等，角不一样', '不对。等腰三角形三个角都相等', '对。不过只有顶角才相等']
+      }
+    ];
+    const it = pick(items);
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在复习图形的知识，他说：${it.claim}`,
+      facts: ['三角形的内角和是 180 度', '等腰三角形有两条边相等'],
+      steps: [
+        S2('他说的对吗？为什么？', it.ok, it.bad.slice(),
+          { ok: '对！判断图形的话，要从图形的特征去想。', no: '别急着下结论，回到这个图形的特征上想一想。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你是从图形的特征去判断的，不是瞎猜！',
+      wrongTip: '判断这类话，先想这个图形的特征：内角和、对边关系、两腰两底角。'
+    };
+  }
+},
+{
+  unit: '大数', kp: '判断题·改写与近似数', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const N = randInt(1, 9) * 10000 + randInt(1, 9999);
+    const approx = Math.round(N / 10000);
+    const items = [
+      {
+        claim: `「把 ${N} 改写成用「万」作单位的数，数的大小不会变。」`,
+        ok: '对。改写只是换个说法，数的大小没变',
+        bad: ['不对。改写成万以后数就变小了', '不对。改写以后要四舍五入，大小会变', '对。不过只有整万的数才能改写'],
+        facts: [`要改写的数 = ${N}`, '改写不改变大小，求近似数才改变大小']
+      },
+      {
+        claim: `「${N} 省略万位后面的尾数约是 ${approx} 万，这个 ${approx} 万跟原来的数一样大。」`,
+        ok: '不对。求近似数以后大小会改变，只能说「大约」',
+        bad: ['对。约等于就是完全相等', '不对。应该约是 ' + (approx + 1) + ' 万', '对。省略尾数不会影响大小'],
+        facts: [`原来的数 = ${N}`, `省略万位后面的尾数 ≈ ${approx} 万`]
+      }
+    ];
+    const it = pick(items);
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在练习大数，他说：${it.claim}`,
+      facts: it.facts,
+      steps: [
+        S2('他说的对吗？为什么？', it.ok, it.bad.slice(),
+          { ok: '对！改写和求近似数是两回事。', no: '分清楚「改写」和「求近似数」：改写大小不变，求近似数大小会变。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你分清了「改写」和「求近似数」！',
+      wrongTip: '改写成万：大小不变；求近似数：大小会变，要用「约」。'
+    };
+  }
+},
+{
+  unit: '周长', kp: '判断题·周长', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const a1 = randInt(4, 9), b1 = randInt(2, a1 - 1);
+    const items = [
+      {
+        claim: '「周长相等的两个长方形，长和宽也一定分别相等。」',
+        ok: `不对。比如长 ${a1} 厘米、宽 ${b1} 厘米，跟长 ${a1 + 1} 厘米、宽 ${b1 - 1} 厘米，周长就一样`,
+        bad: ['对。周长一样，长和宽当然也一样', '不对。周长一样时，长一定不一样，宽一定一样', '对。周长是用长和宽算出来的，反过来也一样'],
+        facts: ['长方形的周长 =（长 + 宽）× 2']
+      },
+      {
+        claim: '「长方形周长也可以写成：长 × 2 + 宽 × 2。」',
+        ok: '对。（长 + 宽）× 2 展开就是长 × 2 + 宽 × 2，两种写法一样',
+        bad: ['不对。周长只能用（长 + 宽）× 2 算', '不对。长 × 2 + 宽 × 2 算出来是长方形的面积', '对。不过只有正方形才能这么算'],
+        facts: ['长方形的周长 =（长 + 宽）× 2']
+      }
+    ];
+    const it = pick(items);
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在复习周长，他说：${it.claim}`,
+      facts: it.facts,
+      steps: [
+        S2('他说的对吗？为什么？', it.ok, it.bad.slice(),
+          { ok: '对！可以把两种算法都写一写、比一比。', no: '拿具体的长和宽算一算，两边的周长是不是真的一样。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用具体的数去验证一句话对不对！',
+      wrongTip: '判断这种话，代几个具体的数进去算一算，最靠得住。'
+    };
+  }
+},
+{
+  unit: '平均数', kp: '判断题·平均数', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const k = randInt(2, 6);
+    const items = [
+      {
+        claim: '「一组数的平均数，一定是这组数里的某一个数。」',
+        ok: '不对。平均数可能不等于这组数里的任何一个数',
+        bad: ['对。平均数就是从这些数里挑出来的', '不对。平均数一定比这组数里最大的还大', '对。算出来的平均数总是在原来那些数里'],
+        facts: ['平均数 = 总数 ÷ 个数']
+      },
+      {
+        claim: `「给一组数的每一个数都加上 ${k}，这组数的平均数也会加上 ${k}。」`,
+        ok: '对。每个数都加同一个数，总数就多了若干倍，平均数也跟着加上这个数',
+        bad: ['不对。平均数不会变', '不对。平均数会变成原来的 ' + k + ' 倍', '对。不过要除以前面的个数才算得出来'],
+        facts: ['平均数 = 总数 ÷ 个数']
+      }
+    ];
+    const it = pick(items);
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在复习平均数，他说：${it.claim}`,
+      facts: it.facts,
+      steps: [
+        S2('他说的对吗？为什么？', it.ok, it.bad.slice(),
+          { ok: '对！举一组具体的数算一遍就知道了。', no: '随便取一组数，按他说的算一遍，看平均数到底是多少。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用一组具体的数去验证关于平均数的说法！',
+      wrongTip: '拿几个数算一算平均数：它不一定等于原来那些数里的某一个。'
+    };
+  }
+},
+{
+  unit: '探索', kp: '判断题·间隔', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const n = randInt(2, 6);
+    const items = [
+      {
+        claim: `「锯一段木头，锯 ${n} 次就能锯成 ${n} 段。」`,
+        ok: `不对。锯 ${n} 次能锯成 ${n + 1} 段，因为每锯一次多一段`,
+        bad: [`对。锯 ${n} 次当然是 ${n} 段`, `不对。锯 ${n} 次能锯成 ${n - 1} 段`, '对。次数和段数总是一样多'],
+        facts: ['锯的次数和段数的关系']
+      },
+      {
+        claim: '「在小路一边栽树，两端都不栽的时候，树的棵数和间隔数一样多。」',
+        ok: '不对。两端都不栽，棵数比间隔数少 1',
+        bad: ['对。两端不栽的时候棵数和间隔数一样', '不对。两端都不栽，棵数比间隔数多 1', '对。不管怎么栽，棵数和间隔数都一样'],
+        facts: ['两端都栽：棵数 = 间隔数 + 1']
+      }
+    ];
+    const it = pick(items);
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在探索规律，他说：${it.claim}`,
+      facts: it.facts,
+      steps: [
+        S2('他说的对吗？为什么？', it.ok, it.bad.slice(),
+          { ok: '对！这类问题画一画就清楚了。', no: '画一条线段，标出锯的位置（或栽树的位置），数一数就明白了。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用「画一画、数一数」来解决间隔问题！',
+      wrongTip: '间隔类问题先画图：锯的次数、栽树的棵数和间隔数之间要数清楚。'
+    };
+  }
+},
+{
+  unit: '度量衡', kp: '判断题·古代单位', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const k = randInt(2, 6);
+    const m = randInt(2, 6);
+    const items = [
+      {
+        claim: `「古代的一尺和现在的一尺一样长。」`,
+        ok: '不对。古代的尺和现在的尺长度不一样，不同朝代的尺也在变',
+        bad: ['对。尺从古到今都是一样长的', '不对。古代的尺比现在的米还长', '对。只是叫法不同，长度是一样的'],
+        facts: ['古代的长度单位有寸、尺、丈、里']
+      },
+      {
+        claim: `「1 里 = 500 米，所以 ${k} 里就是 ${k * 500} 米。」`,
+        ok: `对。${k} 里就是 ${k} 个 500 米，用乘法算`,
+        bad: [`不对。应该用 ${k} 除以 500`, `不对。${k} 里应该是 ${k + 500} 米`, '对。不过还要再换成千米'],
+        facts: ['1 里 = 500 米']
+      },
+      {
+        claim: `「1 升 = 1000 毫升，所以 ${m} 升就是 ${m * 1000} 毫升。」`,
+        ok: `对。${m} 升就是 ${m} 个 1000 毫升`,
+        bad: [`不对。应该用 ${m} 除以 1000`, `不对。${m} 升应该是 ${m + 1000} 毫升`, '对。不过升和毫升不能互相换算'],
+        facts: ['1 升 = 1000 毫升']
+      }
+    ];
+    const it = pick(items);
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 在学度量衡的故事，他说：${it.claim}`,
+      facts: it.facts,
+      steps: [
+        S2('他说的对吗？为什么？', it.ok, it.bad.slice(),
+          { ok: '对！换算要看进率。', no: '先把进率写出来，再看是乘进率还是除以进率。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用进率去判断换算对不对！',
+      wrongTip: '大单位换小单位乘进率，小单位换大单位除以进率。'
+    };
+  }
+},
+{
+  unit: '拓展', kp: '判断题·方向', form: 'judge', noAnswer: true,
+  gen() {
+    const SC = pick(SC_NAME);
+    const DIRS = ['北', '东', '南', '西'];
+    const LEFT = { 北: '西', 东: '北', 南: '东', 西: '南' };
+    const RIGHT = { 北: '东', 东: '南', 南: '西', 西: '北' };
+    const iF = randInt(0, 3);
+    const facing = DIRS[iF];
+    const side = pick(['左', '右']);
+    const realDir = (side === '左' ? LEFT : RIGHT)[facing];
+    const otherDir = (side === '左' ? RIGHT : LEFT)[facing];
+    /* 说对说错都要有：否则学生答两次就发现「这题永远选对」 */
+    const truth = pick([true, false]);
+    const claimed = truth ? realDir : otherDir;
+    return {
+      tag: '四上 · 判断题',
+      text: `${SC} 面向${facing}方站立，他说：「我的${side}手边是${claimed}方。」`,
+      facts: [`面向${facing}方`, '用手结合方向想一想：面向北时，右手边是东'],
+      steps: [
+        S2('他说的对吗？为什么？',
+          truth ? `对。面向${facing}方时，${side}手边就是${realDir}方`
+                : `不对。面向${facing}方时，${side}手边是${realDir}方，不是${claimed}方`,
+          [truth ? `不对。面向${facing}方时，${side}手边是${otherDir}方`
+                 : `对。面向${facing}方时，${side}手边就是${claimed}方`,
+           `不对。面向${facing}方时，${side}手边是${facing}方`,
+           '对。不过方向跟面向哪边没有关系'],
+          { ok: '对！面向哪个方向，左右手边的方向就跟着变。', no: '先在纸上画一个方向图：上北下南、左西右东，再看面向哪边。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会结合「面向哪个方向」判断左右了！',
+      wrongTip: '画一个方向图（上北下南、左西右东），转动自己面向的方向，再看左右手边是哪个方向。'
+    };
+  }
+}
 
 ];
 
@@ -3807,6 +4482,7 @@ let paperWrong = 0;                   /* 整卷里答错的题数 */
 let paperDone = false;                /* 整卷是否已经交卷结算 */
 
 let selectedUnits = [];
+let formFilter = 'base';   /* 大题：base=填空·解决问题 / choice=选择题 / judge=判断题并说理 */
 let questions = [];       /* [{tpl, problem, state}] */
 let current = 0;
 let tplQueue = [];
@@ -3824,10 +4500,13 @@ const plain = t => String(t).replace(/<[^>]*>/g, '');
    出题：按所选单元取模板 → 轮转不扎堆 → 指纹去重
    ========================================================= */
 function poolTemplates() {
-  /* 整卷模式：题源是这套卷指定的单元，和「选择单元」互不影响 */
-  if (paperMode) return problemTemplates.filter(t => paperMode.specs.some(sp => sp.unit === t.unit));
+  /* 整卷模式：题源是这套卷的「单元 + 大题」配比，和「选择单元」互不影响 */
+  if (paperMode) {
+    return problemTemplates.filter(t => paperMode.specs.some(sp =>
+      sp.unit === t.unit && (sp.form || 'base') === formOf(t)));
+  }
   if (selectedUnits.length === 0) return [];
-  return problemTemplates.filter(t => selectedUnits.indexOf(t.unit) >= 0);
+  return problemTemplates.filter(t => selectedUnits.indexOf(t.unit) >= 0 && formOf(t) === formFilter);
 }
 
 function nextTemplate(pool) {
@@ -3866,6 +4545,9 @@ function makeState(problem) {
 
 function newQuestion(tpl) {
   const problem = makeProblem(tpl);
+  /* 大题类型要跟着题目走：渲染 / 判定 / PK 都是看 problem 上的标记 */
+  problem.noAnswer = !!tpl.noAnswer;
+  problem.form = tpl.form || 'base';
   return { tpl, problem, state: makeState(problem) };
 }
 
@@ -3883,11 +4565,16 @@ function buildSession() {
     /* 整卷：按这套卷的单元配比凑够题量，再打乱顺序 */
     const picked = [];
     paperMode.specs.forEach(sp => {
-      const unitPool = shuffleAll(problemTemplates.filter(t => t.unit === sp.unit));
+      const want = sp.form || 'base';
+      const unitPool = shuffleAll(problemTemplates.filter(t => t.unit === sp.unit && formOf(t) === want));
       if (!unitPool.length) return;
       for (let i = 0; i < sp.n; i++) picked.push(unitPool[i % unitPool.length]);
     });
     shuffleAll(picked).slice(0, paperMode.total).forEach(t => questions.push(newQuestion(t)));
+    /* 万一某个配比条目凑不满，用整卷题源补齐 —— 否则进度条永远到不了底、交卷也不触发 */
+    const loose = problemTemplates.filter(t => paperMode.specs.some(sp => sp.unit === t.unit));
+    while (questions.length < paperMode.total && loose.length) questions.push(newQuestion(pick(loose)));
+    SESSION_GOAL = questions.length;
     return;
   }
   const pool = poolTemplates();
@@ -3914,7 +4601,35 @@ function loadUnits() {
   selectedUnits = UNITS.map(u => u.key).filter(k => (saved || []).indexOf(k) >= 0);
 }
 function saveUnits() { LS.set('units', selectedUnits); }
-function countByUnit(key) { return problemTemplates.filter(t => t.unit === key).length; }
+/* 试卷上的「大题」：默认就是原来那些填空题 / 解决问题 */
+const FORM_DEFS = [
+  { key: 'base', name: '填空 · 解决问题', sub: '一步一步想清楚' },
+  { key: 'choice', name: '选择题', sub: '四选一，不填数字' },
+  { key: 'judge', name: '判断题并说理', sub: '看别人的说法对不对' }
+];
+function formOf(t) { return t.form || 'base'; }
+function countByUnit(key) {
+  return problemTemplates.filter(t => t.unit === key && formOf(t) === formFilter).length;
+}
+
+function renderFormChips() {
+  const wrap = $('formChips');
+  if (!wrap) return;
+  wrap.innerHTML = FORM_DEFS.map(f =>
+    `<button class="form-chip${f.key === formFilter ? ' on' : ''}" data-form="${f.key}"
+      aria-pressed="${f.key === formFilter}"><b>${f.name}</b><span>${f.sub}</span></button>`).join('');
+  wrap.querySelectorAll('[data-form]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (paperMode) exitPaper();          /* 换大题就说明不做这套卷了 */
+      formFilter = btn.dataset.form;
+      SFX.click();
+      renderFormChips();
+      renderUnitChips();
+      buildSession();
+      renderAll();
+    });
+  });
+}
 
 function renderUnitChips() {
   const wrap = $('unitChips');
@@ -3953,7 +4668,8 @@ function syncUnitUI() {
     const joined = selectedUnits.map(k => UNIT_MAP[k].short || UNIT_MAP[k].name).join('、');
     label = joined.length <= 16 ? joined : `已选 ${total} 个单元`;
   }
-  $('unitLabel').textContent = label;
+  const fdef = FORM_DEFS.find(f => f.key === formFilter);
+  $('unitLabel').textContent = (formFilter === 'base' ? '' : fdef.name + ' · ') + label;
 
   document.querySelectorAll('#unitChips [data-unit]').forEach(btn => {
     const on = selectedUnits.indexOf(btn.dataset.unit) >= 0;
@@ -4094,7 +4810,9 @@ function handleTimeout() {
     stepIdx: st.stepIdx + 1,
     stepQ: '超时未完成',
     wrongChoice: '（超时）',
-    correctChoice: q.problem.answer + (q.problem.unit ? ' ' + q.problem.unit : '')
+    correctChoice: q.problem.noAnswer && q.problem.steps.length
+      ? String(q.problem.steps[q.problem.steps.length - 1].options[q.problem.steps[q.problem.steps.length - 1].answer])
+      : q.problem.answer + (q.problem.unit ? ' ' + q.problem.unit : '')
   });
   addHistoryRecord(q, 0, false, TIME_LIMIT);
   render();
@@ -4199,7 +4917,9 @@ function render() {
   const p = q.problem;
   $('tag').textContent = p.tag;
   $('counter').textContent = `第 ${current + 1} / ${questions.length} 题`;
-  $('qtext').innerHTML = hl(p.text);
+  /* PK 只显示题干，选择题/判断题的问题句要补上，否则看不出在问什么 */
+  $('qtext').innerHTML = hl(p.text) +
+    (pkMode && p.noAnswer && p.steps[0] ? '<br><b>' + hl(p.steps[0].q) + '</b>' : '');
   renderFacts();
   renderPkRace();                 /* PK 显示竞速区，单人自动隐藏 */
   /* 错题重做：显示提示条，并藏掉「换一题」（否则会绕过重做把错题删掉） */
@@ -4407,6 +5127,15 @@ function renderAnswer() {
     return;
   }
 
+  if (p.noAnswer) {
+    /* 选择题 / 判断题：选完就是答完，不用再填数字 */
+    card.classList.add('locked');
+    inner.innerHTML = st.stepIdx >= p.steps.length
+      ? `<div class="lock-msg">✔ 这道题已经完成，点下面的「下一题」继续</div>`
+      : `<div class="lock-msg">🔒 这道题只要选出正确答案，<br>不用算最后的结果</div>`;
+    return;
+  }
+
   if (st.stepIdx < p.steps.length) {
     card.classList.add('locked');
     const leave = p.steps.length - st.stepIdx;
@@ -4468,6 +5197,10 @@ function handleChoose(stepIdx, optIdx) {
     addScore(10, false);
     incCombo();
     renderFacts(); renderSteps(); renderAnswer(); renderNav();
+    if (p.noAnswer && st.stepIdx >= p.steps.length) {
+      finalizeCorrect(q);         /* 选择题 / 判断题：选完即完成 */
+      return;
+    }
     if (st.stepIdx < p.steps.length) {
       requestAnimationFrame(() => {
         const nodes = document.querySelectorAll('#steps .step');
@@ -4511,12 +5244,15 @@ function handleChoose(stepIdx, optIdx) {
 /* 答对 / 答错：把结果结算到分、连对、历史、错题本 */
 function finalizeCorrect(q) {
   const p = q.problem, st = q.state;
-  const shown = `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
+  const lastStep = p.steps[p.steps.length - 1];
+  const shown = p.noAnswer
+    ? (lastStep ? String(lastStep.options[lastStep.answer]) : '')
+    : `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
   st.solved = true;
   st.timeUsed = timerEnabled ? (TIME_LIMIT - timerRemaining) : 0;
   stopTimer();
   $('timerBar').style.display = 'none';
-  showFb('ok', `✔ 完全正确！答案是 <b>${shown}</b>。<br><span class="fb-sub">${p.praise}</span>`);
+  showFb('ok', `✔ 完全正确！${p.noAnswer ? '' : '答案是 <b>' + shown + '</b>。'}<br><span class="fb-sub">${p.praise}</span>`);
   addScore(30, false);
   incCombo();
   doneCount++;
@@ -4999,6 +5735,11 @@ function replayAnim(el, cls) {
 
 /* 一题的 4 个候选答案：正确答案 + 3 个像样的干扰项，生成一次就固定 */
 function buildPkOptions(problem) {
+  /* 选择题 / 判断题本身就是一题一组选项，直接用它的 */
+  if (problem.noAnswer && problem.steps.length === 1) {
+    const s0 = problem.steps[0];
+    return { options: s0.options.slice(), answer: s0.answer, q: s0.q };
+  }
   const correct = String(problem.answer);
   const wrongs = numWrongs(problem.answer, []).map(String);
   const pool = shuffleAll([correct, ...wrongs.slice(0, 3)]);
@@ -5387,22 +6128,35 @@ function pigSet(which) {
    而且每次的数值都不一样，可以反复练。
    ========================================================= */
 const PAPER_SPECS = [
-  { name: '期末综合评价', sub: '全册配比 · 20 题', total: 20,
-    specs: [{ unit: '度量衡', n: 2 }, { unit: '除法', n: 5 }, { unit: '图形', n: 4 },
-            { unit: '大数', n: 3 }, { unit: '周长', n: 2 }, { unit: '平均数', n: 2 }, { unit: '探索', n: 2 }] },
-  { name: '期中自主评价', sub: '前三单元 · 16 题', total: 16,
-    specs: [{ unit: '度量衡', n: 3 }, { unit: '除法', n: 6 }, { unit: '图形', n: 4 }, { unit: '大数', n: 3 }] },
-  { name: '第一单元 · 除数是两位数的除法', sub: '单元素养达标练 · 12 题', total: 12, specs: [{ unit: '除法', n: 12 }] },
-  { name: '第二单元 · 多边形的认识', sub: '单元素养达标练 · 12 题', total: 12, specs: [{ unit: '图形', n: 12 }] },
-  { name: '第三单元 · 认识更大的数', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '大数', n: 10 }] },
-  { name: '第四单元 · 周长', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '周长', n: 10 }] },
-  { name: '第五单元 · 平均数', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '平均数', n: 10 }] },
-  { name: '第六单元 · 探索乐园', sub: '单元素养达标练 · 10 题', total: 10, specs: [{ unit: '探索', n: 10 }] },
-  { name: '度量衡的故事', sub: '素养达标练 · 8 题', total: 8, specs: [{ unit: '度量衡', n: 8 }] },
+  { name: '期末综合评价', sub: '全册配比 · 20 题（含选择题、判断题）', total: 20,
+    specs: [{ unit: '度量衡', n: 2 }, { unit: '除法', n: 4 }, { unit: '图形', n: 3 },
+            { unit: '大数', n: 2 }, { unit: '周长', n: 2 }, { unit: '平均数', n: 2 }, { unit: '探索', n: 2 },
+            { unit: '除法', n: 1, form: 'choice' }, { unit: '图形', n: 1, form: 'choice' },
+            { unit: '除法', n: 1, form: 'judge' }] },
+  { name: '期中自主评价', sub: '前三单元 · 16 题（含选择题、判断题）', total: 16,
+    specs: [{ unit: '度量衡', n: 3 }, { unit: '除法', n: 5 }, { unit: '图形', n: 3 }, { unit: '大数', n: 3 },
+            { unit: '除法', n: 1, form: 'choice' }, { unit: '图形', n: 1, form: 'judge' }] },
+  { name: '第一单元 · 除数是两位数的除法', sub: '单元素养达标练 · 12 题', total: 12,
+    specs: [{ unit: '除法', n: 10 }, { unit: '除法', n: 1, form: 'choice' }, { unit: '除法', n: 1, form: 'judge' }] },
+  { name: '第二单元 · 多边形的认识', sub: '单元素养达标练 · 12 题', total: 12,
+    specs: [{ unit: '图形', n: 10 }, { unit: '图形', n: 1, form: 'choice' }, { unit: '图形', n: 1, form: 'judge' }] },
+  { name: '第三单元 · 认识更大的数', sub: '单元素养达标练 · 10 题', total: 10,
+    specs: [{ unit: '大数', n: 8 }, { unit: '大数', n: 1, form: 'choice' }, { unit: '大数', n: 1, form: 'judge' }] },
+  { name: '第四单元 · 周长', sub: '单元素养达标练 · 10 题', total: 10,
+    specs: [{ unit: '周长', n: 8 }, { unit: '周长', n: 1, form: 'choice' }, { unit: '周长', n: 1, form: 'judge' }] },
+  { name: '第五单元 · 平均数', sub: '单元素养达标练 · 10 题', total: 10,
+    specs: [{ unit: '平均数', n: 8 }, { unit: '平均数', n: 1, form: 'choice' }, { unit: '平均数', n: 1, form: 'judge' }] },
+  { name: '第六单元 · 探索乐园', sub: '单元素养达标练 · 10 题', total: 10,
+    specs: [{ unit: '探索', n: 8 }, { unit: '探索', n: 1, form: 'choice' }, { unit: '探索', n: 1, form: 'judge' }] },
+  { name: '度量衡的故事', sub: '素养达标练 · 8 题', total: 8,
+    specs: [{ unit: '度量衡', n: 6 }, { unit: '度量衡', n: 1, form: 'choice' }, { unit: '度量衡', n: 1, form: 'judge' }] },
   { name: '专题素养达标练（一）数与运算', sub: '除法 + 更大的数 · 14 题', total: 14,
-    specs: [{ unit: '除法', n: 8 }, { unit: '大数', n: 6 }] },
+    specs: [{ unit: '除法', n: 6 }, { unit: '大数', n: 5 },
+            { unit: '除法', n: 1, form: 'choice' }, { unit: '大数', n: 1, form: 'choice' },
+            { unit: '除法', n: 1, form: 'judge' }] },
   { name: '专题素养达标练（二）图形与几何 · 统计与概率 · 探索乐园', sub: '14 题', total: 14,
-    specs: [{ unit: '图形', n: 5 }, { unit: '周长', n: 4 }, { unit: '平均数', n: 2 }, { unit: '探索', n: 3 }] }
+    specs: [{ unit: '图形', n: 4 }, { unit: '周长', n: 4 }, { unit: '平均数', n: 2 }, { unit: '探索', n: 2 },
+            { unit: '图形', n: 1, form: 'choice' }, { unit: '图形', n: 1, form: 'judge' }] }
 ];
 
 let paperLastSpec = null;      /* 「再来一套」用 */
@@ -5504,6 +6258,7 @@ $('paperBarExit').addEventListener('click', () => { SFX.click(); exitPaper(); })
    启动
    ========================================================= */
 loadUnits();
+renderFormChips();
 renderUnitChips();
 buildSession();
 renderAll();
