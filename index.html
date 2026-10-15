@@ -1130,7 +1130,21 @@ const LETTER = 'ABCD';
    ========================================================= */
 function S(q, correct, wrongs, extra) {
   const c = String(correct);
-  const pool = shuffleAll([c, ...wrongs.slice(0, 3).map(String)]);
+  /* ⚠️ 干扰项偶尔会和正确项、或和另一个干扰项撞成同一串
+     —— 根因是选项里的两个数恰好相等（6÷6 撞 6÷6、先算 10×2 撞 先算 10×2、5−5 撞 5−5）。
+     老做法是补个「？」凑数，屏幕上就会出现「5 厘米、5 厘米、5 厘米？」这种鬼东西，
+     而且还会把「四个选项互不相同」这条检查绕过去（补完确实不重复了）。
+     现在改成：把撞车那句里的某个数轻轻改一下，让它变回一句「看起来合理的错答案」。
+     真改不出来才退回老办法 —— 验收里有一条哨兵专门盯着「？」，出现了就报错。 */
+  const used = [c];
+  const fixed = wrongs.slice(0, 3).map(String).map(w => {
+    let cand = w;
+    if (used.indexOf(cand) >= 0) cand = repairOption(cand, used);
+    if (used.indexOf(cand) >= 0) cand = cand + '？';
+    used.push(cand);
+    return cand;
+  });
+  const pool = shuffleAll([c, ...fixed]);
   const e = extra || {};
   return {
     q,
@@ -1186,18 +1200,39 @@ function numWrongs(v, extra) {
   }
   return out;
 }
+/* 干扰项撞车时的修复：把撞车那句里的某个数轻轻改一下，变成另一句「看起来合理的错答案」。
+   改不出来才退回补「？」。抽出来是因为 textWrongs 和 S 都要用。 */
+function repairOption(str, used) {
+  const nums = String(str).match(/\d+(?:\.\d+)?/g) || [];
+  for (let i = 0; i < nums.length; i++) {
+    const v = Number(nums[i]);
+    const cands = [v + 1, v - 1, v + 2, v - 2];
+    for (let j = 0; j < cands.length; j++) {
+      const nv = cands[j];
+      if (!isFinite(nv) || nv <= 0) continue;
+      const t = String(str).replace(nums[i], String(Math.round(nv * 100) / 100));
+      if (used.indexOf(t) < 0) return t;
+    }
+  }
+  return String(str) + '？';
+}
+
 /* 三个文字型干扰项必须与正确项不同 */
 function textWrongs(correct, list) {
   const c = String(correct);
   const out = [];
-  list.forEach(x => {
-    const s = String(x);
-    if (out.length < 3 && s !== c && !out.includes(s)) out.push(s);
+  const taken = [c];
+  list.slice(0, 3).map(String).forEach(x => {
+    let cand = x;
+    if (taken.indexOf(cand) >= 0) cand = repairOption(cand, taken);
+    if (taken.indexOf(cand) >= 0) cand = cand + '？';      /* 实在改不出来 */
+    taken.push(cand);
+    out.push(cand);
   });
   let k = 1;
   while (out.length < 3) {
     const s = c + '？'.repeat(k);
-    if (!out.includes(s)) out.push(s);
+    if (taken.indexOf(s) < 0) { taken.push(s); out.push(s); }
     k++;
   }
   return out;
@@ -4038,18 +4073,34 @@ const problemTemplates = [
 {
   unit: '图形', kp: '选择题·三边关系', form: 'choice', noAnswer: true,
   gen() {
-    const a = randInt(4, 9);
-    const b = randInt(a, 12);
-    const c = randInt(b, a + b - 1);          /* 正确组：任意两边之和大于第三边 */
+    /* ⚠️ 干扰项必须互不相同、而且都不能和正确项那句一模一样。
+       曾经写成 [a,b,a+b]/[b,c,b+c]/[a,c,a+c]，a=b=c 时三句会撞成同一串，
+       而 textWrongs 的兜底是「补个？」，屏幕上就出现「5 厘米、5 厘米、5 厘米」这种鬼东西。
+       这里改用「确定围不成」的几种构造，并且真的去重，不够就重来。 */
     const fmt = t => `${t[0]} 厘米、${t[1]} 厘米、${t[2]} 厘米`;
+    let sid = null, wrongs = null;
+    for (let guard = 0; guard < 60 && !wrongs; guard++) {
+      const three = [randInt(3, 8), randInt(3, 9), randInt(3, 9)].sort((x, y) => x - y);
+      const s0 = three[0], s1 = three[1], s2 = three[2];
+      if (s0 + s1 <= s2) continue;             /* 正确的那组必须真能围成 */
+      const right = fmt([s0, s1, s2]);
+      const cand = [
+        fmt([s0, s1, s0 + s1]),                /* 两短边之和正好等于最长边 → 围不成 */
+        fmt([s0, s1, s0 + s1 + 1]),
+        fmt([s0, s2, s0 + s2]),
+        fmt([s1, s2, s1 + s2])
+      ];
+      const uniq = [];
+      cand.forEach(x => { if (x !== right && uniq.indexOf(x) < 0) uniq.push(x); });
+      if (uniq.length >= 3) { sid = right; wrongs = uniq.slice(0, 3); }
+    }
     const SC = pick(SC_NAME);
     return {
       tag: '四上 · 选择题',
       text: `${SC} 在用小棒围三角形。下面哪一组小棒能围成一个三角形？`,
       facts: ['三角形任意两边长度的和大于第三边'],
       steps: [
-        S2('哪一组小棒能围成三角形？', fmt([a, b, c]),
-          [fmt([a, b, a + b]), fmt([b, c, b + c]), fmt([a, c, a + c])],
+        S2('哪一组小棒能围成三角形？', sid, wrongs,
           { ok: '对！这一组里任意两边之和都大于第三边。', no: '要满足「任意两边之和大于第三边」：最短的两条加起来也要比最长的那条长。' })
       ],
       answer: 0, unit: '',
