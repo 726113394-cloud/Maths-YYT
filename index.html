@@ -4544,6 +4544,18 @@ let wrongBook = LS.get('wrongBook', []);
    所以「这孩子哪些地方错过」这件事不会因为答对重做就丢掉。 */
 let wrongLog = LS.get('wrongLog', []);
 let history = LS.get('history', []);
+/* 累计统计必须单独存：练习历史列表有 80 条上限，累计数不能跟着那份「被截断的列表」走
+   —— 否则做到第 80 题以后，「已做题目 / 累计得分」就永远冻住不动了（家长反馈过这个）。
+   老数据没有 stats：按当前列表先估一个，别让数字往回跳。 */
+let stats = LS.get('stats', null);
+if (!stats || typeof stats.done !== 'number') {
+  stats = {
+    done: history.length,
+    score: history.reduce((sum, r) => sum + (r.score || 0), 0),
+    perfect: history.filter(r => r.perfect).length
+  };
+  LS.set('stats', stats);
+}
 
 const plain = t => String(t).replace(/<[^>]*>/g, '');
 
@@ -4921,8 +4933,12 @@ function addHistoryRecord(q, pts, perfect, timeUsed) {
     score: pts, perfect, timeUsed,
     timestamp: Date.now()
   });
-  if (history.length > 80) history = history.slice(0, 80);
+  if (history.length > 80) history = history.slice(0, 80);   /* 只截列表，不动累计数 */
   LS.set('history', history);
+  stats.done += 1;
+  stats.score += (pts || 0);
+  if (perfect) stats.perfect += 1;
+  LS.set('stats', stats);
 }
 function renderWrongBadge() {
   const b = $('wrongBadge');
@@ -5709,19 +5725,26 @@ $('clearWrong').addEventListener('click', () => {
 function renderHistory() {
   const statsEl = $('historyStats'), list = $('historyList');
   if (!list || !statsEl) return;
-  if (history.length === 0) {
+  if (stats.done === 0 && history.length === 0) {
     statsEl.innerHTML = '';
     list.innerHTML = `<div class="empty-state">
       <span class="em-icon">📖</span>还没有练习记录<br>去练习页做几道题吧！</div>`;
     return;
   }
-  const totalScore = history.reduce((s, r) => s + (r.score || 0), 0);
-  const perfectTotal = history.filter(r => r.perfect).length;
+  /* 这三个数是「累计」：一直做就一直涨，不受下面列表 80 条上限影响 */
   statsEl.innerHTML = `
-    <div class="stat-box"><span class="num">${history.length}</span><span class="lbl">已做题目</span></div>
-    <div class="stat-box"><span class="num">${totalScore}</span><span class="lbl">累计得分</span></div>
-    <div class="stat-box"><span class="num">${perfectTotal}</span><span class="lbl">完美通关</span></div>`;
-  list.innerHTML = history.map(r => {
+    <div class="stat-box"><span class="num">${stats.done}</span><span class="lbl">累计做题</span></div>
+    <div class="stat-box"><span class="num">${stats.score}</span><span class="lbl">累计得分</span></div>
+    <div class="stat-box"><span class="num">${stats.perfect}</span><span class="lbl">完美通关</span></div>`;
+  if (history.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <span class="em-icon">📖</span>记录列表是空的<br>上面的累计数会一直保留</div>`;
+    return;
+  }
+  const moreHint = stats.done > history.length
+    ? `<div class="hist-more" style="padding:0 0 10px;">累计做过 ${stats.done} 题，这里只列最近 ${history.length} 条</div>`
+    : '';
+  list.innerHTML = moreHint + history.map(r => {
     const t = r.timeUsed > 0 ? `${r.timeUsed}s` : '—';
     return `<div class="record-card ok">
       <div class="record-head">
@@ -5738,12 +5761,14 @@ function renderHistory() {
 }
 
 $('clearHistory').addEventListener('click', () => {
-  if (history.length === 0) { toastMsg('还没有练习记录'); return; }
+  if (history.length === 0 && stats.done === 0) { toastMsg('还没有练习记录'); return; }
   askAdmin(() => {
     history = [];
     LS.set('history', history);
+    stats = { done: 0, score: 0, perfect: 0 };   /* 清空就把累计也归零，否则数字对不上 */
+    LS.set('stats', stats);
     renderHistory();
-    toastMsg('练习历史已清空');
+    toastMsg('练习历史和累计统计都已清空');
   });
 });
 
