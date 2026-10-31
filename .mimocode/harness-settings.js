@@ -65,9 +65,10 @@ safe('初始', function () {
   q('#segRender button[data-v="high"]').click();
   ok('选高级后 data-perf=high', de.dataset.perf === 'high', de.dataset.perf);
   ok('高级档高亮', q('#segRender button[data-v="high"]').classList.contains('on'));
-  ok('高级档给卡片开毛玻璃',
-     getComputedStyle(q('.card')).backdropFilter === 'blur(7px)',
-     getComputedStyle(q('.card')).backdropFilter);
+  /* 高级档现在是 Gost 那套液态玻璃：blur + saturate，还带跟随光斑 */
+  var bf = getComputedStyle(q('.card')).backdropFilter;
+  ok('高级档给卡片开液态玻璃', /blur\(2[0-9]px\)/.test(bf) && /saturate/.test(bf), bf);
+  ok('高级档卡片挂了跟随光斑', !!q('.card .glare'));
 
   /* 渲染：流畅 → 强制 low */
   q('#segRender button[data-v="smooth"]').click();
