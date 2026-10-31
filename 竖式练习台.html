@@ -87,18 +87,52 @@ body{
   background:linear-gradient(180deg,transparent 62%,#DDD4FF 62%,#DDD4FF 92%,transparent 92%);
   padding:0 2px;}
 
+/* ===== PK：同台竞技（一体机上用，每人一栏各做各的题） ===== */
 .v-pk{margin-bottom:10px;}
-.vp-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:16px;
+.vp-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;
   background:#fff;box-shadow:var(--shadow-2);}
-.vp-p{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
-  padding:7px 8px;border-radius:12px;background:#F6F3FF;
-  font-size:12.5px;font-weight:900;color:#8478BC;transition:.2s;}
-.vp-p em{font-style:normal;font-size:16px;font-weight:900;color:#6B4CE6;}
-.vp-p.on{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;}
-.vp-p.on em{color:#fff;}
-.vp-turn{flex:none;font-size:11.5px;font-weight:900;color:#E8944A;letter-spacing:.3px;}
-.v-pk-win{margin-top:8px;padding:9px 12px;border-radius:12px;background:#FFF7E8;
-  border:1.5px solid #FFD9AB;font-size:12.5px;font-weight:900;color:#B26A00;line-height:1.7;}
+.vp-title{flex:none;font-size:14.5px;font-weight:900;color:#4B3A6B;letter-spacing:.3px;}
+.vp-rule{flex:1;min-width:0;font-size:12.5px;font-weight:800;color:#8B7FD0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vp-rule.win{color:#1FA85A;font-size:13.5px;}
+.vp-left{flex:none;font-size:18px;font-weight:900;color:#E63A3A;
+  font-variant-numeric:tabular-nums;min-width:56px;text-align:right;}
+
+.v-pk-panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:12px;margin-bottom:10px;align-items:start;}
+.vpp{background:#fff;border-radius:20px;padding:11px 13px 13px;
+  box-shadow:var(--shadow-2);border:3px solid transparent;transition:border-color .2s;}
+.vpp.win{border-color:#2ED573;box-shadow:0 4px 0 rgba(46,213,115,.2),0 14px 30px rgba(46,213,115,.22);}
+.vpp-head{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.vpp-name{font-size:14px;font-weight:900;color:#4B3A6B;}
+.vpp-done{font-size:11.5px;font-weight:800;color:#8B7FD0;background:#F4F0FF;
+  border-radius:99px;padding:2px 8px;}
+.vpp-score{margin-left:auto;font-size:19px;font-weight:900;color:#6B4CE6;}
+.vpp-score i{font-style:normal;font-size:11px;color:#A79FC2;font-weight:800;margin-left:1px;}
+.vpp-stage{margin:6px auto 8px;overflow-x:auto;}
+.vpp-stage .vs{--vc:26px;--vb:10px;--vr:30px;margin:0 auto;}
+.vpp-stage .vs-cell{font-size:15px;}
+.vpp-q{font-size:13px;font-weight:800;color:#4a4166;line-height:1.55;margin:0 0 8px;
+  min-height:38px;}
+.vpp-q b{color:#5B3FD9;}
+.vpp-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.vpp-opt{min-height:48px;border-radius:13px;border:2.5px solid var(--line);
+  background:#F8F6FF;font-family:inherit;font-size:19px;font-weight:900;
+  color:var(--ink-2);cursor:pointer;box-shadow:0 2px 0 var(--line-2);transition:transform .12s;}
+.vpp-opt:active{transform:scale(.97);}
+.vpp-opt.wrong{background:#FFF6EC;border-color:#FFD9AB;color:#b06a10;
+  text-decoration:line-through;}
+.vpp-fin{grid-column:1 / -1;text-align:center;padding:14px 0;font-size:14px;
+  font-weight:900;color:#1FA85A;}
+.vpp-msg{font-size:11.5px;font-weight:800;color:#E8942A;min-height:17px;margin-top:6px;
+  line-height:1.5;}
+.vpp-msg.ok{color:#1FA85A;}
+
+/* PK 时单人那套全部让位，页面铺开（一体机上用，不按手机比例收窄） */
+body.vpk .v-hero,body.vpk .v-stage,body.vpk .v-coach,
+body.vpk .v-actions,body.vpk .v-foot{display:none !important;}
+body.vpk .wrap{max-width:min(1400px,97vw) !important;}
+body.vpk .v-levels{margin-bottom:10px;}
 
 .v-foot{margin:14px 4px 0;font-size:11.5px;line-height:1.8;font-weight:700;
   color:var(--muted);text-align:center;}
@@ -301,11 +335,13 @@ html[data-perf="low"] body{background-attachment:scroll;}
 
   <div class="v-pk" id="vPkBar" style="display:none">
     <div class="vp-row">
-      <span class="vp-p" id="vp0"><b>玩家1</b><em>0</em></span>
-      <span class="vp-turn" id="vpTurn">玩家1 的回合</span>
-      <span class="vp-p" id="vp1"><b>玩家2</b><em>0</em></span>
+      <span class="vp-title">⚔️ 同台竞技</span>
+      <span class="vp-rule" id="vpRule">各自做自己的题</span>
+      <span class="vp-left" id="vpLeft">150s</span>
     </div>
   </div>
+
+  <div class="v-pk-panels" id="vPkPanels" style="display:none"></div>
 
   <div class="v-coach" id="vCoach">
     <div class="v-track"><div class="v-track-fill" id="vTrackFill"></div></div>
@@ -751,11 +787,6 @@ function vertRenderCoach() {
       : `验算：${p.b} × ${p.q} = ${p.a} ✔`;
     done.innerHTML = `
       <div class="v-done">
-        ${vPk.on ? '<div class="v-pk-win">⚔️ PK 结果：' +
-          (vPk.score[0] === vPk.score[1]
-            ? ('平手 ' + vPk.score[0] + ' : ' + vPk.score[1])
-            : ('玩家' + (vPk.score[0] > vPk.score[1] ? 1 : 2) + ' 赢　' +
-               vPk.score[0] + ' : ' + vPk.score[1])) + '</div>' : ''}
         <div class="v-done-h">✅ 竖式做完啦</div>
         <div class="v-done-big">${p.a} ÷ ${p.b} = <b>${p.q}</b>${rem ? ` …… <b>${rem}</b>` : ''}</div>
         <div class="v-done-check">${check}<br>有余数的除法，余数一定要比除数 ${p.b} 小。</div>
@@ -823,7 +854,6 @@ function vertAnswer(optIdx) {
     st.fb = { t: 'ok', h: '✔ ' + s.ok };
     st.idx++;
     SFX.correct();
-    if (vPk.on) { vPk.score[vPk.turn] += 10; vPk.turn = 1 - vPk.turn; }
     if (st.idx >= p.slots.length) vertFinish();
   } else {
     st.tried[st.idx] = st.tried[st.idx] || [];
@@ -831,8 +861,6 @@ function vertAnswer(optIdx) {
     st.wrongCount++;
     st.fb = { t: 'no', h: '✘ ' + s.hint };
     SFX.wrong();
-    if (vPk.on) { vPk.score[vPk.turn] = Math.max(0, vPk.score[vPk.turn] - 5);
-                  vPk.turn = 1 - vPk.turn; }
   }
   vertRender();
 }
@@ -872,32 +900,180 @@ function vertEnter() {
   else vertRender();
 }
 
-/* ---------- 双人 PK：轮流答，答对 +10 / 答错 −5，每答一次换人 ---------- */
-const vPk = { on: false, turn: 0, score: [0, 0] };
+/* =========================================================
+   PK：同台竞技（教室一体机用）
+   每人一份**自己的竖式**，各自一格一格往下填，互不干扰；
+   比谁先做完 PK_TARGET 道，同时也算分。全局倒计时到点即结算。
+   面板渲染复用 gridHTML(p, st)，和单人页画法完全一致。
+   ========================================================= */
+const PK_TARGET = 3;
+const PK_TIME = 150;          /* 秒 */
+const PK_STEP = 5;            /* 每答对一步 */
+const PK_DONE = 20;           /* 做完一道 */
 
-function vPkPaint() {
-  const bar = $('vPkBar');
-  if (!bar) return;
-  bar.style.display = vPk.on ? '' : 'none';
-  const btn = $('vPk');
-  if (btn) btn.textContent = vPk.on ? '⚔️ 退出 PK' : '⚔️ PK';
-  if (!vPk.on) return;
-  [0, 1].forEach(i => {
-    const el = $('vp' + i);
-    if (!el) return;
-    el.querySelector('em').textContent = vPk.score[i];
-    el.classList.toggle('on', vPk.turn === i);
-  });
-  const t = $('vpTurn');
-  if (t) t.textContent = '玩家' + (vPk.turn + 1) + ' 的回合';
+const vPk = {
+  on: false, over: false, endAt: 0, tick: null, winner: -1, rule: '', players: []
+};
+
+function vPkDeal(pl) {
+  const core = vertMakeProblem();
+  core.slots = vertBuildSlots(core);
+  pl.p = core;
+  pl.st = { idx: 0, filled: {}, justFilled: -1, tried: {}, wrongCount: 0 };
+  pl.msg = '';
 }
 
+function vPkPlayer(i) {
+  return { name: '玩家' + (i + 1), p: null, st: null, score: 0, done: 0, msg: '', ok: false };
+}
+
+function vPkStart() {
+  vPk.on = true;
+  vPk.over = false;
+  vPk.winner = -1;
+  vPk.rule = '各自做自己的题 · 先做完 ' + PK_TARGET + ' 道者赢';
+  vPk.players = [vPkPlayer(0), vPkPlayer(1)];
+  vPk.players.forEach(vPkDeal);
+  vPk.endAt = Date.now() + PK_TIME * 1000;
+  document.body.classList.add('vpk');
+  clearInterval(vPk.tick);
+  vPk.tick = setInterval(vPkTick, 250);
+  SFX.levelup && SFX.levelup();
+  vPkTick();
+  vPkPaint();          /* 发完题立刻画一次，否则面板要等下一次作答才出现 */
+}
+
+function vPkStop() {
+  vPk.on = false;
+  vPk.over = false;
+  clearInterval(vPk.tick);
+  vPk.tick = null;
+  document.body.classList.remove('vpk');
+  const bar = $('vPkBar'), box = $('vPkPanels');
+  if (bar) bar.style.display = 'none';
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btn = $('vPk');
+  if (btn) btn.textContent = '⚔️ PK';
+}
+
+function vPkLeft() {
+  return Math.max(0, Math.ceil((vPk.endAt - Date.now()) / 1000));
+}
+
+function vPkTick() {
+  if (!vPk.on) return;
+  const el = $('vpLeft');
+  if (el) el.textContent = vPkLeft() + 's';
+  if (vPkLeft() <= 0) vPkEnd('时间到');
+}
+
+function vPkAnswer(pi, optIdx) {
+  if (!vPk.on || vPk.over) return;
+  const pl = vPk.players[pi];
+  if (!pl || !pl.p) return;
+  const s0 = pl.p.slots[pl.st.idx];
+  if (!s0) return;
+  if ((pl.st.tried[pl.st.idx] || []).indexOf(optIdx) >= 0) return;
+
+  if (s0.opts[optIdx] === s0.ans) {
+    pl.st.filled[pl.st.idx] = true;
+    pl.st.justFilled = pl.st.idx;
+    pl.st.idx++;
+    pl.score += PK_STEP;
+    pl.msg = '✔ ' + s0.ok;
+    pl.ok = true;
+    SFX.correct();
+    if (pl.st.idx >= pl.p.slots.length) {
+      pl.done++;
+      pl.score += PK_DONE;
+      if (pl.done >= PK_TARGET) { vPkPaint(); vPkEnd('', pi); return; }
+      vPkDeal(pl);
+      pl.msg = '✅ 完成第 ' + pl.done + ' 道，下一道来了（+' + PK_DONE + '）';
+    }
+  } else {
+    pl.st.tried[pl.st.idx] = pl.st.tried[pl.st.idx] || [];
+    pl.st.tried[pl.st.idx].push(optIdx);
+    pl.st.wrongCount++;
+    pl.score = Math.max(0, pl.score - 2);
+    pl.msg = '✘ ' + s0.hint;
+    pl.ok = false;
+    SFX.wrong();
+  }
+  vPkPaint();
+}
+
+function vPkEnd(reason, winIdx) {
+  if (vPk.over) return;
+  vPk.over = true;
+  clearInterval(vPk.tick);
+  vPk.tick = null;
+  let best = 0;
+  if (typeof winIdx === 'number') best = winIdx;
+  else {
+    vPk.players.forEach((pl, i) => {
+      const b = vPk.players[best];
+      if (pl.done > b.done || (pl.done === b.done && pl.score > b.score)) best = i;
+    });
+  }
+  vPk.winner = best;
+  const b = vPk.players[best];
+  vPk.rule = (reason ? reason + '　' : '') + '🏆 ' + b.name + ' 赢（' + b.done + ' 道 / ' + b.score + ' 分）';
+  vPkPaint();
+  SFX.perfect && SFX.perfect();
+}
+
+function vPkPaint() {
+  const bar = $('vPkBar'), box = $('vPkPanels');
+  const btn = $('vPk');
+  if (btn) btn.textContent = vPk.on ? '⚔️ 退出 PK' : '⚔️ PK';
+  if (!bar || !box) return;
+  bar.style.display = vPk.on ? '' : 'none';
+  box.style.display = vPk.on ? '' : 'none';
+  if (!vPk.on) return;
+
+  const rule = $('vpRule');
+  if (rule) {
+    rule.textContent = vPk.rule;
+    rule.classList.toggle('win', vPk.over);
+  }
+  const left = $('vpLeft');
+  if (left) left.textContent = vPkLeft() + 's';
+
+  box.innerHTML = vPk.players.map((pl, pi) => {
+    const g = pl.p ? gridHTML(pl.p, pl.st) : { cols: 'repeat(1,var(--vc))', html: '' };
+    const s0 = pl.p ? pl.p.slots[pl.st.idx] : null;
+    const tried = (s0 && pl.st.tried[pl.st.idx]) || [];
+    const opts = s0 ? s0.opts.map((t, i) =>
+      '<button class="vpp-opt' + (tried.indexOf(i) >= 0 ? ' wrong' : '') +
+      '" data-pk="' + pi + '" data-opt="' + i + '"' +
+      (tried.indexOf(i) >= 0 ? ' disabled' : '') + '>' + t + '</button>').join('')
+      : '<div class="vpp-fin">全部做完 🎉</div>';
+    const isWin = vPk.over && vPk.winner === pi;
+    return '<div class="vpp' + (isWin ? ' win' : '') + '">' +
+      '<div class="vpp-head">' +
+      '<span class="vpp-name">' + pl.name + '</span>' +
+      '<span class="vpp-done">' + pl.done + '/' + PK_TARGET + ' 道</span>' +
+      '<span class="vpp-score">' + pl.score + '<i>分</i></span></div>' +
+      '<div class="vpp-stage"><div class="vs" style="grid-template-columns:' + g.cols + '">' +
+      g.html + '</div></div>' +
+      '<div class="vpp-q">' + (s0 ? s0.ask : '') + '</div>' +
+      '<div class="vpp-opts">' + opts + '</div>' +
+      '<div class="vpp-msg' + (pl.ok ? ' ok' : '') + '">' + (pl.msg || '') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+/* 面板按钮走事件委托：一人一套按钮，靠 data-pk 区分是谁点的 */
+document.addEventListener('click', function (e) {
+  const b = e.target.closest ? e.target.closest('[data-pk]') : null;
+  if (!b || b.disabled) return;
+  vPkAnswer(+b.dataset.pk, +b.dataset.opt);
+});
+
 function vPkToggle() {
-  vPk.on = !vPk.on;
-  vPk.turn = 0;
-  vPk.score = [0, 0];
   SFX.click();
-  vertNewQuestion();
+  if (vPk.on) { vPkStop(); vertNewQuestion(); }
+  else vPkStart();
 }
 
 /* ---------- 事件 ---------- */
