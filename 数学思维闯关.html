@@ -1189,7 +1189,10 @@ html[data-perf="low"] .fact{animation:none;}
    音效（Web Audio 合成，零外链）
    ========================================================= */
 let audioCtx = null;
-let soundEnabled = true;
+/* 站台设置里关掉音效时，练习页也跟着静音（同一个键） */
+let soundEnabled = (function () {
+  try { return localStorage.getItem('math4a.sound') !== 'off'; } catch (e) { return true; }
+})();
 
 function ensureAudio() {
   if (!soundEnabled) return false;

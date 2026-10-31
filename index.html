@@ -580,6 +580,14 @@ html[data-motion="off"] .tour-ring::after{animation:none;opacity:.7;}
       </div>
     </div>
 
+    <div class="pset-row">
+      <span class="pset-k">音效</span>
+      <div class="seg" id="segSound" role="group" aria-label="音效">
+        <button type="button" data-v="on">开</button>
+        <button type="button" data-v="off">关</button>
+      </div>
+    </div>
+
     <div class="pset-btns">
       <button class="sbtn" id="fsBtn" type="button">
         <span class="sico">⛶</span><span class="slb">全屏</span><span class="shint" id="fsHint">未开启</span>
@@ -1821,7 +1829,10 @@ html[data-perf="low"] .fact{animation:none;}
    音效（Web Audio 合成，零外链）
    ========================================================= */
 let audioCtx = null;
-let soundEnabled = true;
+/* 站台设置里关掉音效时，练习页也跟着静音（同一个键） */
+let soundEnabled = (function () {
+  try { return localStorage.getItem('math4a.sound') !== 'off'; } catch (e) { return true; }
+})();
 
 function ensureAudio() {
   if (!soundEnabled) return false;
@@ -8735,7 +8746,10 @@ html[data-perf="low"] body{background-attachment:scroll;}
    音效（Web Audio 合成，零外链）
    ========================================================= */
 let audioCtx = null;
-let soundEnabled = true;
+/* 站台设置里关掉音效时，练习页也跟着静音（同一个键） */
+let soundEnabled = (function () {
+  try { return localStorage.getItem('math4a.sound') !== 'off'; } catch (e) { return true; }
+})();
 
 function ensureAudio() {
   if (!soundEnabled) return false;
@@ -9357,8 +9371,71 @@ vertEnter();
     toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 1600);
   }
 
+  /* ---------- 音效 ----------
+     Web Audio 现场合成，不加载任何音频文件：一个 4KB 的合成器
+     比几十个 mp3 省事，也不会因为文件路径在不同机器上失效。 */
+  var SOUND_PREF = loadPref('sound', ['on', 'off'], 'on');
+  var actx = null;
+  function audioCtx() {
+    if (SOUND_PREF === 'off') return null;
+    try {
+      if (!actx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) { SOUND_PREF = 'off'; return null; }
+        actx = new AC();
+      }
+      if (actx.state === 'suspended') actx.resume().catch(function () {});
+      return actx;
+    } catch (e) { SOUND_PREF = 'off'; return null; }
+  }
+  function note(freq, dur, type, vol, delay) {
+    var ac = audioCtx();
+    if (!ac) return;
+    try {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = type || 'sine';
+      o.frequency.value = freq;
+      var t0 = ac.currentTime + (delay || 0);
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.start(t0); o.stop(t0 + dur + 0.04);
+    } catch (e) {}
+  }
+  var SFX = {
+    tap:  function () { note(880, 0.05, 'sine', 0.07); },
+    tick: function () { note(1046, 0.04, 'sine', 0.06); },
+    open: function () { note(523, 0.07, 'sine', 0.09); note(784, 0.09, 'sine', 0.08, 0.05); },
+    close:function () { note(523, 0.06, 'sine', 0.07); note(392, 0.08, 'sine', 0.06, 0.05); },
+    step: function () { note(660, 0.05, 'sine', 0.07); },
+    done: function () { note(523, 0.08, 'sine', 0.1); note(659, 0.08, 'sine', 0.1, 0.07);
+                        note(784, 0.1, 'sine', 0.1, 0.14); note(1046, 0.16, 'sine', 0.1, 0.21); }
+  };
+  function play(name) { if (SOUND_PREF !== 'off' && SFX[name]) SFX[name](); }
+
+  /* 点哪儿响什么：卡片/抽屉条目厚重一点，三档按钮轻一点 */
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('button, .card, .pitem') : null;
+    if (!el || el.disabled) return;
+    if (el.closest('.tour')) { play('step'); return; }
+    if (el.classList.contains('card')) { play('open'); return; }
+    if (el.closest('.seg')) { play('tick'); return; }
+    play('tap');
+  }, true);
+
+  function paintSound() {
+    var box = document.getElementById('segSound');
+    if (!box) return;
+    Array.prototype.forEach.call(box.children, function (b) {
+      b.classList.toggle('on', b.dataset.v === SOUND_PREF);
+      b.setAttribute('aria-pressed', b.dataset.v === SOUND_PREF ? 'true' : 'false');
+    });
+  }
+
   /* ---------- 抽屉 ---------- */
   function setMenu(on) {
+    if (panel.classList.contains('open') !== on) play(on ? 'open' : 'close');
     panel.classList.toggle('open', on);
     mask.classList.toggle('on', on);
     menuBtn.classList.toggle('open', on);
@@ -9536,6 +9613,7 @@ vertEnter();
   function openSettings() {
     if (!setSheet) return;
     closeFactsLike();
+    play('open');
     setSheet.classList.add('on');
     setMaskEl.classList.add('on');
     setSheet.setAttribute('aria-hidden', 'false');
@@ -9593,6 +9671,12 @@ vertEnter();
     MOTION_PREF = v;
     try { localStorage.setItem('math4a.motion', v); } catch (e) {}
     applySettings();
+  });
+  bindSeg('segSound', function (v) {
+    SOUND_PREF = v;
+    try { localStorage.setItem('math4a.sound', v); } catch (e) {}
+    paintSound();
+    if (v === 'on') play('open');      /* 立刻让他听见 */
   });
   bindSeg('segTilt', function (v) {
     TILT_PREF = v;
@@ -9839,6 +9923,7 @@ vertEnter();
 
   function tourStart() {
     if (!tourEl) return;
+    play('open');
     tourEl.classList.add('on');
     tourEl.setAttribute('aria-hidden', 'false');
     s_setTourFlag();
@@ -9847,6 +9932,7 @@ vertEnter();
 
   function tourEnd() {
     if (!tourEl) return;
+    play('done');
     unLift();
     tourEl.classList.remove('on');
     tourEl.setAttribute('aria-hidden', 'true');
@@ -9893,6 +9979,7 @@ vertEnter();
 
   /* ---------- 启动 ---------- */
   renderStats();
+  paintSound();
   mountCardFx();
   applySettings();
   paintFs();
