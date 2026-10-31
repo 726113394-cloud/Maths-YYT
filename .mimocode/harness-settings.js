@@ -34,7 +34,7 @@ safe('初始', function () {
   /* 两个三段控件 */
   ok('渲染控件 3 个按钮', q('#segRender').querySelectorAll('button').length === 3);
   ok('动画控件 3 个按钮', q('#segMotion').querySelectorAll('button').length === 3);
-  ok('渲染默认档高亮', q('#segRender button[data-v="auto"]').classList.contains('on'));
+  ok('渲染默认档高亮（默认=流畅）', q('#segRender button[data-v="smooth"]').classList.contains('on'));
   ok('动画默认档高亮', q('#segMotion button[data-v="auto"]').classList.contains('on'));
 
   /* 按钮尺寸：学生用手机，靶子要够大 */
@@ -51,12 +51,14 @@ safe('初始', function () {
   ok('全屏按钮有状态提示', !!q('#fsHint') && q('#fsHint').textContent.length > 0, q('#fsHint').textContent);
 
   /* 按钮离屏幕底部要有距离：抽屉底边到最后一个控件要有留白 */
+  /* 全屏/横屏已经搬进二级设置界面，留白也在那边量 */
   q('#menuBtn').click();
-  var pn = q('#panel');
-  pn.scrollTop = pn.scrollHeight;          /* 滚到底再看：贴边才是真问题 */
+  q('#setBtn').click();
+  var pn = q('#setSheet');
+  pn.scrollTop = pn.scrollHeight;
   var land = q('#landBtn').getBoundingClientRect();
   var pnR = pn.getBoundingClientRect();
-  info('抽屉可滚 ' + (pn.scrollHeight > pn.clientHeight) + '，滚到底后按钮 bottom=' +
+  info('设置页可滚 ' + (pn.scrollHeight > pn.clientHeight) + '，滚到底后按钮 bottom=' +
        Math.round(land.bottom) + ' 抽屉内容底=' + Math.round(pnR.bottom));
   ok('滚到底后按钮离内容底边仍有留白', pnR.bottom - land.bottom >= 24,
      Math.round(pnR.bottom - land.bottom));

@@ -1859,10 +1859,11 @@ const LETTER = 'ABCD';
     return dflt;
   }
 
-  var rPref = pref('render', ['high', 'auto', 'smooth'], 'auto');
+  /* 首次默认和站台保持一致：渲染流畅、动画默认、倾斜关 */
+  var rPref = pref('render', ['high', 'auto', 'smooth'], 'smooth');
   var mPref = pref('motion', ['full', 'auto', 'off'], 'auto');
   /* 卡片倾斜/光斑单独一个开关：有人就喜欢安安静静做题 */
-  var tPref = pref('tilt', ['on', 'off'], 'on');
+  var tPref = pref('tilt', ['on', 'off'], 'off');
 
   var perf = rPref === 'high' ? 'high' : (rPref === 'smooth' ? 'low' : PERF_BY[pressure]);
   var motion = mPref === 'full' ? 'on'

@@ -344,7 +344,8 @@ html[data-perf="low"] body{background-attachment:scroll;}
     return dflt;
   }
 
-  var rPref = pref('render', ['high', 'auto', 'smooth'], 'auto');
+  /* 首次默认和站台保持一致：渲染流畅、动画默认 */
+  var rPref = pref('render', ['high', 'auto', 'smooth'], 'smooth');
   var mPref = pref('motion', ['full', 'auto', 'off'], 'auto');
 
   var perf = rPref === 'high' ? 'high' : (rPref === 'smooth' ? 'low' : PERF_BY[pressure]);

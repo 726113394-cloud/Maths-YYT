@@ -359,6 +359,40 @@ html[data-perf="low"] .menu-fab{animation:none !important;}
 .pset-note{font-size:10.5px;font-weight:700;color:#B4A9D2;line-height:1.6;
   padding:0 8px;text-align:center;}
 
+/* ===== 站台设置：二级界面（抽屉里只留一个入口按钮） ===== */
+.setmask{position:fixed;inset:0;z-index:900;background:rgba(28,18,48,.52);
+  opacity:0;pointer-events:none;transition:opacity .24s;}
+.setmask.on{opacity:1;pointer-events:auto;}
+.setsheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:901;
+  width:100%;max-width:520px;margin:0 auto;
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:#fff;border-radius:26px 26px 0 0;
+  padding:16px 16px calc(26px + env(safe-area-inset-bottom));
+  box-shadow:0 -14px 44px rgba(40,24,70,.3);
+  transform:translateY(104%);transition:transform .32s cubic-bezier(.3,1.1,.52,1);
+}
+.setsheet.on{transform:translateY(0);}
+.sethead{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.sethead b{font-size:16.5px;font-weight:900;color:#3a3355;letter-spacing:.3px;}
+.setclose{margin-left:auto;flex:none;width:38px;height:38px;border:none;border-radius:50%;
+  background:#F3EFFF;color:#6B4CE6;font-family:inherit;font-size:15px;font-weight:900;
+  cursor:pointer;transition:transform .15s;}
+.setclose:active{transform:scale(.92);}
+.setsub{margin:0 0 14px;font-size:11.5px;font-weight:700;color:#A79FC2;line-height:1.6;}
+
+/* ===== 首页上的教学动画按钮（不再藏在抽屉里） ===== */
+.home-tut{margin:0 0 12px;}
+.home-tut button{
+  width:100%;min-height:48px;border:1.5px dashed #C9B8F0;border-radius:14px;
+  background:rgba(255,255,255,.72);color:#6B4CE6;
+  font-family:inherit;font-size:13px;font-weight:900;letter-spacing:.3px;
+  cursor:pointer;transition:transform .15s,background .18s;
+}
+.home-tut button:hover{background:#fff;}
+.home-tut button:active{transform:scale(.98);}
+html[data-perf="low"] .home-tut button{background:#fff;border-style:solid;}
+
 /* ===== 横屏：把 #stage 整体转 90°（手机浏览器没有强制转屏的 API） =====
    ⚠️ 用 svh/svw：100vh 在手机上含地址栏占位，转 90° 后会露出一半
    ⚠️ rotate(90deg) 把 (x,y) 映到 (-y,x)，所以要再 translateY(-100%) 才落回可见区 */
@@ -506,8 +540,20 @@ html[data-motion="off"] .tour-ring::after{animation:none;opacity:.7;}
     <span class="pico">🎬</span><span class="plb">看教学动画</span><span class="pgo">›</span>
   </button>
 
-  <div class="pset">
-    <div class="pset-h">站台设置</div>
+  <button class="pitem" id="setBtn">
+    <span class="pico">⚙️</span><span class="plb">站台设置</span><span class="pgo">›</span>
+  </button>
+</aside>
+
+<div class="setmask" id="setMask"></div>
+<div class="setsheet" id="setSheet" role="dialog" aria-modal="true" aria-label="站台设置" aria-hidden="true">
+  <div class="sethead">
+    <b>⚙️ 站台设置</b>
+    <button class="setclose" id="setClose" type="button" aria-label="关闭">✕</button>
+  </div>
+  <p class="setsub">改完立刻生效，也会一起带进两个练习里</p>
+
+    
 
     <div class="pset-row">
       <span class="pset-k">渲染</span>
@@ -545,14 +591,15 @@ html[data-motion="off"] .tour-ring::after{animation:none;opacity:.7;}
     </div>
 
     <div class="pset-note" id="psetNote">默认：按设备压力自动调节</div>
-  </div>
-</aside>
+  
+</div>
 
 <main id="stage">
   <section id="home">
     <h1 class="home-h">数学思维站台</h1>
     <p class="lead">选一个练习开始吧</p>
     <p class="sublead">点左上角 🎯 可以随时切换</p>
+    <div class="home-tut"><button id="tourReplay" type="button">🎬 教学动画：30 秒学会用这个站台</button></div>
     <div class="cards">
       <button class="card" data-tool="math">
         <span class="ico">📚</span>
@@ -2446,10 +2493,11 @@ const LETTER = 'ABCD';
     return dflt;
   }
 
-  var rPref = pref('render', ['high', 'auto', 'smooth'], 'auto');
+  /* 首次默认和站台保持一致：渲染流畅、动画默认、倾斜关 */
+  var rPref = pref('render', ['high', 'auto', 'smooth'], 'smooth');
   var mPref = pref('motion', ['full', 'auto', 'off'], 'auto');
   /* 卡片倾斜/光斑单独一个开关：有人就喜欢安安静静做题 */
-  var tPref = pref('tilt', ['on', 'off'], 'on');
+  var tPref = pref('tilt', ['on', 'off'], 'off');
 
   var perf = rPref === 'high' ? 'high' : (rPref === 'smooth' ? 'low' : PERF_BY[pressure]);
   var motion = mPref === 'full' ? 'on'
@@ -8665,7 +8713,8 @@ html[data-perf="low"] body{background-attachment:scroll;}
     return dflt;
   }
 
-  var rPref = pref('render', ['high', 'auto', 'smooth'], 'auto');
+  /* 首次默认和站台保持一致：渲染流畅、动画默认 */
+  var rPref = pref('render', ['high', 'auto', 'smooth'], 'smooth');
   var mPref = pref('motion', ['full', 'auto', 'off'], 'auto');
 
   var perf = rPref === 'high' ? 'high' : (rPref === 'smooth' ? 'low' : PERF_BY[pressure]);
@@ -9229,9 +9278,11 @@ vertEnter();
     } catch (e) {}
     return dflt;
   }
-  var RENDER_PREF = loadPref('render', ['high', 'auto', 'smooth'], 'auto');
+  /* 首次打开的默认：渲染「流畅」、动画「默认」、倾斜「关」。
+     学生九成用手机，先给最省的一档；想要效果的在设置里往上调。 */
+  var RENDER_PREF = loadPref('render', ['high', 'auto', 'smooth'], 'smooth');
   var MOTION_PREF = loadPref('motion', ['full', 'auto', 'off'], 'auto');
-  var TILT_PREF = loadPref('tilt', ['on', 'off'], 'on');
+  var TILT_PREF = loadPref('tilt', ['on', 'off'], 'off');
 
   function resolvedRender() {
     if (RENDER_PREF === 'high') return 'high';
@@ -9481,6 +9532,31 @@ vertEnter();
   mask.addEventListener('click', function () { setMenu(false); });
   document.getElementById('homeItem').addEventListener('click', goHome);
 
+  /* ---- 站台设置：一个按钮触发二级界面 ---- */
+  var setSheet = document.getElementById('setSheet');
+  var setMask = document.getElementById('setMask');
+  function openSettings() {
+    if (!setSheet) return;
+    closeFactsLike();
+    setSheet.classList.add('on');
+    setMask.classList.add('on');
+    setSheet.setAttribute('aria-hidden', 'false');
+    setMenu(false);
+  }
+  function closeSettings() {
+    if (!setSheet) return;
+    setSheet.classList.remove('on');
+    setMask.classList.remove('on');
+    setSheet.setAttribute('aria-hidden', 'true');
+  }
+  /* 抽屉里的其它入口打开时先把设置收掉，别叠两层 */
+  function closeFactsLike() { closeSettings(); }
+  var setBtn = document.getElementById('setBtn');
+  if (setBtn) setBtn.addEventListener('click', openSettings);
+  var setClose = document.getElementById('setClose');
+  if (setClose) setClose.addEventListener('click', closeSettings);
+  if (setMask) setMask.addEventListener('click', closeSettings);
+
   var items = panel.querySelectorAll('.pitem[data-tool]');
   for (var i = 0; i < items.length; i++) {
     (function (b, idx) {
@@ -9538,7 +9614,9 @@ vertEnter();
   if (landBtn) landBtn.addEventListener('click', toggleLand);
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') setMenu(false);
+    if (e.key !== 'Escape') return;
+    if (setSheet && setSheet.classList.contains('on')) { closeSettings(); return; }
+    setMenu(false);
   });
 
   /* ---------- 高级渲染：玻璃光斑 + 卡片倾斜 ---------- */
@@ -9622,7 +9700,7 @@ vertEnter();
       p: '切换练习、渲染画质、动画、全屏、横屏都收在它里面。它平时是<b>半透明</b>的，不会挡住练习内容。',
       target: '#menuBtn', act: 'menu-off' },
     { ico: '📂', h: '点它，抽屉就滑出来了',
-      p: '抽屉里有 <b>目录</b>、两个练习、<b>拓展提高</b>，最下面是站台设置。点任意一条就切过去，不用刷新。',
+      p: '抽屉里有 <b>目录</b>、两个练习、<b>拓展提高</b>，还有 <b>⚙️ 站台设置</b> 和 <b>🎬 看教学动画</b>。点任意一条就切过去，不用刷新。',
       target: '#menuBtn', act: 'menu-off' },
     { ico: '📚', h: '数学思维闯关',
       p: '每个知识点拆成几步，<b>一步一步想清楚</b>再填答案。答完一步，右下角的灯泡会亮出新的已知条件。',
@@ -9634,7 +9712,7 @@ vertEnter();
       p: '指南针与方向、几何图形与周长专练。这两块是<b>拔高</b>，学有余力再加练，课本单元那边不受影响。',
       target: '.card[data-preset="ext"]', act: 'menu-off' },
     { ico: '🎚️', h: '画质和动画都能调',
-      p: '抽屉最下面：渲染分 <b>高级 / 默认 / 流畅</b>，动画分 <b>全量 / 默认 / 关闭</b>。默认档看手机性能自动调；手机卡就往下调一档。',
+      p: '点抽屉里的 <b>⚙️ 站台设置</b>，会弹出一个设置页：渲染分 <b>高级 / 默认 / 流畅</b>，动画分 <b>全量 / 默认 / 关闭</b>。手机卡就往下调一档。',
       target: '#menuBtn', act: 'menu-off' },
     { ico: '⛶', h: '上课投屏用这两个',
       p: '那里还有 <b>全屏</b>（去浏览器边框，投屏用）和 <b>横屏</b>（把练习区转 90°，竖着拿手机也能用宽屏）。',
@@ -9790,11 +9868,11 @@ vertEnter();
     tourGo(tourIdx - 1);
   });
   document.getElementById('tourSkip').addEventListener('click', tourEnd);
+  function tourStartFromUi() { setMenu(false); closeSettings(); tourStart(); }
   var tourBtn = document.getElementById('tourBtn');
-  if (tourBtn) tourBtn.addEventListener('click', function () {
-    setMenu(false);
-    tourStart();
-  });
+  if (tourBtn) tourBtn.addEventListener('click', tourStartFromUi);
+  var tourReplay = document.getElementById('tourReplay');
+  if (tourReplay) tourReplay.addEventListener('click', tourStartFromUi);
   window.addEventListener('resize', function () {
     if (tourEl && tourEl.classList.contains('on')) tourPaint();
   });

@@ -26,9 +26,13 @@ safe('分级', function () {
   ok('html 上有 data-perf', !!de.dataset.perf, de.dataset.perf);
   ok('perf 是三档之一', ['low', 'mid', 'high'].indexOf(de.dataset.perf) >= 0, de.dataset.perf);
   ok('html 上有 data-motion', de.dataset.motion === 'on' || de.dataset.motion === 'off', de.dataset.motion);
-  ok('核心数不被 ≤4 误判',
+  /* 默认档现在是「流畅」，perf=low 是显式选择，不是把好机器判成弱机。
+     只有在 render=auto 时才谈"误判"。 */
+  ok('弱机判定只认 ≤2 核',
+     de.dataset.render !== 'auto' ||
      !((navigator.hardwareConcurrency || 8) > 2 && de.dataset.perf === 'low'),
-     'cores=' + navigator.hardwareConcurrency + ' perf=' + de.dataset.perf);
+     'render=' + de.dataset.render + ' cores=' + navigator.hardwareConcurrency +
+     ' perf=' + de.dataset.perf);
   ok('抽屉里显示渲染档位', !!q('#psetNote') && q('#psetNote').textContent.length > 4,
      (q('#psetNote') || {}).textContent);
   ok('动画三段控件存在', !!q('#segMotion') && q('#segMotion').querySelectorAll('button').length === 3);
