@@ -86,6 +86,19 @@ body{
   background:linear-gradient(180deg,transparent 62%,#DDD4FF 62%,#DDD4FF 92%,transparent 92%);
   padding:0 2px;}
 
+.v-pk{margin-bottom:10px;}
+.vp-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:16px;
+  background:#fff;box-shadow:var(--shadow-2);}
+.vp-p{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:7px 8px;border-radius:12px;background:#F6F3FF;
+  font-size:12.5px;font-weight:900;color:#8478BC;transition:.2s;}
+.vp-p em{font-style:normal;font-size:16px;font-weight:900;color:#6B4CE6;}
+.vp-p.on{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;}
+.vp-p.on em{color:#fff;}
+.vp-turn{flex:none;font-size:11.5px;font-weight:900;color:#E8944A;letter-spacing:.3px;}
+.v-pk-win{margin-top:8px;padding:9px 12px;border-radius:12px;background:#FFF7E8;
+  border:1.5px solid #FFD9AB;font-size:12.5px;font-weight:900;color:#B26A00;line-height:1.7;}
+
 .v-foot{margin:14px 4px 0;font-size:11.5px;line-height:1.8;font-weight:700;
   color:var(--muted);text-align:center;}
 
@@ -285,6 +298,14 @@ html[data-perf="low"] body{background-attachment:scroll;}
     <div class="vs" id="vGrid"></div>
   </div>
 
+  <div class="v-pk" id="vPkBar" style="display:none">
+    <div class="vp-row">
+      <span class="vp-p" id="vp0"><b>玩家1</b><em>0</em></span>
+      <span class="vp-turn" id="vpTurn">玩家1 的回合</span>
+      <span class="vp-p" id="vp1"><b>玩家2</b><em>0</em></span>
+    </div>
+  </div>
+
   <div class="v-coach" id="vCoach">
     <div class="v-track"><div class="v-track-fill" id="vTrackFill"></div></div>
     <div id="vPlaying">
@@ -297,6 +318,7 @@ html[data-perf="low"] body{background-attachment:scroll;}
   </div>
 
   <div class="v-actions">
+    <button class="mini-btn" id="vPk">⚔️ PK</button>
     <button class="mini-btn" id="vRestart">↺ 重做本题</button>
     <button class="mini-btn primary" id="vNew">🔄 换一题</button>
   </div>
@@ -713,6 +735,11 @@ function vertRenderCoach() {
       : `验算：${p.b} × ${p.q} = ${p.a} ✔`;
     done.innerHTML = `
       <div class="v-done">
+        ${vPk.on ? '<div class="v-pk-win">⚔️ PK 结果：' +
+          (vPk.score[0] === vPk.score[1]
+            ? ('平手 ' + vPk.score[0] + ' : ' + vPk.score[1])
+            : ('玩家' + (vPk.score[0] > vPk.score[1] ? 1 : 2) + ' 赢　' +
+               vPk.score[0] + ' : ' + vPk.score[1])) + '</div>' : ''}
         <div class="v-done-h">✅ 竖式做完啦</div>
         <div class="v-done-big">${p.a} ÷ ${p.b} = <b>${p.q}</b>${rem ? ` …… <b>${rem}</b>` : ''}</div>
         <div class="v-done-check">${check}<br>有余数的除法，余数一定要比除数 ${p.b} 小。</div>
@@ -762,6 +789,7 @@ function vertRender() {
   }
   vertRenderGrid();
   vertRenderCoach();
+  vPkPaint();
   st.justFilled = -1;
 }
 
@@ -779,6 +807,7 @@ function vertAnswer(optIdx) {
     st.fb = { t: 'ok', h: '✔ ' + s.ok };
     st.idx++;
     SFX.correct();
+    if (vPk.on) { vPk.score[vPk.turn] += 10; vPk.turn = 1 - vPk.turn; }
     if (st.idx >= p.slots.length) vertFinish();
   } else {
     st.tried[st.idx] = st.tried[st.idx] || [];
@@ -786,6 +815,8 @@ function vertAnswer(optIdx) {
     st.wrongCount++;
     st.fb = { t: 'no', h: '✘ ' + s.hint };
     SFX.wrong();
+    if (vPk.on) { vPk.score[vPk.turn] = Math.max(0, vPk.score[vPk.turn] - 5);
+                  vPk.turn = 1 - vPk.turn; }
   }
   vertRender();
 }
@@ -825,6 +856,34 @@ function vertEnter() {
   else vertRender();
 }
 
+/* ---------- 双人 PK：轮流答，答对 +10 / 答错 −5，每答一次换人 ---------- */
+const vPk = { on: false, turn: 0, score: [0, 0] };
+
+function vPkPaint() {
+  const bar = $('vPkBar');
+  if (!bar) return;
+  bar.style.display = vPk.on ? '' : 'none';
+  const btn = $('vPk');
+  if (btn) btn.textContent = vPk.on ? '⚔️ 退出 PK' : '⚔️ PK';
+  if (!vPk.on) return;
+  [0, 1].forEach(i => {
+    const el = $('vp' + i);
+    if (!el) return;
+    el.querySelector('em').textContent = vPk.score[i];
+    el.classList.toggle('on', vPk.turn === i);
+  });
+  const t = $('vpTurn');
+  if (t) t.textContent = '玩家' + (vPk.turn + 1) + ' 的回合';
+}
+
+function vPkToggle() {
+  vPk.on = !vPk.on;
+  vPk.turn = 0;
+  vPk.score = [0, 0];
+  SFX.click();
+  vertNewQuestion();
+}
+
 /* ---------- 事件 ---------- */
 (function bindVertical() {
   const lv = $('vLevels');
@@ -848,6 +907,8 @@ function vertEnter() {
     vertAnswer(+btn.dataset.vopt);
   });
 
+  const pkBtn = $('vPk');
+  if (pkBtn) pkBtn.addEventListener('click', vPkToggle);
   const rs = $('vRestart');
   if (rs) rs.addEventListener('click', vertRestart);
   const nw = $('vNew');
