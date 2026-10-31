@@ -662,17 +662,23 @@ body[data-pk="1"] .pk-bar{margin-bottom:12px;}
 
 /* ===== PK 主体：左题右统计，下一题放在右侧 ===== */
 @media (min-width:760px){
-  /* ⚠️ renderPkRace 用的是内联 display:block，不加 !important 压不住 */
+  /* ⚠️ renderPkRace 用的是内联 display:block，不加 !important 压不住。
+     玩家格放在**最下面一整行**：学生站在一体机前，手自然落在屏幕下沿，
+     比让他们去够右上角好点得多。右上只留「下一题」。 */
   body[data-pk="1"] #pkRace{
-    display:grid !important;grid-template-columns:minmax(0,1fr) 330px;
-    gap:14px;align-items:start;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) 240px;
+    grid-template-areas:"opts side" "timer side" "pads pads";
+    gap:12px 14px;align-items:start;
   }
-  body[data-pk="1"] #pkOpts{grid-column:1;grid-row:1;}
-  body[data-pk="1"] .pk-race-timer{grid-column:1;grid-row:2;}
-  body[data-pk="1"] #pkPads{grid-column:2;grid-row:1;}
-  body[data-pk="1"] .pk-side-next{grid-column:2;grid-row:2;}
+  body[data-pk="1"] #pkOpts{grid-area:opts;}
+  body[data-pk="1"] .pk-race-timer{grid-area:timer;}
+  body[data-pk="1"] .pk-side-next{grid-area:side;position:sticky;top:10px;}
+  body[data-pk="1"] #pkPads{grid-area:pads;}
   body[data-pk="1"] #pkResult{grid-column:1 / -1;}
-  body[data-pk="1"] .pk-side-next .next-big{min-height:60px;font-size:18px;}
+  body[data-pk="1"] .pk-side-next .next-big{min-height:64px;font-size:18px;}
+  /* 底下一排玩家格：横着摆，一人一格 */
+  body[data-pk="1"] .pk-pads{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
 }
 .pk-side-next{display:none;}
 body[data-pk="1"] .pk-side-next{display:block;}
@@ -7665,7 +7671,10 @@ function renderPkBar() {
   if (addBtn) {
     const full = pkPlayers.length >= PK_MAX, busy = pkRaceBusy();
     addBtn.disabled = full || busy;
-    addBtn.textContent = full ? '已满 4 人' : busy ? '本题进行中…' : '➕ 添加玩家';
+    /* 文案固定，只用禁用态表示"现在不能加" —— 之前抢答中就变成
+       「本题进行中…」，老师以为按钮不见了 */
+    addBtn.textContent = '➕ 添加玩家';
+    addBtn.title = full ? '已经 4 个人了' : (busy ? '这一题抢答中，下一题再加' : '再加一位玩家');
   }
   const qn = $('pkQNo'), qt = $('pkQTotal');
   if (qn) qn.textContent = Math.min(pkRound + 1, PK_ROUNDS);
