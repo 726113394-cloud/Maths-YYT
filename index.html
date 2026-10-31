@@ -238,10 +238,24 @@ html[data-motion="off"] *::after{
 }
 
 /* ---- 首屏遮罩：脚本一起来就淡出，避免先看到裸骨架 ---- */
-#bootMask{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
+#bootMask{position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
   background:linear-gradient(160deg,#ffe7bd 0%,#ffd8e7 40%,#ddd6ff 72%,#ffffff 100%);
-  transition:opacity .26s ease;}
+  transition:opacity .3s ease;}
 #bootMask.off{opacity:0;pointer-events:none;}
+/* 首次进入的加载界面：文件本身有 900KB 内联代码，得先告诉学生"在装" */
+#bootMask .bm-pig{width:78px;height:78px;background-size:contain;
+  animation:bmBob 1.7s ease-in-out infinite;}
+@keyframes bmBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+#bootMask .bm-t{font-size:13.5px;font-weight:900;color:#8B7FD0;letter-spacing:.6px;}
+#bootMask .bm-bar{width:168px;height:6px;border-radius:99px;overflow:hidden;
+  background:rgba(124,92,255,.16);}
+#bootMask .bm-bar em{display:block;width:42%;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#8B6BFF,#FF6B9D);animation:bmSlide 1.15s ease-in-out infinite;}
+@keyframes bmSlide{0%{margin-left:-42%;}100%{margin-left:100%;}}
+html[data-motion="off"] #bootMask .bm-pig,
+html[data-motion="off"] #bootMask .bm-bar em{animation:none;}
+html[data-motion="off"] #bootMask .bm-bar em{width:100%;margin-left:0;opacity:.65;}
 
 /* ---- 目录页入场 ---- */
 @keyframes cardIn{from{opacity:0;transform:translate3d(0,16px,0) scale(.97);}to{opacity:1;transform:none;}}
@@ -435,7 +449,11 @@ body.land .menu-fab{top:auto;bottom:12px;left:12px;}
    遮罩 989 < 抬起的控件 992 < 光圈 993 < 讲解卡 994 */
 .tour.on{display:block;}
 .tour-card,.tour-skip{pointer-events:auto;}
-.tour-mask{position:fixed;inset:0;z-index:985;pointer-events:none;}
+/* ⚠️ 遮罩已经搬到 .tour 外面（为了让它落在"抬起来的目标"之下），
+   所以不能再靠 .tour.on 连带着显示/隐藏，必须自己管：不开导览时必须 display:none，
+   否则导览结束后那四块暗矩形会一直糊在页面上（虽然还能点，但整屏发暗）。 */
+.tour-mask{position:fixed;inset:0;z-index:985;pointer-events:none;display:none;}
+.tour-mask.on{display:block;}
 .tour-mask i{position:fixed;display:block;background:rgba(11,24,44,.76);
   transition:top .3s cubic-bezier(.22,1,.36,1), left .3s cubic-bezier(.22,1,.36,1),
              width .3s cubic-bezier(.22,1,.36,1), height .3s cubic-bezier(.22,1,.36,1);}
@@ -514,7 +532,11 @@ html[data-motion="off"] .tour-ring::after{animation:none;opacity:.7;}
 </style>
 </head>
 <body>
-<div id="bootMask"></div>
+<div id="bootMask">
+  <span class="pig-ico bm-pig"></span>
+  <span class="bm-t">正在准备练习…</span>
+  <span class="bm-bar"><em></em></span>
+</div>
 <div id="bgGlow" aria-hidden="true"></div>
 <div id="stToast" role="status" aria-live="polite"></div>
 <div class="tour" id="tour" aria-hidden="true">
@@ -10613,6 +10635,8 @@ vertEnter();
     play('open');
     tourEl.classList.add('on');
     tourEl.setAttribute('aria-hidden', 'false');
+    var mk0 = document.getElementById('tourMask');
+    if (mk0) mk0.classList.add('on');
     s_setTourFlag();
     tourGo(0);
   }
@@ -10624,6 +10648,15 @@ vertEnter();
     unLift();
     tourEl.classList.remove('on');
     tourEl.setAttribute('aria-hidden', 'true');
+    /* 遮罩是自己管的，收尾必须一起关掉并清零，否则整屏留一层暗色 */
+    var mk = document.getElementById('tourMask');
+    if (mk) {
+      mk.classList.remove('on');
+      ['tmT', 'tmB', 'tmL', 'tmR'].forEach(function (id) {
+        var m = document.getElementById(id);
+        if (m) { m.style.width = '0px'; m.style.height = '0px'; }
+      });
+    }
     setMenu(false);
   }
 
