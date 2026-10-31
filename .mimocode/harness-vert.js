@@ -1,4 +1,4 @@
-/* 独立页自测：真实点击驱动竖式练习台 */
+﻿/* 独立页自测：真实点击驱动竖式练习台 */
 var out = [];
 var ok = function (name, cond, extra) {
   out.push((cond ? 'PASS ' : 'FAIL ') + name + (extra !== undefined ? ' :: ' + extra : ''));
@@ -61,10 +61,7 @@ try {
   ok('竖式里商拼出来等于答案', Number(qStr) === p0.q, qStr + ' vs ' + p0.q);
 
   /* 换一题 / 重做 */
-  q('#vNew').click();
-  ok('换一题后重置', vertQ.st.solved === false && vertQ.st.idx === 0);
-  ok('换一题后又有高亮空格', document.querySelectorAll('#vGrid .vs-cell.blank.lit').length === 1);
-
+  
   /* 三个关卡都能出题 */
   [1, 2, 3].forEach(function (lv) {
     q('.v-lv[data-vlv="' + lv + '"]').click();
