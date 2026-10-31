@@ -85,7 +85,10 @@ body.panel-open .menu-fab.open{opacity:1;pointer-events:auto}
   line-height:1.7;color:#B4A9D2;border-top:1.5px dashed #EADFF8;}
 
 /* ===== 首页吊猪：从练习页搬过来的那只 ===== */
-.home-pig{display:flex;justify-content:center;margin:2px 0 8px;}
+.home-pig{display:flex;justify-content:center;
+  /* #home 顶部留了 70px 给左上角的浮标，吊猪要贴住页顶就把这 70 抵掉，
+     否则绳子看着像被拉长了 */
+  margin:-70px 0 10px;}
 .home-pig img{width:92px;height:auto;filter:drop-shadow(0 6px 12px rgba(150,110,200,.28));}
 html[data-perf="low"] .home-pig img{filter:none;}
 @media (max-width:380px){ .home-pig img{width:76px;} }
@@ -9772,6 +9775,9 @@ vertEnter();
   var setMaskEl = document.getElementById('setMask');   /* 别叫 setMask：会盖掉聚光灯用的同名函数 */
   function openSettings() {
     if (!setSheet) return;
+    /* ⚠️ 已经开着就别再关一次：关→开会让滑入动画从头再放一遍，
+       聚光灯量到的位置就还在屏幕外（教学里那一步罩不到按钮，根因就是这个） */
+    if (setSheet.classList.contains('on')) { setSheet.setAttribute('aria-hidden', 'false'); return; }
     closeFactsLike();
     play('open');
     setSheet.classList.add('on');
@@ -10040,6 +10046,42 @@ vertEnter();
         if (sc && sc.clientHeight && sc.scrollHeight > sc.clientHeight + 2) {
           sc.scrollTop = sc.scrollHeight;
         }
+      }
+      /* 设置页的子孙：位置 = 设置页落位 + 自身偏移 - 已滚动量。
+         全程只用 offset*，不吃祖先 transform，也不怕过渡没跑完。 */
+      var inSheet = el.closest ? el.closest('#setSheet') : null;
+      if (inSheet && el.id !== 'setSheet') {
+        var sh = inSheet.offsetHeight, sw = inSheet.offsetWidth;
+        var shTop = Math.max(0, vh - sh), shLeft = Math.max(0, (vw - sw) / 2);
+        var ox = 0, oy = 0, n = el;
+        while (n && n !== inSheet) { ox += n.offsetLeft; oy += n.offsetTop; n = n.offsetParent; }
+        /* 让它落在可视区中间 */
+        var want = Math.max(0, Math.min(inSheet.scrollHeight - inSheet.clientHeight,
+                                        oy + el.offsetHeight / 2 - inSheet.clientHeight / 2));
+        if (Math.abs(inSheet.scrollTop - want) > 3) inSheet.scrollTop = want;
+        var eh = el.offsetHeight, ew = el.offsetWidth;
+        var etop = shTop + oy - inSheet.scrollTop;
+        var eleft = shLeft + ox;
+        r = { left: eleft, top: etop, right: eleft + ew, bottom: etop + eh, width: ew, height: eh };
+        var pad2 = 6;
+        tourRing.style.top = (r.top - pad2) + 'px';
+        tourRing.style.left = (r.left - pad2) + 'px';
+        tourRing.style.width = (r.width + pad2 * 2) + 'px';
+        tourRing.style.height = (r.height + pad2 * 2) + 'px';
+        liftTarget(el);
+        var hx2 = r.left - pad2, hy2 = r.top - pad2;
+        var hw2 = r.width + pad2 * 2, hh2 = r.height + pad2 * 2;
+        setMask('tmT', 0, 0, vw, Math.max(0, hy2));
+        setMask('tmB', 0, hy2 + hh2, vw, Math.max(0, vh - (hy2 + hh2)));
+        setMask('tmL', 0, hy2, Math.max(0, hx2), hh2);
+        setMask('tmR', hx2 + hw2, hy2, Math.max(0, vw - (hx2 + hw2)), hh2);
+        var cardH2 = tourCard.offsetHeight || 200;
+        var top2;
+        if (r.bottom + 16 + cardH2 < vh - 12) top2 = r.bottom + 16;
+        else if (r.top - cardH2 - 16 > 12) top2 = r.top - cardH2 - 16;
+        else top2 = Math.max(12, (vh - cardH2) / 2);
+        tourCard.style.top = top2 + 'px';
+        return;
       }
       var r;
       if (el.id === 'panel' || el.id === 'setSheet') {
