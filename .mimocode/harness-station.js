@@ -35,17 +35,16 @@ safe('分级', function () {
   ok('渲染三段控件存在', !!q('#segRender') && q('#segRender').querySelectorAll('button').length === 3);
   ok('全屏/横屏按钮存在', !!q('#fsBtn') && !!q('#landBtn'));
 
-  /* 首屏遮罩：脚本跑完就该淡出并移除 */
-  setTimeout(function () {
-    ok('首屏遮罩已移除', !document.getElementById('bootMask'));
-  }, 500);
+  /* 开机状态要在进工具之前查：进工具会去掉 home 的 in、遮罩也会被拆掉 */
+  ok('home 带 in 类（触发入场动画）', q('#home').classList.contains('in'));
+  ok('首屏遮罩已淡出', !q('#bootMask') || q('#bootMask').classList.contains('off'),
+     q('#bootMask') && q('#bootMask').className);
 });
 
 /* ---- 2. 目录页 + 入场动效 ---- */
 safe('目录', function () {
   var cards = document.querySelectorAll('.card[data-tool]');
-  ok('目录 2 张卡', cards.length === 2, cards.length);
-  setTimeout(function(){ ok('home 带 in 类（触发入场动画）', q('#home').classList.contains('in')); }, 120);
+  ok('目录 3 张卡', cards.length === 3, cards.length);
   ok('卡片带 --i 序号', cards[0].style.getPropertyValue('--i') === '0' &&
      cards[1].style.getPropertyValue('--i') === '1',
      cards[0].style.getPropertyValue('--i') + '/' + cards[1].style.getPropertyValue('--i'));

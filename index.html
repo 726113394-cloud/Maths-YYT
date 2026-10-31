@@ -427,6 +427,10 @@ body.land .menu-fab{top:auto;bottom:12px;left:12px;}
   <button class="pitem" data-tool="vert">
     <span class="pico">✏️</span><span class="plb">竖式练习台</span><span class="pgo">›</span>
   </button>
+  <div class="psec">拓　展</div>
+  <button class="pitem" data-tool="math" data-preset="ext">
+    <span class="pico">🚀</span><span class="plb">拓展提高</span><span class="pgo">›</span>
+  </button>
   <div class="pfoot">点左上角 🎯 随时切换练习，不用记网址、不用刷新。</div>
     <div class="pset">
     <div class="pset-h">站台设置</div>
@@ -479,6 +483,12 @@ body.land .menu-fab{top:auto;bottom:12px;left:12px;}
         <span class="nm">竖式练习台</span>
         <span class="ds">试商 → 乘 → 减 → 落下，一格一格把除法竖式填出来</span>
         <span class="go">开始练习 →</span>
+      </button>
+      <button class="card" data-tool="math" data-preset="ext">
+        <span class="ico">🚀</span>
+        <span class="nm">拓展提高</span>
+        <span class="ds">指南针与方向、几何图形与周长专练；学有余力再加练</span>
+        <span class="go">进入拓展 →</span>
       </button>
     </div>
     <div class="hstats" id="hstats"></div>
@@ -684,6 +694,13 @@ body{
 .unit-panel-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   font-size:14.5px;font-weight:900;color:var(--ink-2);margin-bottom:12px;}
 .unit-panel-head .spacer{flex:1;}
+.ugrp{display:flex;gap:6px;padding:4px;margin-bottom:10px;border-radius:14px;
+  background:#F4F0FF;border:1.5px solid #E6DEFB;}
+.ugrp button{flex:1 1 0;min-height:44px;border:none;border-radius:11px;background:transparent;
+  font-family:inherit;font-size:13.5px;font-weight:900;color:#8478BC;cursor:pointer;
+  transition:background .18s,color .18s,box-shadow .18s;}
+.ugrp button.on{background:#fff;color:#6B4CE6;box-shadow:0 2px 0 #D8CEFF;}
+.ugrp button:active{transform:scale(.97);}
 .unit-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
 .unit-chip{display:flex;align-items:center;gap:7px;min-height:44px;
   padding:9px 14px;border:2.5px solid var(--line);border-radius:14px;
@@ -1470,6 +1487,7 @@ html[data-perf="low"] .fact{animation:none;}
         <span class="form-row-label">大题</span>
         <div class="form-chips" id="formChips"></div>
       </div>
+      <div class="ugrp" id="ugrp"></div>
       <div class="unit-chips" id="unitChips"></div>
       <div class="unit-summary" id="unitSummary"></div>
     </div>
@@ -1966,6 +1984,109 @@ const FIG = (function () {
       return svg(o, W, H);
     },
 
+    /* 数图形：从顶点向对边引 n 条线段 */
+    fan: function (n) {
+      const W = 250, H = 176;
+      const P = triPts(60, 60, 60);
+      const M = mapper(P, W, H, 34);
+      const A1 = M(P.A), B1 = M(P.B), C1 = M(P.C);
+      let o = '<path d="' + ln(A1, B1) + ln(B1, C1) + ln(C1, A1) + '" fill="none" ' +
+        'stroke="' + EDGE + '" stroke-width="1.8" stroke-linejoin="round"/>';
+      for (let i = 1; i <= n; i++) {
+        const t = i / (n + 1);
+        const q = { x: B1.x + (C1.x - B1.x) * t, y: B1.y + (C1.y - B1.y) * t };
+        o += '<path d="' + ln(A1, q) + '" fill="none" stroke="' + EDGE + '" stroke-width="1.3"/>';
+        o += '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="2.2" fill="' + EDGE + '"/>';
+      }
+      o += txt(A1.x, A1.y - 11, 'A', INK, 11);
+      o += txt(B1.x - 11, B1.y + 14, 'B', INK, 11);
+      o += txt(C1.x + 11, C1.y + 14, 'C', INK, 11);
+      return svg(o, W, H);
+    },
+
+    /* 靠墙围栏：上边是墙（虚线 + 斜线阴影），另外三条边是篱笆 */
+    wallPen: function (a, b) {
+      const W = 262, H = 172, pad = 30;
+      const bw = W - pad * 2, bh = 96;
+      const x0 = pad, y0 = 44, x1 = x0 + bw, y1 = y0 + bh;
+      let o = '';
+      /* 墙 */
+      o += '<path d="' + 'M' + x0 + ' ' + y0 + 'L' + x1 + ' ' + y0 + '" fill="none" ' +
+        'stroke="' + MARK + '" stroke-width="3" stroke-dasharray="7 4"/>';
+      for (let x = x0 + 6; x < x1 - 4; x += 14) {
+        o += '<path d="M' + x + ' ' + y0 + 'L' + (x - 8) + ' ' + (y0 - 9) + '" ' +
+          'stroke="' + MARK + '" stroke-width="1.1"/>';
+      }
+      o += txt((x0 + x1) / 2, y0 - 16, '院墙（不用围）', GIVEN, 11);
+      /* 三条篱笆边 */
+      o += '<path d="' + 'M' + x0 + ' ' + y0 + 'L' + x0 + ' ' + y1 +
+        'L' + x1 + ' ' + y1 + 'L' + x1 + ' ' + y0 + '" fill="none" ' +
+        'stroke="' + EDGE + '" stroke-width="2.2" stroke-linejoin="round"/>';
+      o += txt((x0 + x1) / 2, y1 + 18, '长 ' + a + ' 米', GIVEN);
+      o += '<text x="' + (x0 - 6) + '" y="' + ((y0 + y1) / 2) + '" text-anchor="end" ' +
+        'style="font-size:12px;font-weight:800" fill="' + GIVEN + '" ' +
+        'transform="rotate(-90 ' + (x0 - 6) + ' ' + ((y0 + y1) / 2) + ')">宽 ' + b + ' 米</text>';
+      o += '<text x="' + (x1 + 6) + '" y="' + ((y0 + y1) / 2) + '" text-anchor="start" ' +
+        'style="font-size:12px;font-weight:800" fill="' + GIVEN + '" ' +
+        'transform="rotate(90 ' + (x1 + 6) + ' ' + ((y0 + y1) / 2) + ')">宽 ' + b + ' 米</text>';
+      return svg(o, W, H);
+    },
+
+    /* 梯形：四条边都标出来 */
+    trapezoid: function (top, bottom, l1, l2) {
+      const W = 262, H = 176, pad = 34;
+      const bw = W - pad * 2;
+      const x0 = pad, y0 = 42, y1 = y0 + 92;
+      const inset = bw * 0.24;
+      const P = {
+        A: { x: x0 + inset, y: y0 },
+        B: { x: x0 + bw - inset, y: y0 },
+        C: { x: x0 + bw, y: y1 },
+        D: { x: x0, y: y1 }
+      };
+      let o = '<path d="' + ln(P.A, P.B) + ln(P.B, P.C) + ln(P.C, P.D) + ln(P.D, P.A) +
+        '" fill="none" stroke="' + EDGE + '" stroke-width="2" stroke-linejoin="round"/>';
+      o += txt((P.A.x + P.B.x) / 2, P.A.y - 10, '上底 ' + top, GIVEN, 11.5);
+      o += txt((P.D.x + P.C.x) / 2, P.C.y + 18, '下底 ' + bottom, GIVEN, 11.5);
+      o += '<text x="' + (P.A.x - 9) + '" y="' + ((P.A.y + P.D.y) / 2) + '" text-anchor="end" ' +
+        'style="font-size:11.5px;font-weight:800" fill="' + GIVEN + '">腰 ' + l1 + '</text>';
+      o += '<text x="' + (P.B.x + 9) + '" y="' + ((P.B.y + P.C.y) / 2) + '" text-anchor="start" ' +
+        'style="font-size:11.5px;font-weight:800" fill="' + GIVEN + '">腰 ' + l2 + '</text>';
+      return svg(o, W, H);
+    },
+
+    /* 钟面方位：把人面向的方向转到 12 点位置，看目标方向落在几点 */
+    clockFace: function (facingIdx, targetIdx) {
+      /* 底下那行说明也算进画布高度，否则会掉出去压住题干 */
+      const W = 250, H = 248, cx = W / 2, cy = 112, r = 78;
+      const DIRS = ['北', '东', '南', '西'];
+      let o = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" ' +
+        'stroke="' + MARK + '" stroke-width="1.6"/>';
+      o += '<circle cx="' + cx + '" cy="' + cy + '" r="3" fill="' + EDGE + '"/>';
+      /* 12 / 3 / 6 / 9 的刻度 */
+      for (let k = 0; k < 4; k++) {
+        const ang = (-90 + k * 90) * Math.PI / 180;
+        const ix = cx + (r - 9) * Math.cos(ang), iy = cy + (r - 9) * Math.sin(ang);
+        const ox2 = cx + r * Math.cos(ang), oy2 = cy + r * Math.sin(ang);
+        o += '<path d="' + ln({ x: ix, y: iy }, { x: ox2, y: oy2 }) + '" stroke="' +
+          (k === (targetIdx - facingIdx + 4) % 4 ? ASK : MARK) + '" stroke-width="' +
+          (k === (targetIdx - facingIdx + 4) % 4 ? 2.6 : 1.4) + '"/>';
+        /* 钟点数字 */
+        const nx = cx + (r - 22) * Math.cos(ang), ny = cy + (r - 22) * Math.sin(ang) + 4;
+        o += txt(nx, ny, (k * 3 === 0 ? 12 : k * 3) + '', MARK, 10.5);
+      }
+      /* 四个方向：面向的那个放到 12 点 */
+      DIRS.forEach(function (d, k) {
+        const rel = (k - facingIdx + 4) % 4;
+        const ang = (-90 + rel * 90) * Math.PI / 180;
+        const lx = cx + (r + 20) * Math.cos(ang), ly = cy + (r + 20) * Math.sin(ang) + 5;
+        const isTarget = k === targetIdx;
+        o += txt(lx, ly, isTarget ? '?' : d, isTarget ? ASK : INK, isTarget ? 16 : 12.5);
+      });
+      o += txt(cx, cy + r + 44, '面向' + DIRS[facingIdx] + '方 = 12 点钟方向', GIVEN, 11);
+      return svg(o, W, H);
+    },
+
     /* 等腰三角形：两个底角各被平分，中间夹出 ∠5 */
     isoBisectors: function (apex) {
       const W = 268, H = 190;
@@ -2134,12 +2255,26 @@ const UNITS = [
   { key: '周长', name: '第四单元 · 周长', short: '第四单元', sub: '长方形 · 正方形 · 剪拼', icon: '📐' },
   { key: '平均数', name: '第五单元 · 平均数', short: '第五单元', sub: '求平均 · 逆向 · 总量', icon: '📊' },
   { key: '探索', name: '第六单元 · 探索乐园', short: '第六单元', sub: '植树 · 锯木 · 找规律', icon: '🧩' },
-  { key: '拓展', name: '拓展学习 · 指南针与方向', short: '指南针', sub: '方向辨认 · 钟面方位 · 时间推算', icon: '🧭' },
-  { key: '几何', name: '几何拓展 · 图形与周长专练', short: '几何拓展',
+  { key: '拓展', group: 'ext', name: '拓展学习 · 指南针与方向', short: '指南针', sub: '方向辨认 · 钟面方位 · 时间推算', icon: '🧭' },
+  { key: '几何', group: 'ext', name: '几何拓展 · 图形与周长专练', short: '几何拓展',
     sub: '三角形的角 · 数图形 · 梯形周长 · 靠墙围栏', icon: '📐' }
 ];
 const UNIT_MAP = {};
 UNITS.forEach(u => { UNIT_MAP[u.key] = u; });
+
+/* 单元分两组：课本单元 / 拓展提高。
+   拓展那两块不是课本单元（指南针不在冀教版四上里，几何拓展是拔高），
+   混在一起学生会分不清哪些必须会、哪些是加练。 */
+function groupOf(u) { return u.group === 'ext' ? 'ext' : 'core'; }
+const UNIT_GROUPS = [
+  { key: 'core', name: '📚 课本单元', desc: '按课本单元练，考试就考这些' },
+  { key: 'ext', name: '🚀 拓展提高', desc: '拔高题型，学有余力再加练' }
+];
+let unitGroup = 'core';
+try {
+  const g = localStorage.getItem('math4a.unitGroup');
+  if (g === 'ext' || g === 'core') unitGroup = g;
+} catch (e) {}
 
 /* =========================================================
    题库
@@ -3193,6 +3328,7 @@ const problemTemplates = [
     ]);
     return {
       tag: '四上 · 等腰梯形',
+      figure: FIG.trapezoid(up, low, w, w),
       text: sc.t,
       facts: [`上底 ${up} 厘米`, `下底 ${low} 厘米`, `一条腰长 ${w} 厘米`],
       steps: [
@@ -4912,6 +5048,7 @@ const problemTemplates = [
     const SC = pick(SC_NAME);
     return {
       tag: '四上 · 拓展学习',
+      figure: FIG.clockFace(iF, (iF + step) % 4),
       text: `${SC} 拿着指南针站在操场上，面向${facing}方，并把${facing}方定为 12 点钟方向。那么${target}方是几点钟方向？`,
       facts: [`面向${facing}方，${facing}方 = 12 点钟方向`, '钟面上每过 3 个小时，方向正好转过一个直角'],
       steps: [
@@ -5725,6 +5862,7 @@ const problemTemplates = [
     const SC = pick(SC_NAME);
     return {
       tag: '四上 · 数图形',
+      figure: FIG.fan(n),
       text: `${SC} 画了一个三角形，然后从一个顶点向对边画了 ${n} 条线段，把它分成了几个小三角形。请数一数：这个图形里一共有多少个三角形？`,
       facts: [`从顶点向对边引了 ${n} 条线段`, '大小的三角形都要数进去'],
       steps: [
@@ -5756,6 +5894,7 @@ const problemTemplates = [
     const SC = pick(SC_NAME);
     return {
       tag: '四上 · 梯形的周长',
+      figure: FIG.trapezoid(a, b, c, d),
       text: `${SC} 量得一个梯形的上底是 ${a} 厘米、下底是 ${b} 厘米，两条腰分别是 ${c} 厘米和 ${d} 厘米。这个梯形的周长是多少厘米？`,
       facts: [`上底 ${a} 厘米，下底 ${b} 厘米`, `两条腰分别是 ${c} 厘米和 ${d} 厘米`],
       steps: [
@@ -5813,6 +5952,7 @@ const problemTemplates = [
     const SC = pick(SC_NAME);
     return {
       tag: '四上 · 靠墙围栏',
+      figure: FIG.wallPen(a, b),
       text: `${SC} 家有一块长 ${a} 米、宽 ${b} 米的长方形菜地，要在四周围上篱笆。菜地的一条边正好靠着院墙（靠墙那面不用围）。要想篱笆最短，一共需要多少米篱笆？`,
       facts: [`菜地长 ${a} 米，宽 ${b} 米`, '靠墙的那一面不用围篱笆'],
       steps: [
@@ -6065,8 +6205,10 @@ function renderFormChips() {
 }
 
 function renderUnitChips() {
+  renderUnitGroupTabs();
   const wrap = $('unitChips');
-  wrap.innerHTML = UNITS.map(u => {
+  const list = UNITS.filter(u => groupOf(u) === unitGroup);
+  wrap.innerHTML = list.map(u => {
     const on = selectedUnits.indexOf(u.key) >= 0;
     return `<button class="unit-chip${on ? ' on' : ''}" data-unit="${u.key}"
       aria-pressed="${on ? 'true' : 'false'}">
@@ -6086,6 +6228,25 @@ function renderUnitChips() {
       SFX.click();
       buildSession();
       renderAll();
+    });
+  });
+}
+
+function renderUnitGroupTabs() {
+  const wrap = $('ugrp');
+  if (!wrap) return;
+  wrap.innerHTML = UNIT_GROUPS.map(g =>
+    `<button type="button" data-grp="${g.key}" class="${g.key === unitGroup ? 'on' : ''}"
+       aria-pressed="${g.key === unitGroup}">${g.name}</button>`).join('');
+  wrap.querySelectorAll('[data-grp]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.grp;
+      if (k === unitGroup) return;
+      unitGroup = k;
+      try { localStorage.setItem('math4a.unitGroup', k); } catch (e) {}
+      SFX.click();
+      renderUnitChips();
+      syncUnitUI();
     });
   });
 }
@@ -6125,7 +6286,11 @@ function syncUnitUI() {
     sum.className = 'unit-summary';
     const kinds = poolTemplates().length;
     const names = selectedUnits.map(k => UNIT_MAP[k].name.replace(/^第[一二三四五六七八九]单元 · /, '')).join('、');
-    sum.innerHTML = `已选 <b>${total}</b> 个单元 · 共 <b>${kinds}</b> 类题目` +
+    const grpNames = {};
+    selectedUnits.forEach(k => { const g = groupOf(UNIT_MAP[k]); grpNames[g] = true; });
+    const grpTag = grpNames.ext && grpNames.core ? '（课本 + 拓展）'
+                 : (grpNames.ext ? '（拓展提高）' : '（课本单元）');
+    sum.innerHTML = `已选 <b>${total}</b> 个单元 · 共 <b>${kinds}</b> 类题目` + grpTag +
       (total === UNITS.length ? '（全部单元）' : `：${names}`);
   }
 
@@ -7795,6 +7960,19 @@ $('paperBarExit').addEventListener('click', () => { SFX.click(); exitPaper(); })
    启动
    ========================================================= */
 loadUnits();
+
+/* 站台首页点「拓展提高」进来时，先把单元定到拓展那两块 */
+(function applyStationPreset() {
+  let p = null;
+  try { p = localStorage.getItem('math4a.preset'); } catch (e) {}
+  if (p !== 'ext') return;
+  try { localStorage.removeItem('math4a.preset'); } catch (e) {}
+  unitGroup = 'ext';
+  selectedUnits = UNITS.filter(u => groupOf(u) === 'ext').map(u => u.key);
+  saveUnits();
+  try { localStorage.setItem('math4a.unitGroup', 'ext'); } catch (e) {}
+})();
+
 renderFormChips();
 renderUnitChips();
 buildSession();
@@ -8804,10 +8982,12 @@ vertEnter();
     menuBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
     document.body.classList.toggle('panel-open', on);
   }
-  function markItems(key) {
+  function markItems(key, preset) {
     var all = panel.querySelectorAll('.pitem[data-tool]');
     for (var i = 0; i < all.length; i++) {
-      all[i].classList.toggle('on', all[i].dataset.tool === key);
+      var same = all[i].dataset.tool === key &&
+                 (all[i].dataset.preset || '') === (preset || '');
+      all[i].classList.toggle('on', same);
     }
   }
 
@@ -8837,10 +9017,16 @@ vertEnter();
     veil.classList.remove('on');
   }
 
-  function showTool(key) {
+  function showTool(key, preset) {
     var tpl = document.getElementById('tpl-' + key);
     if (!tpl) return;
-    if (current === key) { setMenu(false); return; }
+    var combo = key + (preset ? '#' + preset : '');
+    if (current === combo) { setMenu(false); return; }
+    /* 把"从哪个板块进来"交给模块自己读（同一份代码，两个入口） */
+    try {
+      if (preset) localStorage.setItem('math4a.preset', preset);
+      else localStorage.removeItem('math4a.preset');
+    } catch (e) {}
 
     if (frame) {
       var old = frame;
@@ -8871,10 +9057,10 @@ vertEnter();
     home.classList.remove('in');
     home.style.display = 'none';
     document.body.classList.add('tool-open');
-    current = key;
-    markItems(key);
+    current = combo;
+    markItems(key, preset);
     setMenu(false);
-    toast('🎯 ' + (NAMES[key] || key));
+    toast(preset === 'ext' ? '🚀 拓展提高' : ('🎯 ' + (NAMES[key] || key)));
   }
 
   function goHome() {
@@ -8888,7 +9074,7 @@ vertEnter();
     void home.offsetWidth;
     home.classList.add('in');
     document.body.classList.remove('tool-open');
-    markItems(null);
+    markItems(null, null);
     setMenu(false);
     home.scrollTop = 0;
     toast('🏠 目录', 1200);
@@ -8966,7 +9152,7 @@ vertEnter();
     (function (b, idx) {
       b.style.setProperty('--i', idx);
       b.classList.add('anim-in');
-      b.addEventListener('click', function () { showTool(b.dataset.tool); });
+      b.addEventListener('click', function () { showTool(b.dataset.tool, b.dataset.preset); });
     })(items[i], i);
   }
   var brand = panel.querySelector('.brand');
@@ -8976,7 +9162,7 @@ vertEnter();
   for (var j = 0; j < cards.length; j++) {
     (function (b, idx) {
       b.style.setProperty('--i', idx);
-      b.addEventListener('click', function () { showTool(b.dataset.tool); });
+      b.addEventListener('click', function () { showTool(b.dataset.tool, b.dataset.preset); });
     })(cards[j], j);
   }
 
@@ -9023,7 +9209,8 @@ vertEnter();
     } catch (e) { return false; }
   }
   function tiltEnabled() {
-    return de.dataset.perf === 'high' && de.dataset.motion === 'on' && finePointer();
+    var root = document.documentElement;
+    return root.dataset.perf === 'high' && root.dataset.motion === 'on' && finePointer();
   }
 
   function mountCardFx() {
@@ -9084,14 +9271,24 @@ vertEnter();
   applySettings();
   paintFs();
   paintLand();
-  requestAnimationFrame(function () {
+  /* ⚠️ 开机动画不能只靠 rAF：后台标签页 / 省电模式下 rAF 会被节流甚至不触发，
+     那样 #bootMask 会一直盖着，用户看到的是一张空白页。加一道定时兜底。 */
+  var booted = false;
+  function boot() {
+    if (booted) return;
+    booted = true;
     home.classList.add('in');
     var bm = document.getElementById('bootMask');
     if (bm) {
       bm.classList.add('off');
       setTimeout(function () { if (bm.parentNode) bm.parentNode.removeChild(bm); }, 320);
     }
-  });
+  }
+  /* 直接同步跑一遍：rAF 在某些环境（后台标签、省电模式、headless）根本不触发，
+     只等它会让首屏遮罩一直盖着。动画本身不受影响 —— 首次渲染就会从 0% 关键帧开始。 */
+  boot();
+  requestAnimationFrame(boot);
+  setTimeout(boot, 380);
 
   window.__st = {
     perf: function () { return document.documentElement.dataset.perf; },
