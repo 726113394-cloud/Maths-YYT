@@ -1,0 +1,832 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>✏️ 竖式练习台 · 四年级上册</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+
+:root{
+  --ink:#3a3355;
+  --ink-2:#4a4166;
+  --ink-3:#6b6385;
+  --muted:#a79fc2;
+  --line:#EDE8FF;
+  --line-2:#E4DDFF;
+  --purple:#6B4CE6;
+  --purple-2:#8B6BFF;
+  --purple-deep:#4E35C4;
+  --gold:#FFA751;
+  --gold-2:#FFD86B;
+  --gold-deep:#E8944A;
+  --pink:#FF6B9D;
+  --pink-deep:#B83060;
+  --green:#2ED573;
+  --green-deep:#1FA85A;
+  --card:#ffffff;
+  --shadow-2:0 5px 0 rgba(124,92,255,.07),0 16px 32px rgba(124,92,255,.11);
+}
+
+body{
+  margin:0;padding:0;min-height:100vh;color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background-color:#FFFBF2;
+  background-image:
+    radial-gradient(circle at 10% 15%, #FFE9A8 0%, transparent 38%),
+    radial-gradient(circle at 90% 12%, #B8E5FF 0%, transparent 35%),
+    radial-gradient(circle at 82% 88%, #FFD4E7 0%, transparent 38%),
+    radial-gradient(circle at 15% 88%, #C6F3D9 0%, transparent 35%);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px;}
+
+.card{background:var(--card);border-radius:24px;box-shadow:var(--shadow-2);}
+.mini-btn{border:none;background:#fff;color:#7C5CFF;font-size:14.5px;font-weight:800;
+  cursor:pointer;font-family:inherit;padding:8px 14px;min-height:44px;border-radius:12px;
+  transition:transform .15s,box-shadow .15s,background .15s;
+  box-shadow:0 3px 0 rgba(124,92,255,.13);}
+.mini-btn:hover{transform:translateY(-1px);box-shadow:0 4px 0 rgba(124,92,255,.18);background:#F8F6FF;}
+.mini-btn:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(124,92,255,.13);}
+.mini-btn.primary{background:linear-gradient(135deg,var(--gold-2),var(--gold));
+  color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
+
+.next-big{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;min-height:60px;padding:14px 22px;border:none;border-radius:20px;
+  font-family:inherit;font-size:19px;font-weight:900;letter-spacing:1.2px;
+  color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#4EE08B 0%,#2ED573 55%,#22B863 100%);
+  box-shadow:0 6px 0 var(--green-deep),0 14px 26px rgba(46,213,115,.34);
+  transition:transform .18s,box-shadow .18s;}
+.next-big:hover{transform:translateY(-2px);
+  box-shadow:0 8px 0 var(--green-deep),0 18px 32px rgba(46,213,115,.42);}
+.next-big:active{transform:translateY(3px);box-shadow:0 3px 0 var(--green-deep);}
+
+/* ============ 顶部 ============ */
+.v-hero{display:flex;align-items:center;gap:11px;margin-bottom:12px;padding:0 4px;}
+.v-hero-ico{font-size:30px;line-height:1;flex:none;
+  filter:drop-shadow(0 3px 5px rgba(255,150,60,.35));}
+.v-hero h1{margin:0;font-size:22px;font-weight:900;letter-spacing:.6px;
+  background:linear-gradient(120deg,#FF9F43 0%,#FF6B9D 45%,#7C5CFF 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.v-hero p{margin:2px 0 0;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;}
+
+.v-problem{padding:14px 16px 15px 20px;margin-bottom:10px;position:relative;
+  overflow:hidden;border-radius:22px;}
+.v-problem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;
+  background:linear-gradient(180deg,#FFB84D 0%,#FF7A9C 55%,#A78BFA 100%);}
+.v-problem .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;flex-wrap:wrap;}
+.v-problem .tag{background:linear-gradient(135deg,#FFE08A,#FFC24D);
+  color:#8a5a00;padding:4px 11px;border-radius:20px;font-weight:800;
+  font-size:12px;box-shadow:0 2px 0 #EBA92E;}
+.v-problem .counter{margin-left:auto;}
+.v-problem .qtext{font-size:16.5px;line-height:1.85;color:var(--ink);font-weight:500;}
+.v-problem .qtext b{color:#5B3FD9;font-weight:800;
+  background:linear-gradient(180deg,transparent 62%,#DDD4FF 62%,#DDD4FF 92%,transparent 92%);
+  padding:0 2px;}
+
+.v-foot{margin:14px 4px 0;font-size:11.5px;line-height:1.8;font-weight:700;
+  color:var(--muted);text-align:center;}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;}
+}
+
+/* ============ 竖式练习台 ============ */
+/* （样式与站台里的版本共用，改这里就等于改站台里的那份） */
+.v-levels{display:flex;gap:5px;padding:5px;margin-bottom:10px;background:#fff;
+  border-radius:16px;border:2.5px solid #FFE3A8;box-shadow:0 4px 0 #FFE3A8;}
+.v-lv{flex:1 1 0;min-width:0;min-height:44px;padding:6px 3px;border:none;
+  border-radius:11px;background:transparent;font-family:inherit;cursor:pointer;
+  font-size:13px;font-weight:800;color:#8B7FD0;line-height:1.25;transition:.18s;}
+.v-lv b{display:block;font-size:10.5px;font-weight:800;opacity:.8;margin-top:1px;}
+.v-lv.on{background:linear-gradient(135deg,var(--purple-2),var(--purple));color:#fff;
+  box-shadow:0 3px 0 var(--purple-deep);}
+.v-lv.on b{opacity:.9;}
+
+.v-stat{display:flex;align-items:center;gap:10px;padding:9px 13px;margin-bottom:10px;
+  background:#fff;border-radius:14px;box-shadow:0 3px 0 rgba(124,92,255,.06);
+  font-size:12.5px;font-weight:800;color:var(--ink-3);flex-wrap:wrap;}
+.v-stat b{color:var(--purple);font-weight:900;}
+.v-stat .spacer{flex:1;}
+
+.v-problem .qtext{font-size:16.5px;}
+
+.v-stage{background:#fff;border-radius:22px;padding:16px 8px;margin-bottom:10px;
+  box-shadow:var(--shadow-2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.vs{display:grid;justify-content:center;align-items:center;
+  --vc:30px;--vb:16px;--vr:34px;grid-auto-rows:var(--vr);
+  /* 淡横线当方格纸：空格子表示「等着填」，不是坏掉了 */
+  background-image:repeating-linear-gradient(to bottom,
+    transparent 0,transparent calc(var(--vr) - 1px),
+    rgba(124,92,255,.075) calc(var(--vr) - 1px),rgba(124,92,255,.075) var(--vr));
+  background-position:0 var(--vr);
+  font-variant-numeric:tabular-nums;min-width:max-content;margin:0 auto;}
+.vs-cell{display:flex;align-items:center;justify-content:center;height:100%;
+  font-size:17.5px;font-weight:800;line-height:1;color:var(--ink-2);}
+.vs-cell.is-divisor{color:var(--ink);}
+.vs-cell.is-dividend{border-top:2.5px solid #7C5CFF;color:var(--ink);}
+.vs-cell.is-bracket{border-right:2.5px solid #7C5CFF;}
+.vs-cell.is-bracket-top{border-right:2.5px solid #7C5CFF;
+  border-top:2.5px solid #7C5CFF;border-top-right-radius:10px;}
+.vs-cell.is-quo{color:#E07B2A;}
+.vs-cell.is-prod{border-bottom:2px solid #BEB2E6;}
+.vs-cell.is-rem{color:#1FA85A;}
+
+/* 空格子就当纸上的空白：不画底色、不撒问号。
+   只给「当前这一步」那一格烫一块底 + 一个问号，视线一眼就落上去。 */
+.vs-cell.blank{color:transparent;background:transparent;}
+.vs-cell.blank.qm.lit{background:#FFF3D6;border-radius:8px;animation:vsBlink 1.5s ease-in-out infinite;}
+.vs-cell.blank.qm.lit::after{content:'?';font-size:15px;font-weight:900;color:#E8944A;}
+/* 减法横线跟着数字长出来：没填之前不画，避免空线条乱飘 */
+.vs-cell.is-prod.blank{border-bottom-color:transparent;}
+@keyframes vsBlink{0%,100%{background:#FFF3D6;}50%{background:#FFE1A8;}}
+.vs-cell.filled{animation:vsPop .32s cubic-bezier(.34,1.5,.64,1);}
+@keyframes vsPop{0%{transform:scale(.45);opacity:0;}100%{transform:scale(1);opacity:1;}}
+
+.v-coach{background:#fff;border-radius:22px;padding:14px 15px;margin-bottom:10px;
+  box-shadow:var(--shadow-2);}
+.v-track{height:7px;border-radius:4px;background:#F1ECFF;overflow:hidden;margin-bottom:11px;}
+.v-track-fill{height:100%;width:0%;border-radius:4px;
+  background:linear-gradient(90deg,#7DE7A8,#2ED573);
+  transition:width .4s cubic-bezier(.34,1.2,.64,1);}
+.v-step-tag{display:inline-block;font-size:11.5px;font-weight:900;color:#7C5CFF;
+  background:#EFE9FF;border-radius:99px;padding:3px 10px;margin-bottom:8px;}
+.v-ask{font-size:15.5px;font-weight:800;color:var(--ink-2);line-height:1.65;
+  margin-bottom:11px;}
+.v-ask b{color:#5B3FD9;font-weight:900;}
+.v-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.v-opt{display:flex;align-items:center;justify-content:center;gap:7px;
+  min-height:52px;padding:9px 8px;border-radius:14px;cursor:pointer;
+  background:#F8F6FF;border:2.5px solid var(--line);box-shadow:0 3px 0 var(--line-2);
+  font-family:inherit;font-size:18px;font-weight:900;color:var(--ink-2);
+  transition:transform .15s,box-shadow .15s,background .15s,border-color .15s;}
+.v-opt:hover:not(:disabled){background:#F1ECFF;border-color:#C4B5FD;
+  box-shadow:0 4px 0 #C4B5FD;transform:translateY(-2px);}
+.v-opt:active:not(:disabled){transform:translateY(1px);box-shadow:0 1px 0 #C4B5FD;}
+.v-opt:disabled{cursor:default;}
+.v-opt.wrong{background:#FFF6EC;border-color:#FFD9AB;box-shadow:0 3px 0 #FFD9AB;
+  color:#b06a10;text-decoration:line-through;}
+.v-opt.ok{background:linear-gradient(135deg,#E4FBEE,#F2FFF7);border-color:#7DE7A8;
+  box-shadow:0 3px 0 #7DE7A8;color:#17914F;}
+.v-fb{margin-top:11px;font-size:13.5px;line-height:1.8;font-weight:700;
+  padding:11px 13px;border-radius:12px;display:none;}
+.v-fb.show{display:block;animation:fadeUp .22s ease;}
+.v-fb.ok{background:#E4FBEE;color:#17914F;}
+.v-fb.no{background:#FFF3E0;color:#B26A00;}
+
+.v-actions{display:flex;gap:9px;}
+.v-actions .mini-btn{flex:1 1 0;min-height:46px;}
+
+.v-done{background:linear-gradient(135deg,#F0FCF5,#FBFFFD);border:2.5px solid #B6EFCC;
+  border-radius:20px;padding:14px 16px;box-shadow:0 4px 0 rgba(46,213,115,.14);
+  animation:fadeUp .25s ease;}
+.v-done-h{font-size:15.5px;font-weight:900;color:#17914F;margin-bottom:8px;}
+.v-done-big{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px;
+  letter-spacing:.5px;}
+.v-done-big b{color:#17914F;}
+.v-done-check{font-size:12.5px;font-weight:800;color:#3E8E63;line-height:1.9;
+  background:#fff;border-radius:12px;padding:9px 12px;}
+.v-done-note{margin-top:8px;font-size:12.5px;font-weight:700;color:#5E9E7C;}
+
+@media(max-width:600px){
+  .v-lv{font-size:12px;min-height:42px;}
+  .v-stage{padding:12px 4px;border-radius:20px;}
+  .vs{--vc:27px;--vb:14px;--vr:33px;}
+  .vs-cell{font-size:16px;}
+  .v-coach{padding:12px 13px;border-radius:20px;}
+  .v-ask{font-size:14.5px;}
+  .v-opt{min-height:50px;font-size:17px;}
+  .v-problem .qtext{font-size:15.5px;}
+}
+
+/* ============ 分级渲染：三档 + 动效开关（和闯关页同一套标准） ============ */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after{
+  animation-duration:.001ms !important;animation-iteration-count:1 !important;
+  transition-duration:.001ms !important;
+}
+
+@keyframes vOptIn{
+  from{opacity:0;transform:translate3d(0,9px,0);}
+  to{opacity:1;transform:none;}
+}
+@keyframes vCellIn{
+  from{opacity:0;transform:scale(.55);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes vCoachIn{
+  from{opacity:0;transform:translate3d(0,12px,0);}
+  to{opacity:1;transform:none;}
+}
+
+/* high：选项依次滑入、新填的格子落定弹一下、讲解区换步时浮入 */
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="high"]:not([data-motion="off"]) .v-opt{
+    animation:vOptIn .3s cubic-bezier(.22,1,.36,1) both;
+    animation-delay:calc(var(--i,0) * 42ms);
+  }
+  html[data-perf="high"]:not([data-motion="off"]) .vs-cell.filled{
+    animation:vCellIn .26s cubic-bezier(.34,1.5,.64,1);
+  }
+  html[data-perf="high"]:not([data-motion="off"]) #vPlaying.swap{animation:vCoachIn .26s cubic-bezier(.22,1,.36,1);}
+  html[data-perf="high"]:not([data-motion="off"]) .vs-cell.blank.qm.lit{animation:vsBlink 1.5s ease-in-out infinite, vCellIn .2s ease both;}
+}
+/* mid：只留一次短入场 */
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="mid"]:not([data-motion="off"]) .v-opt{animation:vOptIn .18s ease both;}
+}
+/* low：装饰性动画全砍，答对/答错的状态颜色照旧 */
+html[data-perf="low"] .v-opt,
+html[data-perf="low"] .vs-cell.filled,
+html[data-perf="low"] .vs-cell.blank.qm.lit{animation:none !important;background:#FFF3D6;}
+
+/* 阴影分级 */
+html[data-perf="mid"] .v-stage,
+html[data-perf="mid"] .v-coach,
+html[data-perf="mid"] .card{box-shadow:0 2px 0 rgba(124,92,255,.10);}
+html[data-perf="low"] .v-stage,
+html[data-perf="low"] .v-coach,
+html[data-perf="low"] .card,
+html[data-perf="low"] .v-levels{box-shadow:none;border:2px solid var(--line-2);}
+html[data-perf="low"] body{background-attachment:scroll;}
+
+/* 按下去的手感 */
+.v-opt:active,.v-lv:active,.mini-btn:active{transform:scale(.972);}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="v-hero">
+    <span class="v-hero-ico">✏️</span>
+    <div>
+      <h1>竖式练习台</h1>
+      <p>四年级上册 · 除数是两位数的除法</p>
+    </div>
+  </div>
+
+  <div class="v-levels" id="vLevels"></div>
+  <div class="v-stat" id="vStat"></div>
+
+  <div class="card v-problem">
+    <div class="meta">
+      <span class="tag" id="vTag">四上 · 除法竖式</span>
+      <span class="counter" id="vCounter"></span>
+    </div>
+    <div class="qtext" id="vText"></div>
+  </div>
+
+  <div class="v-stage">
+    <div class="vs" id="vGrid"></div>
+  </div>
+
+  <div class="v-coach" id="vCoach">
+    <div class="v-track"><div class="v-track-fill" id="vTrackFill"></div></div>
+    <div id="vPlaying">
+      <div class="v-step-tag" id="vStepTag"></div>
+      <div class="v-ask" id="vAsk"></div>
+      <div class="v-opts" id="vOpts"></div>
+      <div class="v-fb" id="vFb"></div>
+    </div>
+    <div id="vDone" style="display:none"></div>
+  </div>
+
+  <div class="v-actions">
+    <button class="mini-btn" id="vRestart">↺ 重做本题</button>
+    <button class="mini-btn primary" id="vNew">🔄 换一题</button>
+  </div>
+
+  <p class="v-foot">口诀：试商 → 乘 → 减 → 比余数 → 落下一位，一遍一遍走，越走越顺。</p>
+</div>
+
+<script>
+/* =========================================================
+   分级渲染 + 动效分级（和闯关页同一套标准）
+   ⚠️ 判弱机别按 ≤4 核 / ≤4G：iOS Safari 恒报 4 核、Chrome 的
+      deviceMemory 封顶 8 —— 只有 ≤2 才算 low。
+   ========================================================= */
+(function detectPerf() {
+  let perf = 'high', motion = 'on';
+  try {
+    const cores = navigator.hardwareConcurrency;
+    const mem = navigator.deviceMemory;
+    const conn = navigator.connection || {};
+    const verySmall = (typeof cores === 'number' && cores <= 2) ||
+                      (typeof mem === 'number' && mem <= 2) ||
+                      conn.saveData === true ||
+                      /^(slow-)?2g$/.test(String(conn.effectiveType || ''));
+    const small = (typeof cores === 'number' && cores <= 4) ||
+                  (typeof mem === 'number' && mem <= 4);
+    perf = verySmall ? 'low' : (small ? 'mid' : 'high');
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) motion = 'off';
+  } catch (e) {}
+  try {
+    const saved = localStorage.getItem('math4a.motion');
+    if (saved === '"off"' || saved === 'off') motion = 'off';
+    if (saved === '"on"' || saved === 'on') motion = 'on';
+  } catch (e) {}
+  document.documentElement.dataset.perf = perf;
+  document.documentElement.dataset.motion = motion;
+  window.__perf = perf;
+})();
+
+/* =========================================================
+   音效（Web Audio 合成，零外链）
+   ========================================================= */
+let audioCtx = null;
+let soundEnabled = true;
+
+function ensureAudio() {
+  if (!soundEnabled) return false;
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { soundEnabled = false; return false; }
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    return true;
+  } catch (e) { soundEnabled = false; return false; }
+}
+
+function playNote(freq, dur, type, vol, delay) {
+  if (!ensureAudio()) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    const now = audioCtx.currentTime + (delay || 0);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(vol || 0.15, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    osc.start(now);
+    osc.stop(now + dur + 0.05);
+  } catch (e) {}
+}
+
+const SFX = {
+  correct() {
+    playNote(523.25, 0.10, 'sine', 0.16, 0);
+    playNote(659.25, 0.10, 'sine', 0.16, 0.07);
+    playNote(783.99, 0.16, 'sine', 0.16, 0.14);
+  },
+  wrong() {
+    playNote(349.23, 0.14, 'triangle', 0.12, 0);
+    playNote(261.63, 0.22, 'triangle', 0.12, 0.09);
+  },
+  success() {
+    playNote(523.25, 0.10, 'sine', 0.18, 0);
+    playNote(659.25, 0.10, 'sine', 0.18, 0.08);
+    playNote(783.99, 0.10, 'sine', 0.18, 0.16);
+    playNote(1046.5, 0.30, 'sine', 0.18, 0.24);
+  },
+  perfect() {
+    playNote(523.25, 0.09, 'sine', 0.20, 0);
+    playNote(659.25, 0.09, 'sine', 0.20, 0.07);
+    playNote(783.99, 0.09, 'sine', 0.20, 0.14);
+    playNote(1046.5, 0.09, 'sine', 0.20, 0.21);
+    playNote(1318.5, 0.35, 'sine', 0.20, 0.28);
+  },
+  click() { playNote(880, 0.035, 'sine', 0.06, 0); }
+};
+
+/* =========================================================
+   小工具
+   ========================================================= */
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function shuffleAll(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+const $ = id => document.getElementById(id);
+/* localStorage 全部带工具前缀 math4a. —— 和站台里其它工具共用同一个域 */
+const LS = {
+  get(k, fb) {
+    try { const s = localStorage.getItem('math4a.' + k); return s === null ? fb : JSON.parse(s); }
+    catch (e) { return fb; }
+  },
+  set(k, v) { try { localStorage.setItem('math4a.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+/* =========================================================
+   竖式练习台
+   把「试商 → 乘 → 减 → 落下」切成一小步一小步，学生在竖式格子里
+   一格一格看着数字长出来，同一套动作反复练，手感就出来了。
+   ========================================================= */
+const VERT_LEVELS = [
+  { key: 1, name: '商一位数', tag: '入门' },
+  { key: 2, name: '商两位数', tag: '熟练' },
+  { key: 3, name: '商三位数', tag: '挑战' }
+];
+
+let vertLevel = LS.get('vertLevel', 2);
+if (!VERT_LEVELS.some(l => l.key === vertLevel)) vertLevel = 2;
+let vertStat = LS.get('vertStat', null);
+if (!vertStat || typeof vertStat.done !== 'number') vertStat = { done: 0, perfect: 0 };
+let vertQ = null;
+let vertNo = 0;
+
+/* ---------- 长除法模型：只在纸上真算一遍，得到每一步该出现的数 ---------- */
+function vertDivModel(a, b) {
+  const ds = String(a).split('').map(Number);
+  const n = ds.length;
+  const rounds = [];
+  let cur = 0, started = false;
+  for (let i = 0; i < n; i++) {
+    cur = cur * 10 + ds[i];
+    const q = Math.floor(cur / b);
+    if (!started) {
+      if (q === 0) continue;      /* 最高位还不够除，这一位不写商 */
+      started = true;
+    }
+    const prod = q * b;
+    const rem = cur - prod;
+    rounds.push({ qCol: i + 1, q, cur, prod, rem });
+    cur = rem;
+  }
+  return { a, b, ds, n, rounds };
+}
+
+/* ---------- 出题 ---------- */
+function vertMakeProblem() {
+  const attempt = () => {
+    let b, qLo, qHi;
+    if (vertLevel === 1) { b = randInt(12, 89); qLo = 2; qHi = 9; }
+    else if (vertLevel === 2) { b = randInt(12, 61); qLo = 10; qHi = 99; }
+    else { b = randInt(12, 41); qLo = 100; qHi = 999; }
+
+    const hi = Math.min(qHi, Math.floor(9999 / b));
+    if (hi < qLo) return null;
+    const q = randInt(qLo, hi);
+    /* 商中间出现 0 会让「落下」这一步看起来别扭，不拿它来练 */
+    if (String(q).indexOf('0') >= 0) return null;
+
+    const r = Math.random() < 0.3 ? 0 : randInt(1, b - 1);
+    const a = b * q + r;
+    if (vertLevel === 1 && a < 20) return null;
+
+    const model = vertDivModel(a, b);
+    if (!model || !model.rounds.length) return null;
+    if (model.rounds.length !== String(q).length) return null;
+    if (model.rounds.some(x => x.q === 0)) return null;
+    /* 中间某一步余数为 0 时，竖式里要写成「0 加落下的数」，先避开 */
+    if (model.rounds.slice(0, -1).some(x => x.rem === 0)) return null;
+    return { a, b, q, r, model };
+  };
+  for (let i = 0; i < 80; i++) {
+    const got = attempt();
+    if (got) return got;
+  }
+  const model = vertDivModel(598, 26);
+  return { a: 598, b: 26, q: 23, r: 0, model };
+}
+
+/* ---------- 四个选项：正确项 + 三个「像错的」干扰项 ---------- */
+function vertOpts(correct, cands) {
+  const c = String(correct);
+  const used = [c];
+  const out = [];
+  shuffleAll(cands.map(String)).forEach(x => {
+    if (out.length >= 3) return;
+    if (!/^\d+$/.test(x) || used.indexOf(x) >= 0) return;
+    used.push(x); out.push(x);
+  });
+  let guard = 0;
+  const base = Number(c);
+  while (out.length < 3 && guard < 60) {
+    const nv = String(Math.max(0, base + randInt(-12, 12)));
+    if (used.indexOf(nv) < 0) { used.push(nv); out.push(nv); }
+    guard++;
+  }
+  return shuffleAll([c, ...out]);
+}
+
+/* ---------- 把答案格子按顺序编成"步" ---------- */
+function vertRowProd(k) { return 3 + k * 2; }
+function vertRowRem(k) { return 4 + k * 2; }
+
+function vertDigits(str, r, endCol) {
+  const arr = String(str).split('');
+  const start = endCol - arr.length + 1;
+  return arr.map((d, i) => ({ r, c: start + i, d }));
+}
+
+function vertBuildSlots(p) {
+  const b = p.b;
+  const rounds = p.model.rounds;
+  const slots = [];
+
+  rounds.forEach((rd, k) => {
+    const isLast = k === rounds.length - 1;
+    const curStr = String(rd.cur);
+    const prodStr = String(rd.prod);
+    const remStr = String(rd.rem);
+
+    const qCands = [];
+    [rd.q - 1, rd.q + 1, rd.q - 2, rd.q + 2].forEach(v => {
+      if (v >= 1 && v <= 9) qCands.push(v);
+    });
+    slots.push({
+      kind: 'quo',
+      cells: [{ r: 1, c: rd.qCol, d: String(rd.q) }],
+      ans: String(rd.q),
+      opts: vertOpts(rd.q, qCands),
+      ask: `<b>${curStr}</b> 里面最多有几个 <b>${b}</b>？商就写几。`,
+      hint: `试商：${b} 乘几最接近 ${curStr}，又不超过 ${curStr}。`,
+      ok: `对！商是 ${rd.q}。`
+    });
+
+    slots.push({
+      kind: 'mul',
+      cells: vertDigits(prodStr, vertRowProd(k), rd.qCol),
+      ans: prodStr,
+      opts: vertOpts(rd.prod, [rd.prod + b, rd.prod - b, rd.prod + 10, rd.prod - 10, rd.prod + 1]),
+      ask: `把商和除数相乘：<b>${rd.q} × ${b}</b> 得多少？`,
+      hint: `这一步算「商 × 除数」，结果写在 ${curStr} 的下面。`,
+      ok: `对！${rd.q} × ${b} = ${prodStr}。`
+    });
+
+    slots.push({
+      kind: 'sub',
+      cells: vertDigits(remStr, vertRowRem(k), rd.qCol),
+      ans: remStr,
+      opts: vertOpts(rd.rem, [rd.rem + b, b - rd.rem, rd.rem + 10, rd.rem - 10, rd.rem + 1]),
+      ask: `<b>${curStr} − ${prodStr}</b> 得多少？`,
+      hint: `相减得到余数。记住：余数一定要比除数 ${b} 小。`,
+      ok: rd.rem === 0
+        ? `对！${curStr} − ${prodStr} = 0，正好除尽。`
+        : `对！${curStr} − ${prodStr} = ${remStr}，${remStr} 比 ${b} 小，没问题。`
+    });
+
+    if (!isLast) {
+      const nextDigit = p.model.ds[rd.qCol];
+      const nextCur = String(rounds[k + 1].cur);
+      const dCands = [];
+      for (let v = 0; v <= 9; v++) if (v !== nextDigit) dCands.push(v);
+      slots.push({
+        kind: 'drop',
+        cells: [{ r: vertRowRem(k), c: rd.qCol + 1, d: String(nextDigit) }],
+        ans: String(nextDigit),
+        opts: vertOpts(nextDigit, dCands),
+        ask: `把被除数的下一位落下来，应该落 <b>几</b>？`,
+        hint: `除完一位，要把下一位落下来接着除。`,
+        ok: `对！落下 ${nextDigit}，${remStr} 和 ${nextDigit} 合起来是 ${nextCur}，接着除。`
+      });
+    }
+  });
+
+  slots.forEach((s, i) => { s.step = i + 1; });
+  return slots;
+}
+
+/* ---------- 新题 ---------- */
+function vertNewQuestion() {
+  const core = vertMakeProblem();
+  vertNo++;
+  vertQ = {
+    a: core.a, b: core.b, q: core.q, r: core.r, model: core.model,
+    slots: [],
+    st: { idx: 0, filled: {}, tried: {}, wrongCount: 0, solved: false, fb: null, justFilled: -1 }
+  };
+  vertQ.slots = vertBuildSlots(vertQ);
+  vertRender();
+}
+
+function vertRestart() {
+  if (!vertQ) return;
+  vertQ.st = { idx: 0, filled: {}, tried: {}, wrongCount: 0, solved: false, fb: null, justFilled: -1 };
+  SFX.click();
+  vertRender();
+}
+
+/* ---------- 渲染：竖式网格 ---------- */
+function vertRenderGrid() {
+  const p = vertQ, st = p.st;
+  const bStr = String(p.b);
+  const m = bStr.length, n = p.model.n;
+  const rounds = p.model.rounds;
+  const grid = $('vGrid');
+  if (!grid) return;
+
+  grid.style.gridTemplateColumns =
+    `repeat(${m},var(--vc)) var(--vb) repeat(${n},var(--vc))`;
+
+  const maxRow = 2 + rounds.length * 2;
+  let html = '';
+  const cell = (r, c, text, cls) => {
+    html += `<div class="vs-cell ${cls}" style="grid-row:${r};grid-column:${c}">${text}</div>`;
+  };
+
+  /* 除数 */
+  bStr.split('').forEach((d, i) => cell(2, i + 1, d, 'is-divisor'));
+
+  /* 括号：拐角 + 往下那条竖线 */
+  cell(2, m + 1, '', 'is-bracket-top');
+  for (let r = 3; r <= maxRow; r++) cell(r, m + 1, '', 'is-bracket');
+
+  /* 被除数 */
+  p.model.ds.forEach((d, i) => cell(2, m + 2 + i, d, 'is-dividend'));
+
+  /* 答案格子 */
+  p.slots.forEach((s, si) => {
+    const baseCls = s.kind === 'quo' ? 'is-quo'
+                  : s.kind === 'mul' ? 'is-prod'
+                  : 'is-rem';
+    s.cells.forEach((c, ci) => {
+      const last = ci === s.cells.length - 1;
+      const filled = !!st.filled[si];
+      let cls = baseCls;
+      let text = c.d;
+      if (!filled) {
+        cls += ' blank' + (last ? ' qm' : '') + (last && si === st.idx ? ' lit' : '');
+        text = '';
+      } else if (si === st.justFilled) {
+        cls += ' filled';
+      }
+      cell(c.r, m + 1 + c.c, text, cls);
+    });
+  });
+
+  grid.innerHTML = html;
+}
+
+/* ---------- 渲染：下方讲解区 ---------- */
+function vertRenderCoach() {
+  const p = vertQ, st = p.st;
+  const total = p.slots.length;
+  const fill = $('vTrackFill');
+  if (fill) fill.style.width = Math.round(st.idx / total * 100) + '%';
+
+  const play = $('vPlaying'), done = $('vDone');
+  if (!play || !done) return;
+
+  if (st.solved) {
+    play.style.display = 'none';
+    done.style.display = '';
+    const rem = p.r;
+    const check = rem
+      ? `验算：${p.b} × ${p.q} + ${rem} = ${p.a} ✔`
+      : `验算：${p.b} × ${p.q} = ${p.a} ✔`;
+    done.innerHTML = `
+      <div class="v-done">
+        <div class="v-done-h">✅ 竖式做完啦</div>
+        <div class="v-done-big">${p.a} ÷ ${p.b} = <b>${p.q}</b>${rem ? ` …… <b>${rem}</b>` : ''}</div>
+        <div class="v-done-check">${check}<br>有余数的除法，余数一定要比除数 ${p.b} 小。</div>
+        ${st.wrongCount === 0
+          ? '<div class="v-done-note">一次做对，这一套动作已经熟了 👍</div>'
+          : `<div class="v-done-note">中间改过 ${st.wrongCount} 次，再做一遍就更稳了。</div>`}
+      </div>
+      <button class="next-big" id="vNextBig" style="margin-top:10px"><span>下一题 →</span></button>`;
+    const nb = $('vNextBig');
+    if (nb) nb.addEventListener('click', () => { SFX.click(); vertNewQuestion(); });
+    return;
+  }
+
+  done.style.display = 'none';
+  play.style.display = '';
+
+  const s = p.slots[st.idx];
+  if (!s) return;
+  const tag = $('vStepTag'), ask = $('vAsk'), opts = $('vOpts'), fb = $('vFb');
+  tag.textContent = `第 ${st.idx + 1} / ${total} 步`;
+  ask.innerHTML = s.ask;
+
+  const tried = st.tried[st.idx] || [];
+  opts.innerHTML = s.opts.map((t, i) =>
+    `<button class="v-opt${tried.indexOf(i) >= 0 ? ' wrong' : ''}" data-vopt="${i}" style="--i:${i}"
+       ${tried.indexOf(i) >= 0 ? 'disabled' : ''}>${t}</button>`).join('');
+
+  if (st.fb) {
+    fb.className = 'v-fb show ' + st.fb.t;
+    fb.innerHTML = st.fb.h;
+  } else {
+    fb.className = 'v-fb';
+    fb.innerHTML = '';
+  }
+}
+
+function vertRender() {
+  if (!vertQ) return;
+  const p = vertQ, st = p.st;
+  const t = $('vText'), c = $('vCounter'), tg = $('vTag');
+  if (tg) tg.textContent = '四上 · 除法竖式';
+  if (c) c.textContent = `第 ${vertNo} 题 · ${VERT_LEVELS.find(l => l.key === vertLevel).name}`;
+  if (t) {
+    t.innerHTML = st.solved
+      ? `用竖式计算 <b>${p.a} ÷ ${p.b}</b>，并验算。`
+      : `用竖式计算 <b>${p.a} ÷ ${p.b}</b>。跟着步骤填竖式。`;
+  }
+  vertRenderGrid();
+  vertRenderCoach();
+  st.justFilled = -1;
+}
+
+/* ---------- 答题 ---------- */
+function vertAnswer(optIdx) {
+  const p = vertQ, st = p.st;
+  if (!p || st.solved) return;
+  const s = p.slots[st.idx];
+  if (!s) return;
+  if ((st.tried[st.idx] || []).indexOf(optIdx) >= 0) return;
+
+  if (s.opts[optIdx] === s.ans) {
+    st.filled[st.idx] = true;
+    st.justFilled = st.idx;
+    st.fb = { t: 'ok', h: '✔ ' + s.ok };
+    st.idx++;
+    SFX.correct();
+    if (st.idx >= p.slots.length) vertFinish();
+  } else {
+    st.tried[st.idx] = st.tried[st.idx] || [];
+    st.tried[st.idx].push(optIdx);
+    st.wrongCount++;
+    st.fb = { t: 'no', h: '✘ ' + s.hint };
+    SFX.wrong();
+  }
+  vertRender();
+}
+
+function vertFinish() {
+  const p = vertQ, st = p.st;
+  st.solved = true;
+  vertStat.done++;
+  if (st.wrongCount === 0) vertStat.perfect++;
+  LS.set('vertStat', vertStat);
+  vertRenderStat();
+  if (st.wrongCount === 0) SFX.perfect(); else SFX.success();
+}
+
+function vertRenderStat() {
+  const el = $('vStat');
+  if (!el) return;
+  el.innerHTML =
+    `<span>已完成 <b>${vertStat.done}</b> 题</span>` +
+    `<span>一次做对 <b>${vertStat.perfect}</b> 题</span>` +
+    `<span class="spacer"></span>` +
+    `<span>同级还剩无数题，慢慢练</span>`;
+}
+
+function vertRenderLevels() {
+  const el = $('vLevels');
+  if (!el) return;
+  el.innerHTML = VERT_LEVELS.map(l =>
+    `<button class="v-lv${l.key === vertLevel ? ' on' : ''}" data-vlv="${l.key}">
+       ${l.name}<b>${l.tag}</b></button>`).join('');
+}
+
+function vertEnter() {
+  vertRenderLevels();
+  vertRenderStat();
+  if (!vertQ) vertNewQuestion();
+  else vertRender();
+}
+
+/* ---------- 事件 ---------- */
+(function bindVertical() {
+  const lv = $('vLevels');
+  if (lv) lv.addEventListener('click', e => {
+    const btn = e.target.closest('.v-lv');
+    if (!btn) return;
+    const k = +btn.dataset.vlv;
+    if (k === vertLevel) return;
+    vertLevel = k;
+    LS.set('vertLevel', vertLevel);
+    SFX.click();
+    vertRenderLevels();
+    vertNo = 0;
+    vertNewQuestion();
+  });
+
+  const opts = $('vOpts');
+  if (opts) opts.addEventListener('click', e => {
+    const btn = e.target.closest('.v-opt');
+    if (!btn || btn.disabled) return;
+    vertAnswer(+btn.dataset.vopt);
+  });
+
+  const rs = $('vRestart');
+  if (rs) rs.addEventListener('click', vertRestart);
+  const nw = $('vNew');
+  if (nw) nw.addEventListener('click', () => { SFX.click(); vertNewQuestion(); });
+})();
+
+
+/* =========================================================
+   启动
+   ========================================================= */
+vertEnter();
+</script>
+</body>
+</html>

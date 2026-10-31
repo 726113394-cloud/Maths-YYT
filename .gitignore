@@ -1,0 +1,6 @@
+﻿# 工具缓存里的锁文件
+.mimocode/.cron-lock
+# 系统垃圾
+Thumbs.db
+desktop.ini
+~$*
