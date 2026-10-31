@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -428,14 +428,14 @@ body.land .menu-fab{top:auto;bottom:12px;left:12px;}
 /* ===== 教学动画（新手导览）===== */
 /* 聚光灯用 box-shadow 的 9999px 外扩做"挖洞"：
    不需要四块遮罩拼，也不会在圆角处露缝。 */
-.tour{position:fixed;inset:0;display:none;pointer-events:none;}
+.tour{position:fixed;inset:0;display:none;pointer-events:none;z-index:9990;isolation:isolate;}
 /* ⚠️ 这里**不能**写 z-index：写了就形成层叠上下文，里面 992 的卡片会被
    同样抬到 992 的抽屉整体盖住（手机上实测第三步讲解卡被抽屉压住）。
    不写 z-index，子元素各自对根层叠：
    遮罩 989 < 抬起的控件 992 < 光圈 993 < 讲解卡 994 */
 .tour.on{display:block;}
 .tour-card,.tour-skip{pointer-events:auto;}
-.tour-mask{position:fixed;inset:0;z-index:989;pointer-events:none;}
+.tour-mask{position:fixed;inset:0;z-index:985;pointer-events:none;}
 .tour-mask i{position:fixed;display:block;background:rgba(11,24,44,.76);
   transition:top .3s cubic-bezier(.22,1,.36,1), left .3s cubic-bezier(.22,1,.36,1),
              width .3s cubic-bezier(.22,1,.36,1), height .3s cubic-bezier(.22,1,.36,1);}
@@ -463,7 +463,7 @@ html[data-motion="off"] .tour-ring::after{animation:none;opacity:.7;}
   outline-offset:2px;
 }
 .tour-card{
-  position:fixed;z-index:994;left:50%;transform:translateX(-50%);
+  position:fixed;z-index:9991;left:50%;transform:translateX(-50%);
   width:min(430px, calc(100vw - 28px));
   background:#fff;border-radius:20px;padding:16px 18px 13px;
   box-shadow:0 26px 70px rgba(8,16,32,.5);
@@ -489,7 +489,7 @@ html[data-motion="off"] .tour-ring::after{animation:none;opacity:.7;}
   box-shadow:0 3px 0 #4E35C4;min-width:92px;}
 .tour-btn:disabled{opacity:.4;}
 .tour-skip{
-  position:fixed;z-index:994;right:14px;top:14px;border:none;border-radius:99px;
+  position:fixed;z-index:9991;right:14px;top:14px;border:none;border-radius:99px;
   background:rgba(255,255,255,.18);color:#fff;font-family:inherit;
   font-size:12.5px;font-weight:900;padding:8px 14px;cursor:pointer;
 }
@@ -10397,6 +10397,16 @@ vertEnter();
   var tourRing = document.getElementById('tourRing');
   var tourCard = document.getElementById('tourCard');
   var tourIdx = 0;
+
+  /* 遮罩必须活在 .tour 外面：.tour 现在是最顶层的层叠上下文（z 9990），
+     遮罩若留在里面就会盖在"被抬起来的目标"之上，聚光灯就白打了。
+     搬成 body 的直接子元素后：遮罩 985 < 抬起的目标 992 < .tour 9990。 */
+  (function moveTourMask() {
+    var mk = document.getElementById('tourMask');
+    if (mk && tourEl && mk.parentNode === tourEl) {
+      document.body.insertBefore(mk, tourEl);
+    }
+  })();
   var tourSteps = [
     { ico: '🎯', h: '欢迎来到数学思维站台',
       p: '这里一共 <b>3 个板块</b>：数学思维闯关、竖式练习台、拓展提高。点哪个就进哪个，不用记网址。' },
