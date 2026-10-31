@@ -907,6 +907,10 @@ html[data-perf="low"] .fact{animation:none;}
 
 /* 答案正确时整块答题区弹一下（比只出文字更有分量） */
 .answer.correct-flash{animation:correctPop .38s cubic-bezier(.22,1,.36,1);}
+
+/* 礼花画布：铺满视口但不吃点击，层级在卡片之上、弹窗之下 */
+.fw{position:fixed;inset:0;z-index:945;pointer-events:none;}
+html[data-motion="off"] .fw{display:none;}
 </style>
 <style>
     /* ===== 整卷模式 ===== */
@@ -6617,6 +6621,141 @@ function handleChoose(stepIdx, optIdx) {
    检查最终答案
    ========================================================= */
 /* 答对 / 答错：把结果结算到分、连对、历史、错题本 */
+/* =========================================================
+   答对时的礼花：从页面下沿往上打，炸在屏幕中上部
+   用的是同一块 canvas，逐帧只画几十个点，能量可控：
+     · 关掉动效（data-motion=off）就完全不发 —— 那是用户的明确偏好
+     · 低配机减半粒子数，保证不卡
+   连对越多，礼花越大：1 发 → 3 发 → 满屏收尾
+   ========================================================= */
+const FW = (function () {
+  let cvs = null, ctx = null, raf = 0, rockets = [], sparks = [], dpr = 1;
+  const HUE = [45, 330, 275, 200, 150];      /* 暖黄 / 粉 / 紫 / 蓝 / 青 */
+
+  function ensure() {
+    if (cvs) return true;
+    try {
+      cvs = document.createElement('canvas');
+      cvs.className = 'fw';
+      document.body.appendChild(cvs);
+      ctx = cvs.getContext('2d');
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+      return !!ctx;
+    } catch (e) { return false; }
+  }
+  function resize() {
+    if (!cvs) return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    cvs.width = Math.floor(window.innerWidth * dpr);
+    cvs.height = Math.floor(window.innerHeight * dpr);
+    cvs.style.width = window.innerWidth + 'px';
+    cvs.style.height = window.innerHeight + 'px';
+  }
+  function motionOff() {
+    return document.documentElement.dataset.motion === 'off';
+  }
+  function lowend() {
+    return document.documentElement.dataset.perf === 'low';
+  }
+
+  function addRocket(x, targetY, hue, power) {
+    rockets.push({
+      x: x, y: cvs.height / dpr + 8,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: -(6.2 + Math.random() * 1.6) * (power ? 1.12 : 1),
+      targetY: targetY, hue: hue, power: power || 0,
+      trail: []
+    });
+  }
+
+  function explode(r) {
+    const n = r.power ? 96 : 56;
+    const pn = lowend() ? Math.round(n * 0.5) : n;
+    const sp = r.power ? 4.6 : 3.4;
+    for (let i = 0; i < pn; i++) {
+      const a = (Math.PI * 2 * i) / pn + Math.random() * 0.12;
+      const v = sp * (0.55 + Math.random() * 0.75);
+      sparks.push({
+        x: r.x, y: r.y,
+        vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+        life: 1, decay: 0.012 + Math.random() * 0.012,
+        hue: (r.hue + (Math.random() * 40 - 20) + 360) % 360,
+        size: 1.6 + Math.random() * 1.9
+      });
+    }
+  }
+
+  function tick() {
+    raf = 0;
+    if (!ctx) return;
+    const W = cvs.width / dpr, H = cvs.height / dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i];
+      r.trail.push({ x: r.x, y: r.y });
+      if (r.trail.length > 7) r.trail.shift();
+      r.x += r.vx; r.y += r.vy; r.vy += 0.085;
+      /* 尾迹 */
+      for (let t = 0; t < r.trail.length; t++) {
+        const p = r.trail[t], k = t / r.trail.length;
+        ctx.beginPath();
+        ctx.fillStyle = 'hsla(' + r.hue + ',100%,' + (62 + k * 18) + '%,' + (k * 0.5) + ')';
+        ctx.arc(p.x, p.y, 1.4 * k + 0.6, 0, 6.3);
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.fillStyle = 'hsla(' + r.hue + ',100%,78%,.95)';
+      ctx.arc(r.x, r.y, 2.4, 0, 6.3);
+      ctx.fill();
+      if (r.y <= r.targetY || r.vy >= -0.6) {
+        explode(r);
+        rockets.splice(i, 1);
+      }
+    }
+
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const p = sparks[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.982; p.vy = p.vy * 0.982 + 0.055;
+      p.life -= p.decay;
+      if (p.life <= 0) { sparks.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.fillStyle = 'hsla(' + p.hue + ',100%,' + (58 + p.life * 22) + '%,' + (p.life * 0.95) + ')';
+      ctx.arc(p.x, p.y, p.size * (0.4 + p.life * 0.8), 0, 6.3);
+      ctx.fill();
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    if (rockets.length || sparks.length) {
+      raf = requestAnimationFrame(tick);
+    } else {
+      ctx.clearRect(0, 0, W, H);
+    }
+  }
+
+  /* level: 1 普通 / 2 连对 / 3 连对很多 */
+  function celebrate(level) {
+    if (motionOff()) return;
+    if (!ensure()) return;
+    resize();
+    const W = cvs.width / dpr, H = cvs.height / dpr;
+    const n = level >= 3 ? 5 : (level === 2 ? 3 : 2);
+    const count = lowend() ? Math.max(1, Math.round(n / 2)) : n;
+    for (let i = 0; i < count; i++) {
+      const x = W * (0.12 + Math.random() * 0.76);
+      const ty = H * (0.16 + Math.random() * 0.3);
+      addRocket(x, ty, HUE[Math.floor(Math.random() * HUE.length)], level - 1);
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  return { celebrate: celebrate };
+})();
+
 function finalizeCorrect(q) {
   const p = q.problem, st = q.state;
   const lastStep = p.steps[p.steps.length - 1];
@@ -6648,6 +6787,8 @@ function finalizeCorrect(q) {
   } else {
     SFX.success();
   }
+  /* 连对越多，礼花越大：1 发 → 3 发 → 满屏 */
+  FW.celebrate(combo >= 4 ? 3 : (combo >= 2 ? 2 : 1));
   if (!st.recorded) {
     st.recorded = true;
     addHistoryRecord(q, scoreVisible ? (st.hadWrong ? 30 : 50) : 0, !st.hadWrong, st.timeUsed);
