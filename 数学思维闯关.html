@@ -287,6 +287,29 @@ html[data-perf="low"] .qfig{max-width:250px;}
   box-shadow:0 3px 0 #FFE3A8;
   animation:factPop .42s cubic-bezier(.34,1.5,.64,1);}
 
+/* 该填最终答案了：灯泡发光闪烁，把人引回"已知条件"那里核对一遍
+   ⚠️ 用 !important 盖掉高配档的 fabBob 呼吸动画，两者不能同时跑 */
+@keyframes fabUrgent{
+  0%,100%{transform:scale(1);box-shadow:0 4px 0 #FFCF7E,0 12px 26px rgba(255,170,60,.34),
+          0 0 0 0 rgba(255,184,77,.55);}
+  55%{transform:scale(1.07);box-shadow:0 4px 0 #FFCF7E,0 14px 30px rgba(255,170,60,.5),
+          0 0 0 13px rgba(255,184,77,0);}
+}
+.facts-fab.urgent{
+  border-color:#FFB84D !important;
+  background:linear-gradient(160deg,#FFFDF6,#FFF1D6) !important;
+  animation:fabUrgent 1.15s ease-in-out infinite !important;
+}
+.facts-fab.urgent .fab-ico{animation:fabIco 1.15s ease-in-out infinite;}
+@keyframes fabIco{0%,100%{transform:scale(1) rotate(0deg);}
+  55%{transform:scale(1.16) rotate(-6deg);}}
+/* 关掉动效时不做动画，但"该填答案了"这个状态还得看得见 */
+html[data-motion="off"] .facts-fab.urgent{
+  animation:none !important;
+  box-shadow:0 0 0 6px rgba(255,184,77,.35),0 4px 0 #FFCF7E !important;
+}
+html[data-motion="off"] .facts-fab.urgent .fab-ico{animation:none;}
+
 /* 右下角悬浮「灯泡」——已知信息的门 */
 .facts-fab{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));
   z-index:770;display:none;align-items:center;justify-content:center;
@@ -6200,6 +6223,22 @@ function renderAll() {
   render();
 }
 
+/* 灯泡发光：状态放 class，动画写内联（避开各档位 animation:none !important 的互相覆盖） */
+function setFabUrgent(el, on) {
+  if (!el) return;
+  el.classList.toggle('urgent', on);
+  const calm = document.documentElement.dataset.motion === 'off';
+  if (on && !calm) {
+    el.style.setProperty('animation', 'fabUrgent 1.15s ease-in-out infinite', 'important');
+    const ico = el.querySelector('.fab-ico');
+    if (ico) ico.style.setProperty('animation', 'fabIco 1.15s ease-in-out infinite', 'important');
+  } else {
+    el.style.removeProperty('animation');
+    const ico = el.querySelector('.fab-ico');
+    if (ico) ico.style.removeProperty('animation');
+  }
+}
+
 /* ---- 题目卡上的倾斜 / 光斑 ---- */
 let tiltBound = false;
 function finePointer() {
@@ -6495,6 +6534,15 @@ function renderAnswer() {
   const q = questions[current]; if (!q) return;
   const p = q.problem, st = q.state;
   const card = $('answerCard'), inner = $('answerInner');
+
+  /* 思考步骤走完、正在等最终答案 → 灯泡发光闪起来，
+     提醒学生回"已知信息"核一遍条件再填数。答完/超时就熄掉。 */
+  const fabEl = $('factsFab');
+  if (fabEl) {
+    const wantUrgent = !st.solved && !st.timedOut && !p.noAnswer &&
+                       st.stepIdx >= p.steps.length;
+    setFabUrgent(fabEl, wantUrgent);
+  }
   const unitHtml = p.unit ? `<span class="unit">${p.unit}</span>` : '';
 
   if (st.timedOut) {
@@ -6763,6 +6811,8 @@ function finalizeCorrect(q) {
     ? (lastStep ? String(lastStep.options[lastStep.answer]) : '')
     : `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
   st.solved = true;
+  /* 答案已经填完，灯泡不用再闪了（finalizeCorrect 之后不一定再走 renderAnswer） */
+  setFabUrgent($('factsFab'), false);
   st.timeUsed = timerEnabled ? (TIME_LIMIT - timerRemaining) : 0;
   stopTimer();
   $('timerBar').style.display = 'none';
