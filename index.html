@@ -9923,8 +9923,8 @@ vertEnter();
       p: '切换练习、渲染画质、动画、全屏、横屏都收在它里面。它平时是<b>半透明</b>的，不会挡住练习内容。',
       target: '#menuBtn', act: 'menu-off' },
     { ico: '📂', h: '点它，抽屉就滑出来了',
-      p: '抽屉里有 <b>目录</b>、两个练习、<b>拓展提高</b>，还有 <b>⚙️ 站台设置</b> 和 <b>🎬 看教学动画</b>。点任意一条就切过去，不用刷新。',
-      target: '#menuBtn', act: 'menu-off' },
+      p: '我现在<b>真的把它点开了</b>——看左边。上面是目录和两个练习，中间是<b>拓展提高</b>，下面还有 <b>⚙️ 站台设置</b> 和 <b>🎬 看教学动画</b>。',
+      target: '#panel', act: 'menu-on' },
     { ico: '📚', h: '数学思维闯关',
       p: '每个知识点拆成几步，<b>一步一步想清楚</b>再填答案。答完一步，右下角的灯泡会亮出新的已知条件。',
       target: '.card[data-tool="math"]', act: 'menu-off' },
@@ -9936,10 +9936,10 @@ vertEnter();
       target: '.card[data-preset="ext"]', act: 'menu-off' },
     { ico: '🎚️', h: '画质和动画都能调',
       p: '点抽屉里的 <b>⚙️ 站台设置</b>，会弹出一个设置页：渲染分 <b>高级 / 默认 / 流畅</b>，动画分 <b>全量 / 默认 / 关闭</b>。手机卡就往下调一档。',
-      target: '#menuBtn', act: 'menu-off' },
+      target: '#setSheet', act: 'settings-on' },
     { ico: '⛶', h: '上课投屏用这两个',
-      p: '那里还有 <b>全屏</b>（去浏览器边框，投屏用）和 <b>横屏</b>（把练习区转 90°，竖着拿手机也能用宽屏）。',
-      target: '#menuBtn', act: 'menu-off' },
+      p: '设置页底下这两个：<b>全屏</b>去掉浏览器边框（投屏用），<b>横屏</b>把练习区转 90°（竖着拿手机也能用宽屏）。',
+      target: '#landBtn', act: 'settings-on' },
     { ico: '🚀', h: '可以开始了',
       p: '随时点左上角靶子回来换练习。这个引导在抽屉里点 <b>🎬 看教学动画</b> 还能再看一遍。',
       act: 'menu-off' }
@@ -10013,11 +10013,24 @@ vertEnter();
         setMask('tmR', 0, 0, 0, 0);
         return;
       }
+      /* 设置页是可滚容器，目标可能被挡在可视区外。
+         scrollIntoView 对 fixed + transform 的容器不可靠，直接算 scrollTop。 */
+      if (el.id !== 'panel' && el.id !== 'setSheet') {
+        var sc = el.closest ? el.closest('#setSheet') : null;
+        /* 设置页里要讲的东西都在最下面那块，直接滚到底，保证目标真的在可视区 */
+        if (sc && sc.clientHeight && sc.scrollHeight > sc.clientHeight + 2) {
+          sc.scrollTop = sc.scrollHeight;
+        }
+      }
       var r;
-      if (el.id === 'panel') {
-        /* 抽屉落位是 left:0 top:0、尺寸由 offset* 给出（不受 transform 影响） */
-        r = { left: 0, top: 0, right: el.offsetWidth, width: el.offsetWidth,
-              bottom: el.offsetHeight, height: el.offsetHeight };
+      if (el.id === 'panel' || el.id === 'setSheet') {
+        /* 这两块都是 transform 滑进来的，getBoundingClientRect 拿到的是滑出前的位置，
+           所以按"落位"算：抽屉贴左、设置页贴底居中（和 CSS 一致） */
+        var ow = el.offsetWidth, oh = el.offsetHeight;
+        var oleft = (el.id === 'setSheet') ? Math.max(0, (vw - ow) / 2) : 0;
+        var otop = (el.id === 'setSheet') ? Math.max(0, vh - oh) : 0;
+        r = { left: oleft, top: otop, right: oleft + ow, bottom: otop + oh,
+              width: ow, height: oh };
       } else {
         r = el.getBoundingClientRect();
         r = { left: r.left, top: r.top, right: r.right, bottom: r.bottom,
@@ -10050,15 +10063,21 @@ vertEnter();
     paintNow();
     requestAnimationFrame(paintNow);
     /* 抽屉/提示这类有滑动过渡的，等它停稳再校一次位置 */
-    if (tourSteps[tourIdx].act === 'menu-on') setTimeout(paintNow, 340);
+    /* 抽屉 / 设置页都是 320ms 滑进来的：里面的子元素要等它停稳再量，
+       否则 getBoundingClientRect 拿到的是"还在屏幕外"的位置。 */
+    var _act = tourSteps[tourIdx].act;
+    if (_act === 'menu-on' || _act === 'settings-on') setTimeout(paintNow, 380);
   }
 
   function tourGo(i) {
     if (i < 0 || i >= tourSteps.length) return tourEnd();
     tourIdx = i;
     var act = tourSteps[i].act;
-    if (act === 'menu-on') setMenu(true);
-    else if (act === 'menu-off') setMenu(false);
+    /* 讲哪一块就把哪一块真的打开：只圈靶子、不打开抽屉，
+       后面讲抽屉里有什么就成了"白说"（老师原话）。 */
+    if (act === 'menu-on') { closeSettings(); setMenu(true); }
+    else if (act === 'settings-on') { openSettings(); }
+    else { closeSettings(); setMenu(false); }
     tourPaint();
   }
 
@@ -10074,6 +10093,7 @@ vertEnter();
   function tourEnd() {
     if (!tourEl) return;
     play('done');
+    closeSettings();
     unLift();
     tourEl.classList.remove('on');
     tourEl.setAttribute('aria-hidden', 'true');
