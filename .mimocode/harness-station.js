@@ -29,9 +29,11 @@ safe('分级', function () {
   ok('核心数不被 ≤4 误判',
      !((navigator.hardwareConcurrency || 8) > 2 && de.dataset.perf === 'low'),
      'cores=' + navigator.hardwareConcurrency + ' perf=' + de.dataset.perf);
-  ok('抽屉里显示渲染档位', q('#perfName') && q('#perfName').textContent.length > 0,
-     q('#perfName') && q('#perfName').textContent);
-  ok('动效切换按钮存在', !!q('#motionBtn'));
+  ok('抽屉里显示渲染档位', !!q('#psetNote') && q('#psetNote').textContent.length > 4,
+     (q('#psetNote') || {}).textContent);
+  ok('动画三段控件存在', !!q('#segMotion') && q('#segMotion').querySelectorAll('button').length === 3);
+  ok('渲染三段控件存在', !!q('#segRender') && q('#segRender').querySelectorAll('button').length === 3);
+  ok('全屏/横屏按钮存在', !!q('#fsBtn') && !!q('#landBtn'));
 
   /* 首屏遮罩：脚本跑完就该淡出并移除 */
   setTimeout(function () {
@@ -118,21 +120,20 @@ setTimeout(function () {
   });
 
   /* ---- 5. 动效开关：要同步进 iframe ---- */
-  safe('动效开关', function () {
+  safe('动画档位', function () {
     var before = document.documentElement.dataset.motion;
-    q('#motionBtn').click();
+    var toOff = before === 'on' ? 'off' : 'full';
+    q('#segMotion button[data-v="' + toOff + '"]').click();
     var after = document.documentElement.dataset.motion;
-    ok('点动效开关能切换', before !== after, before + ' -> ' + after);
-    ok('按钮文字跟着变', q('#motionBtn').textContent === (after === 'off' ? '关' : '开'),
-       q('#motionBtn').textContent);
+    ok('点动画档位能切换', before !== after, before + ' -> ' + after);
     var doc = null;
     try { doc = f1.contentDocument; } catch (e) {}
-    ok('iframe 里的动效偏好也变了',
+    ok('iframe 里的动画偏好也变了',
        !!doc && doc.documentElement.dataset.motion === after,
        doc && doc.documentElement.dataset.motion);
-    /* 切回来 */
-    q('#motionBtn').click();
-    ok('再点切回来', document.documentElement.dataset.motion === before);
+    q('#segMotion button[data-v="auto"]').click();
+    ok('能切回默认档', document.documentElement.dataset.motionPref === 'auto',
+       document.documentElement.dataset.motionPref);
   });
 
   /* ---- 6. 切工具 + 回目录 ---- */

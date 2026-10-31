@@ -1,4 +1,425 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🎯 数学思维站台 · 四年级上册</title>
+<style>/* ============================================================
+   数学思维站台 —— 外壳样式
+   设计沿用「来自太空的英语站台」：工具占满整屏，所有站台控件
+   都收进左上角那个「🎯」按钮里，正文区域一寸都不让给顶栏/底栏。
+   ============================================================ */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  background:linear-gradient(160deg,#ffe7bd 0%,#ffd8e7 36%,#ddd6ff 66%,#ffffff 100%);
+  color:#3a3355;height:100dvh;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== 舞台：铺满整屏，不留顶栏底栏 ===== */
+#stage{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column}
+#home{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:70px 18px calc(30px + env(safe-area-inset-bottom));}
+.tool-frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#fff}
+
+/* ===== 🎯 站台浮标 ===== */
+.menu-fab{
+  position:fixed;left:12px;top:12px;z-index:60;
+  width:48px;height:48px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.6);
+  background:linear-gradient(135deg,#8a63e8,#e0578f);
+  color:#fff;cursor:pointer;font-family:inherit;font-size:21px;line-height:1;
+  box-shadow:0 4px 16px rgba(120,80,180,.38);
+  opacity:.8;transition:opacity .22s ease,transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-fab:hover,.menu-fab:focus-visible{opacity:1;transform:scale(1.07)}
+.menu-fab:active{transform:scale(.93)}
+.menu-fab.open{opacity:1;box-shadow:0 6px 22px rgba(120,80,180,.5)}
+/* 工具页占满整屏，浮标会压住工具自己的标题 —— 让它淡一点，底下内容透得出来。
+   抽屉打开时必须是唯一可点的关闭入口，所以下面 .open 要一起写（特异性问题）。 */
+body.tool-open .menu-fab{opacity:.42}
+body.tool-open .menu-fab:hover,
+body.tool-open .menu-fab:focus-visible{opacity:1}
+body.panel-open .menu-fab,
+body.panel-open .menu-fab.open{opacity:1;pointer-events:auto}
+
+/* ===== 抽屉 ===== */
+.panel-mask{position:fixed;inset:0;z-index:55;background:rgba(48,36,72,.42);
+  opacity:0;pointer-events:none;transition:opacity .24s;}
+.panel-mask.on{opacity:1;pointer-events:auto}
+.panel{
+  position:fixed;left:0;top:0;bottom:0;z-index:58;width:min(288px,84vw);
+  display:flex;flex-direction:column;gap:4px;
+  padding:18px 14px calc(30px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.96);
+  box-shadow:18px 0 48px rgba(58,44,88,.26);
+  transform:translateX(-104%);transition:transform .3s cubic-bezier(.3,1.1,.5,1);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.panel.open{transform:translateX(0)}
+
+.brand{display:flex;align-items:center;gap:10px;padding:4px 6px 14px;
+  border-bottom:1.5px dashed #EADFF8;margin-bottom:10px;}
+.brand-ico{font-size:26px;line-height:1;flex:none}
+.brand b{display:block;font-size:16px;font-weight:900;color:#4B3A6B;letter-spacing:.4px}
+.brand i{display:block;font-style:normal;font-size:11.5px;font-weight:700;
+  color:#9A8FC0;margin-top:2px;letter-spacing:.3px}
+
+.psec{font-size:11px;font-weight:900;color:#B4A9D2;letter-spacing:2px;
+  padding:10px 10px 4px;}
+.pitem{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;
+  padding:11px 12px;border:none;border-radius:14px;background:transparent;
+  font-family:inherit;font-size:15px;font-weight:800;color:#4B3A6B;
+  text-align:left;cursor:pointer;transition:background .18s,color .18s;
+  -webkit-tap-highlight-color:transparent;}
+.pitem:hover{background:#F6F1FF}
+.pitem.on{background:linear-gradient(135deg,#EFE7FF,#FDF2F8);color:#6B4CE6}
+.pico{font-size:19px;line-height:1;flex:none;width:24px;text-align:center}
+.plb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgo{flex:none;font-size:17px;font-weight:900;opacity:.35}
+.pitem.on .pgo{opacity:1}
+.pfoot{margin-top:auto;padding:14px 10px 0;font-size:11.5px;font-weight:700;
+  line-height:1.7;color:#B4A9D2;border-top:1.5px dashed #EADFF8;}
+
+/* ===== 目录页 ===== */
+.home-h{margin:0 0 6px;font-size:24px;font-weight:900;letter-spacing:.8px;
+  background:linear-gradient(120deg,#FF9F43 0%,#FF6B9D 45%,#7C5CFF 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.lead{margin:0;font-size:15px;font-weight:900;color:#4B3A6B;letter-spacing:.4px}
+.sublead{margin:5px 0 18px;font-size:12.5px;font-weight:700;color:#9A8FC0}
+
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;
+  align-items:center;column-gap:12px;row-gap:2px;width:100%;text-align:left;
+  padding:15px 16px;border:2px solid rgba(255,255,255,.9);border-radius:20px;
+  background:rgba(255,255,255,.82);
+  box-shadow:0 5px 0 rgba(150,120,220,.10),0 14px 30px rgba(140,110,210,.14);
+  font-family:inherit;cursor:pointer;
+  transition:transform .18s,box-shadow .18s,background .18s;
+  -webkit-tap-highlight-color:transparent;backdrop-filter:none;}
+html[data-perf="high"] .card{-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
+/* 渲染分级：卡片阴影跟着降，流畅档换成扁平描边（滚动时不重绘大面积柔光） */
+html[data-perf="mid"] .card{box-shadow:0 2px 0 rgba(150,120,220,.10);}
+html[data-perf="mid"] .howto,
+html[data-perf="mid"] .hstats span{box-shadow:none;}
+html[data-perf="low"] .card{box-shadow:none;border:2px solid rgba(124,92,255,.20);}
+html[data-perf="low"] .howto{box-shadow:none;border:1.5px solid rgba(124,92,255,.16);}
+html[data-perf="low"] .hstats span{box-shadow:none;background:rgba(255,255,255,.55);}
+html[data-perf="low"] .panel{box-shadow:8px 0 20px rgba(58,44,88,.18);}
+html[data-perf="low"] .tl-card{box-shadow:0 8px 18px -10px rgba(90,60,150,.3);}
+html[data-perf="low"] .menu-fab{box-shadow:0 3px 10px rgba(120,80,180,.3);}
+.card:hover{transform:translateY(-3px);background:#fff;
+  box-shadow:0 8px 0 rgba(150,120,220,.12),0 18px 34px rgba(140,110,210,.2)}
+.card:active{transform:translateY(1px);box-shadow:0 3px 0 rgba(150,120,220,.12)}
+.card .ico{grid-row:1 / span 2;font-size:30px;line-height:1;text-align:center}
+.card .nm{font-size:17px;font-weight:900;color:#3a3355;letter-spacing:.3px}
+.card .ds{font-size:12.5px;font-weight:700;color:#8B7FD0;line-height:1.6}
+.card .go{grid-column:1 / -1;margin-top:9px;font-size:12.5px;font-weight:900;
+  color:#6B4CE6;letter-spacing:.4px}
+
+.foot-hint{margin:20px 2px 0;font-size:11.5px;line-height:1.85;font-weight:700;
+  color:#9A8FC0}
+.foot-hint b{color:#6B4CE6}
+
+@media(max-width:380px){
+  #home{padding-left:14px;padding-right:14px}
+  .card .nm{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms !important;animation-duration:.001ms !important}
+}
+
+/* ============================================================
+   动效 + 分级渲染（沿用「来自太空的英语站台」那一套）
+   · 装饰动画全部包在 prefers-reduced-motion: no-preference 里
+   · 低配走 html[data-perf="low"]，只留必要过渡
+   · html[data-motion="off"] 是「减少动效」偏好的等价开关
+   ============================================================ */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after{
+  animation-duration:.001ms !important;animation-iteration-count:1 !important;
+  transition-duration:.001ms !important;
+}
+
+/* ---- 首屏遮罩：脚本一起来就淡出，避免先看到裸骨架 ---- */
+#bootMask{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#ffe7bd 0%,#ffd8e7 40%,#ddd6ff 72%,#ffffff 100%);
+  transition:opacity .26s ease;}
+#bootMask.off{opacity:0;pointer-events:none;}
+
+/* ---- 目录页入场 ---- */
+@keyframes cardIn{from{opacity:0;transform:translate3d(0,16px,0) scale(.97);}to{opacity:1;transform:none;}}
+@keyframes headIn{from{opacity:0;transform:translate3d(0,10px,0);}to{opacity:1;transform:none;}}
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="high"]:not([data-motion="off"]) #home.in .home-h{animation:headIn .44s cubic-bezier(.22,1.12,.34,1) both;}
+  html[data-perf="high"]:not([data-motion="off"]) #home.in .lead{animation:headIn .44s cubic-bezier(.22,1.12,.34,1) .06s both;}
+  html[data-perf="high"]:not([data-motion="off"]) #home.in .sublead{animation:headIn .44s cubic-bezier(.22,1.12,.34,1) .1s both;}
+  html[data-perf="high"]:not([data-motion="off"]) #home.in .card{
+    animation:cardIn .52s cubic-bezier(.22,1.12,.34,1) both;
+    animation-delay:calc(var(--i,0) * 92ms + .14s);
+  }
+  html[data-perf="mid"]:not([data-motion="off"]) #home.in .card{animation:cardIn .26s ease both;}
+}
+html[data-perf="low"] .card,html[data-perf="low"] .home-h{animation:none !important;}
+
+/* ---- 抽屉条目依次滑入（跟英语站台同一条曲线） ---- */
+@keyframes pIn{0%{opacity:0;transform:translate3d(-26px,0,0) scale(.955);}
+  60%{opacity:1;}100%{opacity:1;transform:none;}}
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="high"]:not([data-motion="off"]) .panel.open .anim-in{
+    animation:pIn .62s cubic-bezier(.2,1.14,.32,1) both;
+    animation-delay:calc(var(--i,0) * 46ms);
+  }
+}
+html[data-perf="low"] .panel.open .anim-in{animation:none !important;}
+
+/* ---- 工具 iframe：淡入 / 淡出 + 加载遮罩 ---- */
+.tool-frame{opacity:1;transition:opacity .22s ease;}
+.tool-frame.pending,.tool-frame.out{opacity:0;}
+html[data-perf="low"] .tool-frame{transition:none;}
+
+.view-loading{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,251,242,.92);opacity:0;pointer-events:none;transition:opacity .24s ease;}
+.view-loading.on{opacity:1;pointer-events:auto;}
+.tl-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 26px;border-radius:18px;
+  max-width:78%;background:#fff;border:1px solid rgba(120,90,180,.10);
+  box-shadow:0 18px 40px -18px rgba(90,60,150,.35);color:#4B3A6B;text-align:center;}
+.tl-card b{font-size:15px;font-weight:900;}
+.tl-card small{font-size:12px;color:#8B7FD0;line-height:1.55;font-weight:700;}
+.tl-dot{width:32px;height:32px;border-radius:50%;border:3px solid rgba(107,76,230,.18);
+  border-top-color:#6B4CE6;animation:tlSpin .9s linear infinite;}
+.tl-bar{position:relative;display:block;width:190px;height:6px;border-radius:99px;
+  background:rgba(107,76,230,.14);overflow:hidden;}
+.tl-bar em{position:absolute;top:0;left:-40%;width:40%;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#8B6BFF,#FF6B9D);animation:tlSlide 1.15s ease-in-out infinite;}
+@keyframes tlSpin{to{transform:rotate(360deg);}}
+@keyframes tlSlide{0%{left:-40%;}60%{left:60%;}100%{left:100%;}}
+@media(prefers-reduced-motion:reduce){
+  .tl-dot{animation:none;}
+  .tl-bar em{animation:none;left:0;width:100%;opacity:.6;}
+}
+html[data-perf="low"] .tl-dot,html[data-perf="low"] .tl-bar em{animation:none;}
+html[data-perf="low"] .tl-dot{border-top-color:rgba(107,76,230,.55);}
+html[data-perf="low"] .tl-bar em{left:0;width:100%;opacity:.6;}
+
+/* ---- 🎯 浮标轻呼吸（只在高配且没关动效时；抽屉开着不呼吸） ---- */
+@keyframes fabBreath{0%,100%{box-shadow:0 4px 16px rgba(120,80,180,.36);}
+  50%{box-shadow:0 7px 24px rgba(120,80,180,.55);}}
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="high"]:not([data-motion="off"]) body:not(.panel-open) .menu-fab{
+    animation:fabBreath 4.4s ease-in-out infinite;
+  }
+}
+html[data-perf="low"] .menu-fab{animation:none !important;}
+
+/* 按下去的手感 */
+.card:active,.pitem:active,.menu-fab:active{transform:scale(.975);}
+
+/* ---- 抽屉底部的渲染档位 / 动效开关 ---- */
+.pmeta{margin:8px 10px 0;font-size:11px;font-weight:800;color:#B4A9D2;line-height:1.9;}
+.pmeta b{color:#6B4CE6;}
+.pmeta button{border:none;background:#F3EEFF;color:#6B4CE6;font-family:inherit;
+  font-size:11px;font-weight:900;border-radius:99px;padding:3px 11px;margin:0 2px;cursor:pointer;}
+.pmeta button.on{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);color:#fff;}
+
+/* ---- 首页：内容垂直居中 + 练习统计条（把底部那片空白用掉） ---- */
+/* 不要垂直居中：卡少的时候居中会把标题和卡片之间扯出一大块空白 */
+#home .hstats{flex:none;}
+#home .foot-hint{margin-top:16px;flex:none;}
+
+/* ============================================================
+   站台设置：渲染 / 动画 两个维度，各三级
+   · 渲染  高级 / 默认 / 流畅   → html[data-perf] = high / mid / low
+   · 动画  全量 / 默认 / 关闭   → html[data-motion] = on / off
+   · 默认档按设备压力自动落档；高级/全量是强制最高，不留余地
+   ============================================================ */
+.pset{
+  margin-top:auto;                     /* 贴底，但下面留了安全距离 */
+  padding:12px 2px 2px;
+  border-top:1.5px dashed #EADFF8;
+}
+.pset-h{font-size:11px;font-weight:900;color:#B4A9D2;letter-spacing:2px;padding:2px 8px 8px;}
+.pset-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.pset-k{flex:none;width:38px;font-size:12.5px;font-weight:900;color:#6B5FA8;}
+
+/* 三段选择：足够大的手指靶（学生都是手机） */
+.seg{flex:1;display:flex;gap:4px;padding:4px;border-radius:14px;
+  background:#F4F0FF;border:1.5px solid #E6DEFB;}
+.seg button{
+  flex:1 1 0;min-width:0;min-height:46px;padding:6px 2px;
+  border:none;border-radius:11px;background:transparent;cursor:pointer;
+  font-family:inherit;font-size:13px;font-weight:900;color:#8478BC;
+  transition:background .18s,color .18s,transform .14s,box-shadow .18s;
+  -webkit-tap-highlight-color:transparent;
+}
+.seg button:active{transform:scale(.96);}
+.seg button.on{
+  background:#fff;color:#6B4CE6;
+  box-shadow:0 2px 0 #D8CEFF,0 4px 10px rgba(124,92,255,.18);
+}
+.seg button:focus-visible{outline:2px solid #8B6BFF;outline-offset:2px;}
+
+.pset-btns{display:flex;gap:8px;margin:2px 0 9px;}
+.sbtn{
+  flex:1 1 0;min-width:0;min-height:58px;padding:7px 4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  border-radius:14px;cursor:pointer;font-family:inherit;text-align:center;
+  background:rgba(124,92,255,.07);border:1.5px solid rgba(124,92,255,.20);color:#4B3A6B;
+  transition:transform .16s,background .2s,border-color .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.sbtn:not(.off){background:rgba(124,92,255,.13);border-color:rgba(124,92,255,.46);}
+.sbtn:active{transform:scale(.95);}
+.sbtn .sico{width:24px;height:24px;border-radius:8px;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+  transition:background .22s,transform .3s cubic-bezier(.34,1.56,.64,1);}
+.sbtn.off .sico{background:rgba(124,92,255,.22);color:#6B5FA8;transform:scale(.92);}
+.sbtn .slb{font-size:12.5px;font-weight:900;line-height:1.2;}
+.sbtn .shint{font-size:10.5px;font-weight:700;color:#8B7FD0;line-height:1.2;}
+.sbtn[hidden]{display:none;}
+
+.pset-note{font-size:10.5px;font-weight:700;color:#B4A9D2;line-height:1.6;
+  padding:0 8px;text-align:center;}
+
+/* ===== 横屏：把 #stage 整体转 90°（手机浏览器没有强制转屏的 API） =====
+   ⚠️ 用 svh/svw：100vh 在手机上含地址栏占位，转 90° 后会露出一半
+   ⚠️ rotate(90deg) 把 (x,y) 映到 (-y,x)，所以要再 translateY(-100%) 才落回可见区 */
+body.land #stage{
+  position:fixed;left:0;top:0;
+  width:100vh;height:100vw;
+  width:100svh;height:100svw;
+  transform:rotate(90deg) translateY(-100%);
+  transform-origin:0 0;
+}
+/* 转过来以后浮标挪到底部，别压住旋转后内容的左上角 */
+body.land .menu-fab{top:auto;bottom:12px;left:12px;}
+@media (min-width:901px){ #landBtn{display:none !important;} }
+
+/* ===== 切换工具的提示条（跟英语站台一样：进哪个说一声） ===== */
+#stToast{position:fixed;left:50%;top:14px;z-index:900;
+  transform:translate(-50%,-18px);opacity:0;pointer-events:none;
+  padding:9px 16px;border-radius:99px;max-width:86vw;
+  background:rgba(58,44,88,.92);color:#fff;
+  font-size:12.5px;font-weight:800;letter-spacing:.3px;text-align:center;
+  box-shadow:0 10px 24px rgba(58,44,88,.28);
+  transition:opacity .22s ease,transform .22s cubic-bezier(.34,1.4,.64,1);}
+#stToast.on{opacity:1;transform:translate(-50%,0);}
+
+
+/* 「怎么用」三行：把页面底部那片空白变成有用的信息 */
+.howto{margin:18px 0 0;padding:14px 16px;border-radius:18px;
+  background:rgba(255,255,255,.72);border:1.5px solid rgba(255,255,255,.9);
+  box-shadow:0 4px 0 rgba(150,120,220,.08);}
+.howto b{display:block;font-size:12.5px;font-weight:900;color:#6B5FA8;
+  letter-spacing:.6px;margin-bottom:7px;}
+.howto p{margin:0;font-size:12px;line-height:1.85;font-weight:700;color:#7A6E92;}
+
+.hstats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 2px 0;}
+.hstats span{display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.8);border-radius:99px;padding:7px 13px;
+  font-size:12px;font-weight:800;color:#6B5FA8;
+  box-shadow:0 2px 0 rgba(150,120,220,.10);}
+.hstats b{color:#6B4CE6;font-weight:900;font-size:13px;}
+.hstats .empty{background:transparent;box-shadow:none;color:#A79FC2;padding-left:2px;font-weight:700;}
+</style>
+</head>
+<body>
+<div id="bootMask"></div>
+<div id="stToast" role="status" aria-live="polite"></div>
+
+<button class="menu-fab" id="menuBtn" aria-label="站台菜单" aria-expanded="false">🎯</button>
+<div class="panel-mask" id="panelMask"></div>
+
+<aside class="panel" id="panel">
+  <div class="brand">
+    <span class="brand-ico">🎯</span>
+    <div>
+      <b>数学思维站台</b>
+      <i>四年级上册 · 冀教版</i>
+    </div>
+  </div>
+  <button class="pitem" id="homeItem">
+    <span class="pico">🏠</span><span class="plb">目录</span><span class="pgo">›</span>
+  </button>
+  <div class="psec">练　习</div>
+  <button class="pitem" data-tool="math">
+    <span class="pico">📚</span><span class="plb">数学思维闯关</span><span class="pgo">›</span>
+  </button>
+  <button class="pitem" data-tool="vert">
+    <span class="pico">✏️</span><span class="plb">竖式练习台</span><span class="pgo">›</span>
+  </button>
+  <div class="pfoot">点左上角 🎯 随时切换练习，不用记网址、不用刷新。</div>
+    <div class="pset">
+    <div class="pset-h">站台设置</div>
+
+    <div class="pset-row">
+      <span class="pset-k">渲染</span>
+      <div class="seg" id="segRender" role="group" aria-label="渲染质量">
+        <button type="button" data-v="high">高级</button>
+        <button type="button" data-v="auto">默认</button>
+        <button type="button" data-v="smooth">流畅</button>
+      </div>
+    </div>
+
+    <div class="pset-row">
+      <span class="pset-k">动画</span>
+      <div class="seg" id="segMotion" role="group" aria-label="动画强度">
+        <button type="button" data-v="full">全量</button>
+        <button type="button" data-v="auto">默认</button>
+        <button type="button" data-v="off">关闭</button>
+      </div>
+    </div>
+
+    <div class="pset-btns">
+      <button class="sbtn" id="fsBtn" type="button">
+        <span class="sico">⛶</span><span class="slb">全屏</span><span class="shint" id="fsHint">未开启</span>
+      </button>
+      <button class="sbtn off" id="landBtn" type="button">
+        <span class="sico">🔄</span><span class="slb">横屏</span><span class="shint" id="landHint">竖屏</span>
+      </button>
+    </div>
+
+    <div class="pset-note" id="psetNote">默认：按设备压力自动调节</div>
+  </div>
+</aside>
+
+<main id="stage">
+  <section id="home">
+    <h1 class="home-h">数学思维站台</h1>
+    <p class="lead">选一个练习开始吧</p>
+    <p class="sublead">点左上角 🎯 可以随时切换</p>
+    <div class="cards">
+      <button class="card" data-tool="math">
+        <span class="ico">📚</span>
+        <span class="nm">数学思维闯关</span>
+        <span class="ds">每个知识点拆成几步，一步一步想清楚再填答案；带错题本、PK、整卷</span>
+        <span class="go">开始练习 →</span>
+      </button>
+      <button class="card" data-tool="vert">
+        <span class="ico">✏️</span>
+        <span class="nm">竖式练习台</span>
+        <span class="ds">试商 → 乘 → 减 → 落下，一格一格把除法竖式填出来</span>
+        <span class="go">开始练习 →</span>
+      </button>
+    </div>
+    <div class="hstats" id="hstats"></div>
+    <div class="howto">
+      <b>怎 么 用</b>
+      <p>🎯 点左上角随时换练习，不用重开页面、不用记网址。</p>
+      <p>💡 闯关页每答完一步，右下角的灯泡会亮出新的已知条件。</p>
+      <p>✏️ 竖式练习台有 入门 / 熟练 / 挑战 三档，一格一格把竖式填出来。</p>
+    </div>
+    <p class="foot-hint">这个文件已经把两个练习都装在里面了，可以单独拷走使用。<br>
+      错题本、竖式进度、单元选择都存在本机浏览器里，换浏览器或清缓存会丢。</p>
+  </section>
+</main>
+
+<template id="tpl-math"><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -239,29 +660,61 @@ body{
   background:linear-gradient(180deg,transparent 62%,#DDD4FF 62%,#DDD4FF 92%,transparent 92%);
   padding:0 2px;}
 
-.facts{padding:18px 20px 20px;margin-bottom:22px;
+/* 已知信息不再占正文位置：默认收在底部，点右下角灯泡才滑出 */
+.facts{padding:14px 16px calc(20px + env(safe-area-inset-bottom));
+  position:fixed;left:0;right:0;bottom:0;z-index:760;
+  width:100%;max-width:720px;margin:0 auto;
+  max-height:min(76vh,540px);overflow-y:auto;-webkit-overflow-scrolling:touch;
   background:linear-gradient(140deg,#FFFCF2 0%,#F5FBFF 55%,#FBF6FF 100%);
-  border:2.5px dashed #FFD98A;border-radius:24px;
-  box-shadow:0 5px 0 rgba(255,200,100,.10),0 14px 28px rgba(255,180,80,.10);
-  scroll-margin-top:18px;}
+  border:2.5px dashed #FFD98A;border-bottom:none;border-radius:26px 26px 0 0;
+  box-shadow:0 -12px 40px rgba(90,60,150,.22);
+  transform:translateY(104%);opacity:0;pointer-events:none;
+  transition:transform .32s cubic-bezier(.3,1.12,.52,1),opacity .22s;}
+.facts.open{transform:translateY(0);opacity:1;pointer-events:auto;}
 .facts.flash{animation:factsFlash 1.1s ease;}
 @keyframes factsFlash{
-  0%,100%{box-shadow:0 5px 0 rgba(255,200,100,.10),0 14px 28px rgba(255,180,80,.10);border-color:#FFD98A;}
-  30%{box-shadow:0 0 0 7px rgba(255,200,100,.42);border-color:#FFB84D;}
+  0%,100%{border-color:#FFD98A;}
+  30%{border-color:#FFB84D;box-shadow:0 -12px 40px rgba(255,160,60,.42);}
 }
-.facts-head{display:flex;align-items:center;gap:8px;font-size:14.5px;
-  font-weight:900;color:var(--ink-2);margin-bottom:5px;}
+.facts-mask{position:fixed;inset:0;z-index:750;background:rgba(58,44,88,.42);
+  opacity:0;pointer-events:none;transition:opacity .24s;}
+.facts-mask.on{opacity:1;pointer-events:auto;}
+.facts-head{display:flex;align-items:center;gap:8px;font-size:15px;
+  font-weight:900;color:var(--ink-2);margin-bottom:4px;}
 .facts-count{font-size:11.5px;font-weight:800;color:#fff;
   background:linear-gradient(135deg,var(--purple-2),var(--purple));
-  padding:3px 10px;border-radius:20px;margin-left:auto;
+  padding:3px 10px;border-radius:20px;
   box-shadow:0 2px 0 var(--purple-deep);}
-.facts-sub{font-size:12.5px;color:var(--muted);margin-bottom:13px;padding-left:26px;font-weight:600;}
-.facts-list{display:flex;flex-wrap:wrap;gap:10px;min-height:2px;}
+.facts-close{margin-left:auto;flex:none;width:36px;height:36px;border:none;
+  border-radius:50%;background:#fff;color:#8B7FD0;font-family:inherit;
+  font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 2px 0 #E4DDFF;}
+.facts-sub{font-size:12.5px;color:var(--muted);margin-bottom:11px;font-weight:600;}
+.facts-list{display:flex;flex-direction:column;gap:8px;min-height:2px;}
 .fact{display:flex;align-items:center;gap:9px;background:#fff;color:var(--ink-2);
-  font-size:13.5px;font-weight:600;padding:9px 15px 9px 9px;
-  border-radius:14px;line-height:1.5;border:2.5px solid #FFE3A8;
+  font-size:13.5px;font-weight:600;padding:9px 13px 9px 9px;
+  border-radius:14px;line-height:1.55;border:2.5px solid #FFE3A8;
   box-shadow:0 3px 0 #FFE3A8;
   animation:factPop .42s cubic-bezier(.34,1.5,.64,1);}
+
+/* 右下角悬浮「灯泡」——已知信息的门 */
+.facts-fab{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));
+  z-index:770;display:none;align-items:center;justify-content:center;
+  width:54px;height:54px;border-radius:50%;border:2.5px solid #FFD08A;
+  background:#fff;font-family:inherit;cursor:pointer;
+  box-shadow:0 4px 0 #FFCF7E,0 12px 26px rgba(255,170,60,.32);
+  transition:transform .18s,box-shadow .18s;}
+.facts-fab.show{display:flex;}
+.facts-fab.open{border-color:#C4B5FD;box-shadow:0 4px 0 #DDD4FF,0 12px 26px rgba(124,92,255,.26);}
+.facts-fab:active{transform:scale(.94);}
+.facts-fab .fab-ico{font-size:24px;line-height:1;}
+.facts-fab .fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;
+  padding:0 5px;border-radius:10px;background:linear-gradient(135deg,#FFB84D,#FF8A3D);
+  color:#fff;font-size:11px;font-weight:900;line-height:20px;text-align:center;
+  border:2px solid #fff;}
+.facts-fab .fab-badge.done{background:linear-gradient(135deg,#4EE08B,#2ED573);}
+.facts-fab .fab-badge.hide{display:none;}
+.facts-fab.pop{animation:fabPop .6s cubic-bezier(.34,1.5,.64,1);}
+@keyframes fabPop{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
 .fact-no{flex:none;width:22px;height:22px;border-radius:8px;
   background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#fff;
   font-size:11.5px;font-weight:900;display:flex;align-items:center;
@@ -316,45 +769,43 @@ body{
   box-shadow:0 4px 0 rgba(124,92,255,.06),0 10px 22px rgba(124,92,255,.09);
   overflow:hidden;transition:box-shadow .25s,transform .2s;}
 .step.active{box-shadow:0 0 0 3px #A78BFA,0 12px 28px rgba(124,92,255,.22);}
-.step.locked{opacity:.55;background:#FAF9FE;box-shadow:0 2px 0 rgba(124,92,255,.04);}
-.step.done{background:linear-gradient(180deg,#FBFFFD,#F6FFFA);}
 
-.step-head{display:flex;align-items:center;gap:12px;padding:16px 20px;}
-.step.locked .step-head{padding:13px 20px;}
+/* 已完成的步骤：一行小胶囊 */
+.done-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:7px 10px;margin-bottom:10px;border-radius:14px;
+  background:linear-gradient(135deg,#F0FCF5,#F8FFFB);border:2px solid #C7F0D8;}
+.done-strip-t{flex:none;font-size:12px;font-weight:900;color:#1FA85A;letter-spacing:.3px;}
+.done-chip{display:inline-flex;align-items:center;gap:3px;min-height:30px;padding:3px 10px;
+  border-radius:99px;border:2px solid #B6EFCC;background:#fff;cursor:pointer;
+  font-family:inherit;font-size:12.5px;font-weight:900;color:#1FA85A;
+  transition:background .16s,border-color .16s,transform .16s;line-height:1;}
+.done-chip:active{transform:scale(.94);}
+.done-chip .dc-tick{font-size:11px;}
+.done-chip.on{background:linear-gradient(135deg,#4EE08B,#2ED573);
+  border-color:#1FA85A;color:#fff;}
+.done-panel{padding:12px 14px;margin-bottom:10px;border-radius:16px;background:#fff;
+  border:2px solid #DCEFE4;box-shadow:0 3px 0 rgba(46,213,115,.10);
+  animation:fadeUp .2s ease;}
+.done-panel-q{font-size:13.5px;font-weight:800;color:var(--ink-3);line-height:1.6;
+  margin-bottom:7px;}
+.done-panel .chosen-line{margin-top:0;margin-bottom:7px;font-size:13px;}
+.done-panel .fb-inline{margin-top:0;font-size:13px;padding:9px 12px;}
+
+/* 还没解锁的步骤：一行带过 */
+.step-locked-line{display:flex;align-items:center;gap:7px;padding:9px 14px;
+  border-radius:14px;background:#FAF9FE;border:2px dashed #E0DCF0;
+  font-size:12.5px;font-weight:700;color:#A79FC2;margin-bottom:8px;}
+
+.step-head{display:flex;align-items:center;gap:12px;padding:14px 18px;}
 .step-num{flex:none;width:28px;height:28px;border-radius:10px;
   background:#EDE8FF;color:#7C5CFF;font-size:13px;font-weight:900;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 2px 0 #D8CEFF;transition:background .2s,color .2s,transform .2s;}
 .step.active .step-num{background:linear-gradient(135deg,var(--purple-2),var(--purple));
   color:#fff;box-shadow:0 3px 0 var(--purple-deep);}
-.step.done .step-num{background:linear-gradient(135deg,#4EE08B,#2ED573);
-  color:#fff;box-shadow:0 3px 0 var(--green-deep);font-size:14px;}
-.step.locked .step-num{background:#EDEBF5;color:#B0A9C6;
-  box-shadow:0 2px 0 #E0DDF0;font-size:13px;}
 .step-q{font-size:15px;font-weight:800;color:var(--ink-2);line-height:1.6;flex:1;}
-.step.done .step-q{color:var(--ink-3);font-weight:700;font-size:14px;}
-.step.locked .step-q{color:#B0A9C6;font-weight:600;font-size:13.5px;}
 
-.step.done{cursor:pointer;}
-.step.done .step-head{padding:11px 20px;transition:background .2s;}
-.step.done .step-head:hover{background:rgba(78,224,139,.06);}
-.step-chevron{flex:none;color:#8B7FD0;font-size:13px;
-  transition:transform .3s cubic-bezier(.34,1.2,.64,1);display:inline-block;}
-.step.done.expanded .step-chevron{transform:rotate(180deg);}
-
-.step-body-wrap{display:grid;grid-template-rows:0fr;
-  transition:grid-template-rows .35s cubic-bezier(.4,0,.2,1);will-change:grid-template-rows;}
-.step.done.expanded .step-body-wrap{grid-template-rows:1fr;}
-.step-body-wrap > .step-body{overflow:hidden;padding:0 18px 0 60px;}
-.step.done.expanded .step-body-wrap > .step-body{padding:0 18px 18px 60px;}
-@media(max-width:520px){
-  .step-body-wrap > .step-body,
-  .step.done.expanded .step-body-wrap > .step-body{padding-left:16px;padding-right:16px;}
-}
-.step.active .step-body{padding:0 18px 18px 60px;}
-@media(max-width:520px){
-  .step.active .step-body{padding:0 16px 16px 16px;}
-}
+.step.active .step-body{padding:0 16px 16px 16px;}
 
 .opts{margin-top:2px;}
 .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
@@ -447,23 +898,59 @@ body{
   box-shadow:0 3px 0 rgba(124,92,255,.07);}
 .nav-info b{color:var(--purple);font-weight:900;margin:0 2px;}
 
-.back-to-facts{position:fixed;right:24px;bottom:24px;z-index:100;
-  display:flex;align-items:center;gap:7px;padding:13px 18px 13px 14px;
-  min-height:48px;border:2.5px solid #C4B5FD;border-radius:999px;background:#fff;
-  color:var(--purple);font-family:inherit;font-size:14.5px;font-weight:800;
-  cursor:pointer;box-shadow:0 4px 0 #DDD4FF,0 12px 26px rgba(124,92,255,.20);
-  opacity:0;transform:translateY(18px) scale(.9);pointer-events:none;
-  transition:opacity .28s cubic-bezier(.34,1.3,.64,1),
-             transform .28s cubic-bezier(.34,1.3,.64,1);}
-.back-to-facts.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-.back-to-facts:hover{background:#F6F2FF;transform:translateY(-2px) scale(1.03);}
-@media(max-width:520px){
-  .back-to-facts{right:14px;bottom:14px;padding:12px 16px 12px 12px;font-size:13.5px;}
+/* ============ 手机端：把竖着占地方的横条压扁，让题目和当前步骤同屏 ============ */
+@media(max-width:600px){
+  .wrap{padding:12px 12px 96px;}
+  .hero{margin-bottom:8px;}
+  .hero .mascot{width:46px;margin-bottom:0;}
+  .hero h1{font-size:20px;margin-bottom:2px;letter-spacing:.4px;}
+  .hero p{font-size:11.5px;letter-spacing:.2px;}
+
+  .tab-nav{padding:4px;margin-bottom:10px;border-radius:16px;}
+  .tab-btn{min-height:42px;padding:7px 3px;font-size:12px;letter-spacing:0;border-radius:10px;}
+  .tab-btn .badge{min-width:17px;height:17px;padding:0 4px;font-size:10px;line-height:17px;margin-left:1px;}
+
+  .score-bar{padding:7px 9px;margin-bottom:10px;border-radius:15px;}
+  .score-item{padding:4px 7px;gap:3px;border-radius:10px;}
+  .score-icon{font-size:14px;}
+  .score-value{font-size:15px;}
+  .score-label{font-size:10.5px;}
+  .score-toggle{font-size:12px;min-height:38px;padding:4px 8px;}
+
+  .tool-bar{padding:7px 9px;margin-bottom:10px;border-radius:15px;}
+  .unit-btn{min-height:40px;padding:7px 11px;font-size:13px;}
+  .timer-btn,.sound-btn{min-height:40px;padding:6px 10px;font-size:13px;}
+
+  .goal-bar{padding:8px 12px;margin-bottom:10px;border-radius:15px;}
+  .goal-line{font-size:12.5px;margin-bottom:6px;}
+  .goal-line .goal-num{font-size:13px;}
+  .goal-track{height:9px;}
+
+  .problem{padding:13px 14px 14px 18px;margin-bottom:10px;border-radius:20px;}
+  .problem::before{width:6px;}
+  .meta{font-size:11.5px;margin-bottom:8px;}
+  .meta .tag{padding:3px 10px;font-size:11.5px;}
+  .qtext{font-size:16px;line-height:1.8;}
+
+  .section-title{font-size:12.5px;margin:0 0 9px 2px;gap:7px;}
+  .section-title .mini-btn{font-size:12.5px;padding:6px 10px;min-height:38px;}
+  .dot-mark{width:8px;height:8px;}
+
+  .step-head{padding:12px 14px;gap:9px;}
+  .step-q{font-size:14.5px;line-height:1.55;}
+  .step-num{width:26px;height:26px;font-size:12px;}
+  .opt{min-height:50px;padding:11px 13px;font-size:14.5px;margin-bottom:8px;}
+
+  .answer{margin-top:14px;padding:14px;border-radius:20px;}
+  .nav{margin-top:16px;gap:9px;}
+  .nav-btn{width:46px;height:46px;}
+  .nav-info{font-size:12.5px;padding:9px 12px;border-radius:12px;}
 }
 
 .page-head{display:flex;align-items:center;justify-content:space-between;
   margin-bottom:16px;padding:0 4px;gap:10px;flex-wrap:wrap;}
 .page-head h2{font-size:19px;margin:0;font-weight:900;color:var(--ink-2);}
+
 .page-head .mini-btn{background:linear-gradient(135deg,var(--gold-2),var(--gold));
   color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
 .page-head .mini-btn.danger{background:#fff;color:#C2410C;box-shadow:0 3px 0 rgba(194,65,12,.18);}
@@ -704,15 +1191,102 @@ body{
 .record-tag.tag-rt{background:linear-gradient(135deg,#FFB3C8,#FF6B9D);color:#fff;}
 .record-tag.tag-cc{background:linear-gradient(135deg,#9EE7FF,#3BA9DD);color:#fff;}
 
-/* ============ 低配 / 减少动效 ============ */
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
-    transition-duration:.001ms !important;}
+/* ============ 分级渲染：三档 + 动效开关 ============ */
+/* low  —— 只留反馈动画（答对/答错），装饰全砍，阴影压成描边
+   mid  —— 保留短促入场，砍掉位移+缩放的组合动画和长阴影
+   high —— 完整动效
+   动效总开关走 html[data-motion="off"]，它是「减少动效」偏好的等价物。 */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after{
+  animation-duration:.001ms !important;animation-iteration-count:1 !important;
+  transition-duration:.001ms !important;
 }
+
+@keyframes optIn{
+  from{opacity:0;transform:translate3d(0,10px,0);}
+  to{opacity:1;transform:none;}
+}
+@keyframes stepIn{
+  from{opacity:0;transform:translate3d(0,14px,0) scale(.99);}
+  to{opacity:1;transform:none;}
+}
+@keyframes chipIn{
+  from{opacity:0;transform:translate3d(-8px,0,0) scale(.94);}
+  to{opacity:1;transform:none;}
+}
+@keyframes fabBob{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-3px);}
+}
+@keyframes goalShine{
+  from{transform:translateX(-120%);}
+  to{transform:translateX(320%);}
+}
+@keyframes correctPop{
+  0%{transform:scale(1);}
+  40%{transform:scale(1.035);}
+  100%{transform:scale(1);}
+}
+
+/* —— high：选项依次滑入、当前步骤卡轻微浮入 —— */
+.goal-fill{position:relative;overflow:hidden;}
+@media (prefers-reduced-motion: no-preference){
+  html[data-perf="high"]:not([data-motion="off"]) .step.active{animation:stepIn .34s cubic-bezier(.22,1,.36,1) both;}
+  html[data-perf="high"]:not([data-motion="off"]) .opt{
+    animation:optIn .34s cubic-bezier(.22,1,.36,1) both;
+    animation-delay:calc(var(--i,0) * 46ms);
+  }
+  html[data-perf="high"]:not([data-motion="off"]) .done-chip{
+    animation:chipIn .3s cubic-bezier(.22,1,.36,1) both;
+    animation-delay:calc(var(--i,0) * 40ms);
+  }
+  html[data-perf="high"]:not([data-motion="off"]) .facts-fab.show{animation:fabBob 3.4s ease-in-out infinite;}
+  html[data-perf="high"]:not([data-motion="off"]) .facts:not(.open) .fact{animation:none;}
+  html[data-perf="high"]:not([data-motion="off"]) .goal-bar.reached .goal-fill::after{
+    content:'';position:absolute;inset:0;border-radius:8px;
+    background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.75) 50%,transparent 100%);
+    animation:goalShine 1.5s ease-in-out .2s 2;
+  }
+}
+/* —— mid：只留一次短入场，不排队、不缩放 —— */
+@media (prefers-reduced-motion: no-preference){
+  html[data-perf="mid"]:not([data-motion="off"]) .opt{animation:optIn .2s ease both;}
+  html[data-perf="mid"]:not([data-motion="off"]) .step.active{animation:optIn .22s ease both;}
+}
+/* —— low：装饰性动画一律不出现（答对/答错的反馈动画保留） —— */
+html[data-perf="low"] .opt,
+html[data-perf="low"] .step.active,
+html[data-perf="low"] .done-chip,
+html[data-perf="low"] .facts-fab{animation:none !important;}
+
+/* 阴影分级：mid / low 把大面积柔光换成扁平描边，滚动时不重绘整块阴影 */
+html[data-perf="mid"] .card,
+html[data-perf="mid"] .step,
+html[data-perf="mid"] .v-coach,
+html[data-perf="mid"] .v-stage,
+html[data-perf="mid"] .facts{box-shadow:0 2px 0 rgba(124,92,255,.10);}
+html[data-perf="low"] .card,
+html[data-perf="low"] .step,
+html[data-perf="low"] .v-coach,
+html[data-perf="low"] .v-stage,
+html[data-perf="low"] .facts,
+html[data-perf="low"] .record-card{box-shadow:none;border:2px solid var(--line-2);}
+html[data-perf="low"] body{background-attachment:scroll;}
 [data-perf="low"] .score-float{animation-duration:.9s;}
-[data-perf="low"] .card,[data-perf="low"] .step,
-[data-perf="low"] .record-card{box-shadow:0 3px 0 rgba(124,92,255,.07);}
 [data-perf="low"] .problem::before{background:#A78BFA;}
+/* 状态变化的反馈必须留着：它是「答对了」的唯一即时信号 */
+html[data-perf="low"] .opt.wrong,
+html[data-perf="low"] .fact{animation:none;}
+
+/* 按下去的手感：所有可点控件统一给一点压缩，比 hover 更适合手机 */
+.mini-btn:active,.opt:active,.v-opt:active,.done-chip:active,
+.tab-btn:active,.nav-btn:active,.unit-chip:active,.form-chip:active{
+  transform:scale(.972);
+}
+
+/* 答案正确时整块答题区弹一下（比只出文字更有分量） */
+.answer.correct-flash{animation:correctPop .38s cubic-bezier(.22,1,.36,1);}
 </style>
 <style>
     /* ===== 整卷模式 ===== */
@@ -898,10 +1472,12 @@ body{
         <div class="qtext" id="qtext"></div>
       </div>
 
+      <div class="facts-mask" id="factsMask"></div>
       <div class="facts" id="factsBox">
         <div class="facts-head">
           📋 已知信息
           <span class="facts-count" id="factsCount" style="display:none;"></span>
+          <button class="facts-close" id="factsClose" aria-label="收起已知信息">✕</button>
         </div>
         <div class="facts-sub" id="factsSub">完成思考步骤，条件会逐步出现</div>
         <div class="facts-list" id="factsList"></div>
@@ -969,8 +1545,9 @@ body{
 
 </div>
 
-<button class="back-to-facts" id="backToFacts" aria-label="回到已知信息栏">
-  <span>📋</span><span>看已知信息</span>
+<button class="facts-fab" id="factsFab" aria-label="查看已知信息" aria-expanded="false">
+  <span class="fab-ico">💡</span>
+  <span class="fab-badge hide" id="factsFabBadge">0</span>
 </button>
 
 <div class="pk-toast" id="pkToast"></div>
@@ -1110,18 +1687,68 @@ const $ = id => document.getElementById(id);
 const hl = t => String(t).replace(/(\d+(?:\.\d+)?)/g, '<b>$1</b>');
 const LETTER = 'ABCD';
 
-/* 低配降级：低端机 / 用户要求减少动效 */
+/* =========================================================
+   分级渲染 + 动效分级
+   ⚠️ 判弱机别按 ≤4 核 / ≤4G 猜：iOS Safari 在 iPhone 上也恒报 4 核，
+      Chrome 的 deviceMemory 封顶 8、很多中端机报 4 —— 按 ≤4 判会把
+      好机器一起降级（英语站台吃过这一次亏，记录在案）。
+      所以：只有 ≤2 核 / ≤2G / 开了省流量 才算 low；
+      ≤4 核 / ≤4G 算 mid（只削装饰，不削功能）。
+   ⚠️「减少动效」是用户的动效偏好（Windows 关动画、开省电都会命中），
+      不是机器弱 —— 它单独走 data-motion，不参与画质分级。
+   ========================================================= */
+/* ===== 渲染与动画两个维度，各三级 ===== */
+/* 站台会把同样的偏好写进 localStorage；直接双击打开这个文件时也照样生效。
+   渲染 高级/默认/流畅 → html[data-perf]=high/mid/low
+   动画 全量/默认/关闭 → html[data-motion]=on/off
+   ⚠️ 只读一次静态线索（核心数/内存/省流量），不起定时器、不跑 rAF 循环。
+   ⚠️ 判弱机只认 ≤2：iOS Safari 恒报 4 核、Chrome 的 deviceMemory 封顶 8，
+      按 ≤4 判会把好机器一起降级。 */
 (function detectPerf() {
-  let low = false;
+  var PERF_BY = ['high', 'mid', 'low'];
+  var pressure = 0, reduced = false;
   try {
-    const cores = navigator.hardwareConcurrency;
-    const mem = navigator.deviceMemory;
-    if (typeof cores === 'number' && cores <= 4) low = true;
-    if (typeof mem === 'number' && mem <= 4) low = true;
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) low = true;
+    var cores = navigator.hardwareConcurrency || 4;
+    var mem = navigator.deviceMemory || 4;
+    var conn = navigator.connection || {};
+    var saveData = conn.saveData === true;
+    var slowNet = /^(slow-)?2g$/.test(String(conn.effectiveType || ''));
+    pressure = (cores <= 2 || mem <= 2 || saveData || slowNet) ? 2 : ((cores <= 4 || mem <= 4) ? 1 : 0);
+    reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   } catch (e) {}
-  document.body.dataset.perf = low ? 'low' : 'high';
+
+  function pref(key, allowed, dflt) {
+    try {
+      var v = localStorage.getItem('math4a.' + key);
+      if (v === null) return dflt;
+      v = String(v).replace(/^"|"$/g, '');
+      if (allowed.indexOf(v) >= 0) return v;
+      if (key === 'motion') {                 /* 旧版本只存 on/off */
+        if (v === 'on') return 'full';
+        if (v === 'off') return 'off';
+      }
+    } catch (e) {}
+    return dflt;
+  }
+
+  var rPref = pref('render', ['high', 'auto', 'smooth'], 'auto');
+  var mPref = pref('motion', ['full', 'auto', 'off'], 'auto');
+
+  var perf = rPref === 'high' ? 'high' : (rPref === 'smooth' ? 'low' : PERF_BY[pressure]);
+  var motion = mPref === 'full' ? 'on'
+             : (mPref === 'off' ? 'off' : (reduced || pressure >= 2 ? 'off' : 'on'));
+
+  var root = document.documentElement;
+  root.dataset.render = rPref;
+  root.dataset.motionPref = mPref;      /* 注意：data-motion 是解析后的结果 */
+  root.dataset.perf = perf;
+  root.dataset.motion = motion;
+  document.body.dataset.perf = perf;
+  document.body.dataset.motion = motion;
+  window.__perf = perf;
+  window.__motion = motion;
 })();
+
 
 /* =========================================================
    选项构造器
@@ -1963,6 +2590,163 @@ const problemTemplates = [
       text, facts: factList, steps, answer, unit,
       praise: '你把等腰三角形的特征用得又快又准！',
       wrongTip: tip
+    };
+  }
+},
+
+/* 三角形的外角：把一条边延长，外角和它旁边的内角凑成平角 */
+{
+  unit: '图形', kp: '三角形的外角',
+  gen() {
+    let a, b;
+    do { a = randInt(30, 75); b = randInt(30, 70); }
+    while (a + b > 150 || a + b < 95 || a === b || a + b === 180 - a - b);
+    const c = 180 - a - b;          /* C 处的内角 */
+    const answer = a + b;           /* C 处的外角 = 两个不相邻内角的和 */
+    const who = pick(SC_NAME);
+    const text = pick([
+      `在三角形 ABC 中，∠A = ${a}°，∠B = ${b}°。把 BC 边延长到 D，∠ACD 是多少度？`,
+      `一块三角形地 ABC，∠A = ${a}°，∠B = ${b}°。把 BC 边延长到 D 点，∠ACD 是多少度？`,
+      `${who}画了一个三角形 ABC，量得 ∠A = ${a}°，∠B = ${b}°。把 BC 边延长到 D，∠ACD 是多少度？`,
+      `三角形 ABC 中 ∠A = ${a}°、∠B = ${b}°。D 在 BC 的延长线上，∠ACD 是多少度？`
+    ]);
+    return {
+      tag: '四上 · 三角形的外角',
+      text,
+      facts: [`∠A = ${a}°，∠B = ${b}°`, '三角形内角和是 180°', '一条直线上的两个角合起来是 180°'],
+      steps: [
+        S2('任意三角形的内角和是多少度？', 180, [90, 270, 360],
+          { ok: '对！三角形三个内角的和是 180°。', no: '三角形的内角和是 180°，这个要记牢。' }),
+        S2(`先求 ∠ACB。${a}° 和 ${b}° 一共 ${a + b}°，∠ACB 是多少度？`, c,
+          numWrongs(c, [a + b, 180 - a, 180 - b]),
+          { ok: `对！180 − ${a} − ${b} = ${c}°。`, no: `内角和 180° 减去已知的两个角：180 − ${a} − ${b} = ${c}。` }),
+        S2('把 BC 延长成一条直线，∠ACB 和 ∠ACD 合起来是多少度？', '180°，正好是一个平角',
+          ['90°，正好是一个直角', '360°，正好是一个周角', '没有固定的度数，要看图形'],
+          { ok: '对！直线上的两个角合起来一定是一个平角 180°。', no: '把边延长得到的就是一条直线，直线上相邻的两个角合起来是 180°。' }),
+        S2('求 ∠ACD 该用哪个算式？', `180 − ${c}`,
+          [`180 + ${c}`, `${c} − 180`, `360 − ${c}`],
+          { ok: `对！用 180 − ${c}。算出来填进下面的框里吧！`, no: '平角 180° 减去旁边的内角，剩下的就是外角。' })
+      ],
+      answer, unit: '°',
+      praise: `你发现了吧：外角 ∠ACD 正好等于不相邻的两个内角之和（${a} + ${b} = ${answer}°）！`,
+      wrongTip: `先求 ∠ACB = 180 − ${a} − ${b} = ${c}°，再求外角 = 180 − ${c} = ${answer}°。也可以直接用 ${a} + ${b} = ${answer}°。`
+    };
+  }
+},
+
+/* 等边三角形 + 一条连线（卷子上常见的构图） */
+{
+  unit: '图形', kp: '等边三角形求角',
+  gen() {
+    let x;
+    do { x = randInt(18, 55); } while (180 - 60 - x === x || 180 - 60 - x === 60);
+    const answer = 180 - 60 - x;      /* △ABD 里的 ∠ADB */
+    const who = pick(SC_NAME);
+    const text = pick([
+      `三角形 ABC 是等边三角形，D 是 BC 延长线上的一点，连结 AD。量得 ∠BAD = ${x}°，∠ADB 是多少度？`,
+      `等边三角形 ABC 中，把 BC 延长到 D，连结 AD。${who}量出 ∠BAD = ${x}°，∠ADB 是多少度？`,
+      `如图，△ABC 是等边三角形，D 在 BC 的延长线上，∠1 = ${x}°（∠1 就是 ∠BAD），求 ∠2（也就是 ∠ADB）是多少度？`
+    ]);
+    return {
+      tag: '四上 · 等边三角形',
+      text,
+      facts: ['△ABC 是等边三角形', `∠BAD = ${x}°`, '三角形内角和是 180°'],
+      steps: [
+        S2('等边三角形的每个内角是多少度？', 60, numWrongs(60, [90, 45, 30]),
+          { ok: '对！等边三角形三个角都相等，每个都是 60°。', no: '180 ÷ 3 = 60°，等边三角形每个内角都是 60°。' }),
+        S2('在三角形 ABD 里，∠ABD 是几度？', 60,
+          [30, 90, 180 - x],
+          { ok: '对！∠ABD 和等边三角形的 ∠ABC 是同一个角，也是 60°。', no: 'B 处的角没有被动过，它还是等边三角形的内角 60°。' }),
+        S2('求 ∠ADB 该用哪个算式？', `180 − 60 − ${x}`,
+          [`180 − 60 + ${x}`, `180 − ${x}`, `90 − ${x}`],
+          { ok: `对！180 − 60 − ${x}。算出来填进下面的框里吧！`, no: '三角形 ABD 的内角和也是 180°，减掉已知的两个角。' })
+      ],
+      answer, unit: '°',
+      praise: '你看出来了：连线以后要盯住新的小三角形，它的内角和同样是 180°。',
+      wrongTip: `看三角形 ABD：∠BAD = ${x}°，∠ABD = 60°，所以 ∠ADB = 180 − 60 − ${x} = ${answer}°。`
+    };
+  }
+},
+
+/* 求内角 + 按角分类（卷子「求各角度数并按角分类」那一类） */
+{
+  unit: '图形', kp: '求内角·按角分类',
+  gen() {
+    let a, b;
+    do { a = randInt(25, 85); b = randInt(25, 85); }
+    while (a + b > 155 || a + b < 55 || a === b);
+    const c = 180 - a - b;
+    const mx = Math.max(a, b, c);
+    const kind = mx === 90 ? '直角' : (mx > 90 ? '钝角' : '锐角');
+    /* 三个干扰项必须凑满，否则 textWrongs 会补出「钝角三角形？」这种鬼东西 */
+    const kindWrongs = ['锐角三角形', '直角三角形', '钝角三角形']
+      .filter(k => k !== kind + '三角形');
+    kindWrongs.push('等边三角形');        /* 拿「按边分」的答案来混，正好是个好陷阱 */
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 求角并分类',
+      text: pick([
+        `一个三角形的两个内角分别是 ${a}° 和 ${b}°。第三个角是多少度？这个三角形按角分属于哪一类？`,
+        `一块三角形纸片，两个角分别是 ${a}° 和 ${b}°。第三个角是多少度？它是哪种三角形？`,
+        `${who}在方格纸上画了一个三角形，量得两个角是 ${a}° 和 ${b}°。第三个角是多少度？按角分它是什么三角形？`
+      ]),
+      facts: [`两个角分别是 ${a}° 和 ${b}°`, '三角形内角和是 180°', '最大的角决定三角形的类型'],
+      steps: [
+        S2('任意三角形的内角和是多少度？', 180, [90, 270, 360],
+          { ok: '对！三角形的内角和是 180°。', no: '三角形的内角和是 180°。' }),
+        S2(`已知的两个角一共是多少度？`, a + b,
+          numWrongs(a + b, [a - b > 0 ? a - b : b - a, 180 - a - b, 90]),
+          { ok: `对！${a} + ${b} = ${a + b}°。`, no: `把两个已知角加起来：${a} + ${b} = ${a + b}。` }),
+        S2('求第三个角，该用哪个算式？', `180 − ${a + b}`,
+          [`180 + ${a + b}`, `360 − ${a + b}`, `${a + b} − 180`],
+          { ok: `对！用 180 − ${a + b}。`, no: '内角和减掉两个已知角，就是第三个角。' }),
+        S2(`第三个角是 ${c}°。三个角里最大的是 ${mx}°，这个三角形是什么三角形？`, kind + '三角形',
+          kindWrongs,
+          { ok: `对！最大的角是 ${mx}°，所以是${kind}三角形。把第三个角的度数填进下面的框里吧！`, no: '看最大的那个角：等于 90° 是直角三角形，大于 90° 是钝角三角形，都小于 90° 才是锐角三角形。' })
+      ],
+      answer: c, unit: '°',
+      praise: `你既求出了 ${c}°，又判断出它是${kind}三角形，两件事一起做完了！`,
+      wrongTip: `第三个角 = 180 − ${a} − ${b} = ${c}°；最大角是 ${mx}°，所以是${kind}三角形。`
+    };
+  }
+},
+
+/* 选择题：哪一组角不可能在同一个三角形中 */
+{
+  unit: '图形', kp: '选择题·内角和', form: 'choice', noAnswer: true,
+  gen() {
+    const fmt = t => `${t[0]}°、${t[1]}°、${t[2]}°`;
+    /* 能凑成三角形的那几组：三个角加起来正好 180° */
+    const possible = [];
+    for (let g = 0; g < 300 && possible.length < 3; g++) {
+      let x, y, z;
+      do { x = randInt(25, 110); y = randInt(25, 110); z = 180 - x - y; }
+      while (z < 25 || z > 110);
+      const s = fmt([x, y, z].sort((p, q) => p - q));
+      if (possible.indexOf(s) < 0) possible.push(s);
+    }
+    /* 不可能的那一组：三个角和不是 180° */
+    let sid = null;
+    for (let g = 0; g < 300 && !sid; g++) {
+      const x = randInt(20, 120), y = randInt(20, 120);
+      let z = 180 - x - y + pick([10, 20, 30, -10, -20, 40]);
+      if (z < 10 || z > 150) continue;
+      if (x + y + z === 180) continue;
+      const s = fmt([x, y, z].sort((p, q) => p - q));
+      if (possible.indexOf(s) < 0) sid = s;
+    }
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 选择题',
+      text: `${SC} 在整理三角形玻璃片。下面哪一组角不可能出现在同一个三角形中？`,
+      facts: ['三角形内角和是 180°'],
+      steps: [
+        S2('哪一组角不可能在同一个三角形中？', sid, possible.slice(0, 3),
+          { ok: '对！这一组的三个角加起来不是 180°，所以拼不成三角形。', no: '把每一组的三个角加起来看看：只有和正好是 180° 的一组才能出现在同一个三角形里。' })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用「内角和必须是 180°」来排除不可能的角了！',
+      wrongTip: '三组一的加：三个角的和不是 180° 的那一组，就不可能在同一个三角形中。'
     };
   }
 },
@@ -4520,6 +5304,44 @@ const problemTemplates = [
      等边三角形的周长、靠墙围栏（周长的最省围法）、图形特征辨析（选择题）
    ========================================================= */
 
+/* ---------- 等腰三角形：两个底角各被平分，求中间那个角 ---------- */
+{
+  unit: '几何', kp: '等腰三角形·等分角',
+  gen() {
+    /* 顶角取 4 的倍数，底角的一半才是整度数 */
+    const a = randInt(10, 25) * 4;         /* 顶角 40°~100° */
+    const baseSum = 180 - a;               /* 两个底角一共 */
+    const base = baseSum / 2;              /* 一个底角 */
+    const half = base / 2;                 /* ∠1 = ∠2 = 半个底角 */
+    const answer = 180 - half - half;      /* ∠5 = 180 − ∠2 − ∠3 */
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 等腰三角形',
+      text: pick([
+        `等腰三角形 ABC 的顶角是 ${a}°，∠1 = ∠2，∠3 = ∠4。求 ∠5 是多少度？`,
+        `一块等腰三角形木板，顶角是 ${a}°。把两个底角分别平分（∠1 = ∠2，∠3 = ∠4），两条平分线相交得到的 ∠5 是多少度？`,
+        `${who}画了一个顶角 ${a}° 的等腰三角形，并且 ∠1 = ∠2、∠3 = ∠4。那么 ∠5 是多少度？`
+      ]),
+      facts: [`顶角 ${a}°`, '两个底角相等', '∠1 = ∠2，∠3 = ∠4', '三角形内角和是 180°'],
+      steps: [
+        S2(`两个底角一共是多少度？`, baseSum, numWrongs(baseSum, [a, base, 180 - base]),
+          { ok: `对！180 − ${a} = ${baseSum}°。`, no: `内角和 180° 减去顶角 ${a}°。` }),
+        S2(`两个底角相等，一个底角是多少度？`, base, numWrongs(base, [baseSum, half, a]),
+          { ok: `对！${baseSum} ÷ 2 = ${base}°。`, no: `把两个底角的和 ${baseSum} 平均分成 2 份。` }),
+        S2(`∠1 = ∠2，所以 ∠2 是多少度？`, half, numWrongs(half, [base, baseSum, a]),
+          { ok: `对！${base} ÷ 2 = ${half}°。`, no: `一个底角是 ${base}°，再平均分成 2 份。` }),
+        S2('看中间那个小三角形：∠5 和 ∠2、∠3 是它的三个内角。求 ∠5 该用哪个算式？',
+          `180 − ${half} − ${half}`,
+          [`180 − ${base}`, `${half} + ${half}`, `180 − ${a} − ${half}`],
+          { ok: `对！180 − ${half} − ${half}。算出来填进下面的框里吧！`, no: '中间的小三角形内角和也是 180°，减掉 ∠2 和 ∠3（都是 ' + half + '°）。' })
+      ],
+      answer, unit: '°',
+      praise: '你把「内角和」用在小三角形上，一步步拆到底，很厉害！',
+      wrongTip: `底角 = (180 − ${a}) ÷ 2 = ${base}°；∠2 = ∠3 = ${base} ÷ 2 = ${half}°；∠5 = 180 − ${half} − ${half} = ${answer}°。`
+    };
+  }
+},
+
 /* ---------- 直角三角形的两个锐角互余 ---------- */
 {
   unit: '几何', kp: '直角三角形的锐角',
@@ -5219,8 +6041,12 @@ function renderFacts() {
   const p = q.problem, st = q.state;
   const box = $('factsBox');
 
-  if (!p.facts || p.facts.length === 0) { box.style.display = 'none'; return; }
-  box.style.display = '';
+  if (!p.facts || p.facts.length === 0) {
+    box.classList.remove('open');
+    closeFacts();
+    syncFactsFab(-1, 0);
+    return;
+  }
 
   const revealed = new Set();
   if (pkMode) {
@@ -5242,6 +6068,7 @@ function renderFacts() {
     countEl.style.display = 'none';
     subEl.textContent = '完成思考步骤，条件会逐步出现';
     list.innerHTML = `<div class="facts-empty">还没有找到已知条件<br>先完成下面的思考步骤吧 👇</div>`;
+    syncFactsFab(revealed.size, p.facts.length);
     return;
   }
   countEl.style.display = 'inline-block';
@@ -5253,7 +6080,10 @@ function renderFacts() {
     ? `<div class="fact"><span class="fact-no">${i + 1}</span><span>${hl(f)}</span></div>`
     : `<div class="fact locked"><span class="fact-no">?</span><span class="fact-hidden">待解锁的条件</span></div>`
   ).join('');
+  syncFactsFab(revealed.size, p.facts.length);
 }
+
+/* 灯泡上的角标状态在下方「悬浮灯泡」一段里统一维护 */
 
 function renderSteps() {
   const q = questions[current]; if (!q) return;
@@ -5261,61 +6091,84 @@ function renderSteps() {
   const wrap = $('steps');
   wrap.innerHTML = '';
 
-  p.steps.forEach((s, i) => {
-    const el = document.createElement('div');
-    el.dataset.step = i;
+  /* 已完成的步骤不再一人一张卡：全部压成一行小胶囊，点胶囊才展开那一步的解析。
+     这样「题目 + 当前这一步」在手机上一屏就能同时看到。 */
+  const doneN = Math.min(st.stepIdx, p.steps.length);
+  if (doneN > 0) {
+    const strip = document.createElement('div');
+    strip.className = 'done-strip';
+    let chips = '';
+    for (let i = 0; i < doneN; i++) {
+      chips += `<button class="done-chip${st.expanded[i] ? ' on' : ''}" data-done="${i}" style="--i:${i}">
+                  <span class="dc-tick">✓</span><span class="dc-idx">${i + 1}</span>
+                </button>`;
+    }
+    strip.innerHTML = `<span class="done-strip-t">已想清楚</span>${chips}`;
+    wrap.appendChild(strip);
 
-    if (i < st.stepIdx) {
-      el.className = 'step done' + (st.expanded[i] ? ' expanded' : '');
+    for (let i = 0; i < doneN; i++) {
+      if (!st.expanded[i]) continue;
+      const s = p.steps[i];
       const pickIdx = st.chosen[i];
       const pickText = (pickIdx !== null && pickIdx !== undefined) ? s.options[pickIdx] : '—';
-      el.innerHTML = `
-        <div class="step-head">
-          <span class="step-num">✓</span>
-          <span class="step-q">第 ${i + 1} 步 · ${s.q}</span>
-          <span class="step-chevron">▾</span>
-        </div>
-        <div class="step-body-wrap">
-          <div class="step-body">
-            <div class="chosen-line">你的选择：<b>${pickIdx !== null ? LETTER[pickIdx] + '. ' + pickText : '—'}</b></div>
-            <div class="fb-inline ok">✔ ${s.correct}</div>
-          </div>
-        </div>`;
-      el.querySelector('.step-head').addEventListener('click', () => {
-        st.expanded[i] = !st.expanded[i];
-        el.classList.toggle('expanded', st.expanded[i]);
-        SFX.click();
-      });
-    } else if (i === st.stepIdx && !st.solved) {
-      el.className = 'step active';
-      const optsHtml = s.options.map((text, idx) => {
-        const isWrong = st.tried[i].indexOf(idx) >= 0;
-        return `<button class="opt${isWrong ? ' wrong' : ''}" data-step="${i}" data-opt="${idx}"
-                  ${isWrong ? 'disabled' : ''}>
-                  <span class="opt-key">${LETTER[idx]}</span>
-                  <span class="opt-text">${text}</span>
-                </button>`;
-      }).join('');
-      const fb = st.tried[i].length ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
-      el.innerHTML = `
-        <div class="step-head">
-          <span class="step-num">${i + 1}</span>
-          <span class="step-q">${s.q}</span>
-        </div>
-        <div class="step-body">
-          <div class="opts">${optsHtml}</div>
-          ${fb}
-        </div>`;
-    } else {
-      el.className = 'step locked';
-      el.innerHTML = `
-        <div class="step-head">
-          <span class="step-num">🔒</span>
-          <span class="step-q">第 ${i + 1} 步 · 完成上一步后解锁</span>
-        </div>`;
+      const panel = document.createElement('div');
+      panel.className = 'done-panel';
+      panel.innerHTML = `
+        <div class="done-panel-q">第 ${i + 1} 步 · ${s.q}</div>
+        <div class="chosen-line">你的选择：<b>${pickIdx !== null ? LETTER[pickIdx] + '. ' + pickText : '—'}</b></div>
+        <div class="fb-inline ok">✔ ${s.correct}</div>`;
+      wrap.appendChild(panel);
     }
+
+    strip.addEventListener('click', e => {
+      const chip = e.target.closest('.done-chip');
+      if (!chip) return;
+      const i = +chip.dataset.done;
+      st.expanded[i] = !st.expanded[i];
+      SFX.click();
+      renderSteps();
+    });
+  }
+
+  /* 当前要做的这一步：保留完整卡片，是屏幕的视觉重心 */
+  const i = st.stepIdx;
+  if (i < p.steps.length && !st.solved) {
+    const s = p.steps[i];
+    const el = document.createElement('div');
+    el.className = 'step active';
+    el.dataset.step = i;
+    const optsHtml = s.options.map((text, idx) => {
+      const isWrong = st.tried[i].indexOf(idx) >= 0;
+      return `<button class="opt${isWrong ? ' wrong' : ''}" data-step="${i}" data-opt="${idx}"
+                style="--i:${idx}" ${isWrong ? 'disabled' : ''}>
+                <span class="opt-key">${LETTER[idx]}</span>
+                <span class="opt-text">${text}</span>
+              </button>`;
+    }).join('');
+    const fb = st.tried[i].length ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
+    el.innerHTML = `
+      <div class="step-head">
+        <span class="step-num">${i + 1}</span>
+        <span class="step-q">${s.q}</span>
+      </div>
+      <div class="step-body">
+        <div class="opts">${optsHtml}</div>
+        ${fb}
+      </div>`;
     wrap.appendChild(el);
-  });
+  }
+
+  /* 还没解锁的步骤合并成一行，不再每步占一张卡 */
+  const rest = p.steps.length - Math.max(st.stepIdx + (st.solved ? 0 : 1), 0);
+  if (!st.solved && rest > 0) {
+    const lock = document.createElement('div');
+    lock.className = 'step-locked-line';
+    const names = [];
+    for (let k = st.stepIdx + 1; k < p.steps.length; k++) names.push(k + 1);
+    lock.innerHTML = `<span class="sll-ico">🔒</span>
+      <span class="sll-t">第 ${names.join('、')} 步 · 完成这一步后自动解锁</span>`;
+    wrap.appendChild(lock);
+  }
 }
 
 /* 底部导航：题目可以一直往下出，所以用「第 N 题 + 已完成」代替固定圆点 */
@@ -5473,8 +6326,7 @@ function handleChoose(stepIdx, optIdx) {
     }
     if (st.stepIdx < p.steps.length) {
       requestAnimationFrame(() => {
-        const nodes = document.querySelectorAll('#steps .step');
-        const next = nodes[st.stepIdx];
+        const next = document.querySelector('#steps .step.active');
         if (next) {
           const y = next.getBoundingClientRect().top + window.scrollY - 110;
           window.scrollTo({ top: y, behavior: 'smooth' });
@@ -5523,6 +6375,14 @@ function finalizeCorrect(q) {
   stopTimer();
   $('timerBar').style.display = 'none';
   showFb('ok', `✔ 完全正确！${p.noAnswer ? '' : '答案是 <b>' + shown + '</b>。'}<br><span class="fb-sub">${p.praise}</span>`);
+  /* 答题区整块弹一下 —— 比只冒一行文字更有「成了！」的分量 */
+  const ansCard = $('answerCard');
+  if (ansCard) {
+    ansCard.classList.remove('correct-flash');
+    void ansCard.offsetWidth;
+    ansCard.classList.add('correct-flash');
+    setTimeout(() => ansCard.classList.remove('correct-flash'), 460);
+  }
   addScore(30, false);
   incCombo();
   doneCount++;
@@ -5599,41 +6459,84 @@ function check() {
   }
 }
 
-/* =========================================================
-   悬浮按钮：回到已知信息
-   ========================================================= */
-const backBtn = $('backToFacts');
-const factsBox = $('factsBox');
-let rafPending = false;
+/* 灯泡上的角标：已解锁 / 全部。新条件刚出现时灯泡弹一下，提醒去看 */
+let factsFabSeen = -1;
+const factsLast = { got: -1, total: 0 };
 
-function updateBackBtn() {
-  if (rafPending) return;
-  rafPending = true;
-  requestAnimationFrame(() => {
-    rafPending = false;
-    const q = questions[current];
-    const hidden = !factsBox || (q && q.problem.facts && q.problem.facts.length === 0);
-    if (!backBtn || hidden || currentTab !== 'practice' || (selectedUnits.length === 0 && !redoActive())) {
-      if (backBtn) backBtn.classList.remove('show');
-      return;
-    }
-    backBtn.classList.toggle('show', factsBox.getBoundingClientRect().bottom < 60);
+function syncFactsFab(got, total) {
+  factsLast.got = got;
+  factsLast.total = total;
+  const fab = $('factsFab');
+  if (fab && got >= 0 && got > factsFabSeen) {
+    fab.classList.remove('pop');
+    void fab.offsetWidth;
+    fab.classList.add('pop');
+  }
+  factsFabSeen = got;
+  paintFactsFab();
+}
+
+function paintFactsFab() {
+  const fab = $('factsFab'), badge = $('factsFabBadge');
+  if (!fab) return;
+  const got = factsLast.got, total = factsLast.total;
+  const usable = got >= 0 && total > 0 && currentTab === 'practice' && !pkMode &&
+                 (selectedUnits.length > 0 || redoActive() || paperMode);
+  fab.classList.toggle('show', usable);
+  if (!usable) { closeFacts(); factsFabSeen = -1; return; }
+  badge.classList.remove('hide');
+  badge.textContent = got + '/' + total;
+  badge.classList.toggle('done', got === total);
+}
+
+/* 手机上这些浮层会叠在一起（已知信息抽屉 / 单元面板 / 整卷 / PK 弹窗），
+   同时开两个就会出现「上面盖着、下面点得到」的鬼状态。
+   统一规则：开新的先关旧的。except 传要保留的那一个。 */
+function closeAllOverlays(except) {
+  if (except !== 'facts') closeFacts();
+  if (except !== 'unit') setUnitPanel(false);
+  if (except !== 'paper') {
+    const pm = $('paperMask'), pr = $('paperResultMask');
+    if (pm) pm.classList.remove('on');
+    if (pr) pr.classList.remove('on');
+  }
+  if (except !== 'pk') {
+    ['pkModal', 'adminModal'].forEach(id => {
+      const m = $(id);
+      if (m) m.classList.remove('on');
+    });
+  }
+}
+
+function openFacts() {
+  closeAllOverlays('facts');
+  const box = $('factsBox'), mask = $('factsMask'), fab = $('factsFab');
+  if (!box) return;
+  box.classList.add('open');
+  if (mask) mask.classList.add('on');
+  if (fab) { fab.classList.add('open'); fab.setAttribute('aria-expanded', 'true'); }
+}
+function closeFacts() {
+  const box = $('factsBox'), mask = $('factsMask'), fab = $('factsFab');
+  if (box) box.classList.remove('open');
+  if (mask) mask.classList.remove('on');
+  if (fab) { fab.classList.remove('open'); fab.setAttribute('aria-expanded', 'false'); }
+}
+
+function bindFactsFab() {
+  const fab = $('factsFab'), mask = $('factsMask'), close = $('factsClose');
+  if (fab) fab.addEventListener('click', () => {
+    SFX.click();
+    if ($('factsBox').classList.contains('open')) closeFacts(); else openFacts();
   });
+  if (mask) mask.addEventListener('click', closeFacts);
+  if (close) close.addEventListener('click', () => { SFX.click(); closeFacts(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFacts(); });
 }
+bindFactsFab();
 
-let flashTimer = null;
-function backToFacts() {
-  if (!factsBox) return;
-  factsBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  clearTimeout(flashTimer);
-  factsBox.classList.remove('flash');
-  void factsBox.offsetWidth;
-  factsBox.classList.add('flash');
-  flashTimer = setTimeout(() => factsBox.classList.remove('flash'), 1200);
-}
-if (backBtn) backBtn.addEventListener('click', backToFacts);
-window.addEventListener('scroll', updateBackBtn, { passive: true });
-window.addEventListener('resize', updateBackBtn);
+/* 老名字还在被 render / 切页调用，语义已变成「重算灯泡显不显示」 */
+function updateBackBtn() { paintFactsFab(); }
 
 /* =========================================================
    开关与导航
@@ -5665,11 +6568,15 @@ $('timerToggle').addEventListener('click', () => {
 
 /* ---- 单元面板 ---- */
 const unitPanel = $('unitPanel');
-function toggleUnitPanel(force) {
-  const open = typeof force === 'boolean' ? force : !unitPanel.classList.contains('open');
+function setUnitPanel(open) {
   unitPanel.classList.toggle('open', open);
   $('unitToggle').classList.toggle('open', open);
   $('unitToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function toggleUnitPanel(force) {
+  const open = typeof force === 'boolean' ? force : !unitPanel.classList.contains('open');
+  if (open) closeAllOverlays('unit');
+  setUnitPanel(open);
 }
 $('unitToggle').addEventListener('click', () => { SFX.click(); toggleUnitPanel(); });
 $('unitAll').addEventListener('click', () => {
@@ -5727,6 +6634,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const tab = btn.dataset.tab;
     currentTab = tab;
+    closeAllOverlays(null);          /* 换页时把所有浮层收掉，别带到另一个 Tab 上 */
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
     $('page-practice').style.display = tab === 'practice' ? 'block' : 'none';
     $('page-wrong').style.display = tab === 'wrong' ? 'block' : 'none';
@@ -5872,6 +6780,7 @@ function askAdmin(then) {
   adminThen = then;
   const m = $('adminModal'), inp = $('adminInput');
   if (!m || !inp) { return; }
+  closeAllOverlays('pk');
   $('adminErr').textContent = '';
   inp.value = '';
   m.classList.add('on');
@@ -6337,6 +7246,7 @@ function openPkResult() {
       <button class="pk-again" id="pkAgain">🔁 再来一局</button>
       <button class="pk-exit" id="pkExit">退出 PK</button>
     </div>`;
+  closeAllOverlays('pk');
   $('pkModal').classList.add('on');
   SFX.perfect();
   $('pkAgain').addEventListener('click', () => { SFX.click(); setPkMode(true); });
@@ -6454,6 +7364,7 @@ function renderPaperList() {
 }
 function openPaperPicker() {
   if (pkMode) setPkMode(false);
+  closeAllOverlays('paper');
   renderPaperList();
   $('paperMask').classList.add('on');
 }
@@ -6522,6 +7433,7 @@ function showPaperResult() {
         : '全部一次做对，太厉害了！') +
       `</div>`;
   }
+  closeAllOverlays('paper');
   $('paperResultMask').classList.add('on');
   SFX.levelup();
 }
@@ -6555,6 +7467,1228 @@ renderWrongBadge();
   setTimeout(() => toastMsg('已清理 ' + (before - wrongBook.length) + ' 条旧版错题记录'), 900);
 })();
 
+</script>
+</body>
+</html></template>
+<template id="tpl-vert"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>✏️ 竖式练习台 · 四年级上册</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+
+:root{
+  --ink:#3a3355;
+  --ink-2:#4a4166;
+  --ink-3:#6b6385;
+  --muted:#a79fc2;
+  --line:#EDE8FF;
+  --line-2:#E4DDFF;
+  --purple:#6B4CE6;
+  --purple-2:#8B6BFF;
+  --purple-deep:#4E35C4;
+  --gold:#FFA751;
+  --gold-2:#FFD86B;
+  --gold-deep:#E8944A;
+  --pink:#FF6B9D;
+  --pink-deep:#B83060;
+  --green:#2ED573;
+  --green-deep:#1FA85A;
+  --card:#ffffff;
+  --shadow-2:0 5px 0 rgba(124,92,255,.07),0 16px 32px rgba(124,92,255,.11);
+}
+
+body{
+  margin:0;padding:0;min-height:100vh;color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background-color:#FFFBF2;
+  background-image:
+    radial-gradient(circle at 10% 15%, #FFE9A8 0%, transparent 38%),
+    radial-gradient(circle at 90% 12%, #B8E5FF 0%, transparent 35%),
+    radial-gradient(circle at 82% 88%, #FFD4E7 0%, transparent 38%),
+    radial-gradient(circle at 15% 88%, #C6F3D9 0%, transparent 35%);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px;}
+
+.card{background:var(--card);border-radius:24px;box-shadow:var(--shadow-2);}
+.mini-btn{border:none;background:#fff;color:#7C5CFF;font-size:14.5px;font-weight:800;
+  cursor:pointer;font-family:inherit;padding:8px 14px;min-height:44px;border-radius:12px;
+  transition:transform .15s,box-shadow .15s,background .15s;
+  box-shadow:0 3px 0 rgba(124,92,255,.13);}
+.mini-btn:hover{transform:translateY(-1px);box-shadow:0 4px 0 rgba(124,92,255,.18);background:#F8F6FF;}
+.mini-btn:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(124,92,255,.13);}
+.mini-btn.primary{background:linear-gradient(135deg,var(--gold-2),var(--gold));
+  color:#8a5a00;box-shadow:0 3px 0 var(--gold-deep);}
+
+.next-big{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;min-height:60px;padding:14px 22px;border:none;border-radius:20px;
+  font-family:inherit;font-size:19px;font-weight:900;letter-spacing:1.2px;
+  color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#4EE08B 0%,#2ED573 55%,#22B863 100%);
+  box-shadow:0 6px 0 var(--green-deep),0 14px 26px rgba(46,213,115,.34);
+  transition:transform .18s,box-shadow .18s;}
+.next-big:hover{transform:translateY(-2px);
+  box-shadow:0 8px 0 var(--green-deep),0 18px 32px rgba(46,213,115,.42);}
+.next-big:active{transform:translateY(3px);box-shadow:0 3px 0 var(--green-deep);}
+
+/* ============ 顶部 ============ */
+.v-hero{display:flex;align-items:center;gap:11px;margin-bottom:12px;padding:0 4px;}
+.v-hero-ico{font-size:30px;line-height:1;flex:none;
+  filter:drop-shadow(0 3px 5px rgba(255,150,60,.35));}
+.v-hero h1{margin:0;font-size:22px;font-weight:900;letter-spacing:.6px;
+  background:linear-gradient(120deg,#FF9F43 0%,#FF6B9D 45%,#7C5CFF 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.v-hero p{margin:2px 0 0;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;}
+
+.v-problem{padding:14px 16px 15px 20px;margin-bottom:10px;position:relative;
+  overflow:hidden;border-radius:22px;}
+.v-problem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;
+  background:linear-gradient(180deg,#FFB84D 0%,#FF7A9C 55%,#A78BFA 100%);}
+.v-problem .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;flex-wrap:wrap;}
+.v-problem .tag{background:linear-gradient(135deg,#FFE08A,#FFC24D);
+  color:#8a5a00;padding:4px 11px;border-radius:20px;font-weight:800;
+  font-size:12px;box-shadow:0 2px 0 #EBA92E;}
+.v-problem .counter{margin-left:auto;}
+.v-problem .qtext{font-size:16.5px;line-height:1.85;color:var(--ink);font-weight:500;}
+.v-problem .qtext b{color:#5B3FD9;font-weight:800;
+  background:linear-gradient(180deg,transparent 62%,#DDD4FF 62%,#DDD4FF 92%,transparent 92%);
+  padding:0 2px;}
+
+.v-foot{margin:14px 4px 0;font-size:11.5px;line-height:1.8;font-weight:700;
+  color:var(--muted);text-align:center;}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;}
+}
+
+/* ============ 竖式练习台 ============ */
+/* （样式与站台里的版本共用，改这里就等于改站台里的那份） */
+.v-levels{display:flex;gap:5px;padding:5px;margin-bottom:10px;background:#fff;
+  border-radius:16px;border:2.5px solid #FFE3A8;box-shadow:0 4px 0 #FFE3A8;}
+.v-lv{flex:1 1 0;min-width:0;min-height:44px;padding:6px 3px;border:none;
+  border-radius:11px;background:transparent;font-family:inherit;cursor:pointer;
+  font-size:13px;font-weight:800;color:#8B7FD0;line-height:1.25;transition:.18s;}
+.v-lv b{display:block;font-size:10.5px;font-weight:800;opacity:.8;margin-top:1px;}
+.v-lv.on{background:linear-gradient(135deg,var(--purple-2),var(--purple));color:#fff;
+  box-shadow:0 3px 0 var(--purple-deep);}
+.v-lv.on b{opacity:.9;}
+
+.v-stat{display:flex;align-items:center;gap:10px;padding:9px 13px;margin-bottom:10px;
+  background:#fff;border-radius:14px;box-shadow:0 3px 0 rgba(124,92,255,.06);
+  font-size:12.5px;font-weight:800;color:var(--ink-3);flex-wrap:wrap;}
+.v-stat b{color:var(--purple);font-weight:900;}
+.v-stat .spacer{flex:1;}
+
+.v-problem .qtext{font-size:16.5px;}
+
+.v-stage{background:#fff;border-radius:22px;padding:16px 8px;margin-bottom:10px;
+  box-shadow:var(--shadow-2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.vs{display:grid;justify-content:center;align-items:center;
+  --vc:30px;--vb:16px;--vr:34px;grid-auto-rows:var(--vr);
+  /* 淡横线当方格纸：空格子表示「等着填」，不是坏掉了 */
+  background-image:repeating-linear-gradient(to bottom,
+    transparent 0,transparent calc(var(--vr) - 1px),
+    rgba(124,92,255,.075) calc(var(--vr) - 1px),rgba(124,92,255,.075) var(--vr));
+  background-position:0 var(--vr);
+  font-variant-numeric:tabular-nums;min-width:max-content;margin:0 auto;}
+.vs-cell{display:flex;align-items:center;justify-content:center;height:100%;
+  font-size:17.5px;font-weight:800;line-height:1;color:var(--ink-2);}
+.vs-cell.is-divisor{color:var(--ink);}
+.vs-cell.is-dividend{border-top:2.5px solid #7C5CFF;color:var(--ink);}
+.vs-cell.is-bracket{border-right:2.5px solid #7C5CFF;}
+.vs-cell.is-bracket-top{border-right:2.5px solid #7C5CFF;
+  border-top:2.5px solid #7C5CFF;border-top-right-radius:10px;}
+.vs-cell.is-quo{color:#E07B2A;}
+.vs-cell.is-prod{border-bottom:2px solid #BEB2E6;}
+.vs-cell.is-rem{color:#1FA85A;}
+
+/* 空格子就当纸上的空白：不画底色、不撒问号。
+   只给「当前这一步」那一格烫一块底 + 一个问号，视线一眼就落上去。 */
+.vs-cell.blank{color:transparent;background:transparent;}
+.vs-cell.blank.qm.lit{background:#FFF3D6;border-radius:8px;animation:vsBlink 1.5s ease-in-out infinite;}
+.vs-cell.blank.qm.lit::after{content:'?';font-size:15px;font-weight:900;color:#E8944A;}
+/* 减法横线跟着数字长出来：没填之前不画，避免空线条乱飘 */
+.vs-cell.is-prod.blank{border-bottom-color:transparent;}
+@keyframes vsBlink{0%,100%{background:#FFF3D6;}50%{background:#FFE1A8;}}
+.vs-cell.filled{animation:vsPop .32s cubic-bezier(.34,1.5,.64,1);}
+@keyframes vsPop{0%{transform:scale(.45);opacity:0;}100%{transform:scale(1);opacity:1;}}
+
+.v-coach{background:#fff;border-radius:22px;padding:14px 15px;margin-bottom:10px;
+  box-shadow:var(--shadow-2);}
+.v-track{height:7px;border-radius:4px;background:#F1ECFF;overflow:hidden;margin-bottom:11px;}
+.v-track-fill{height:100%;width:0%;border-radius:4px;
+  background:linear-gradient(90deg,#7DE7A8,#2ED573);
+  transition:width .4s cubic-bezier(.34,1.2,.64,1);}
+.v-step-tag{display:inline-block;font-size:11.5px;font-weight:900;color:#7C5CFF;
+  background:#EFE9FF;border-radius:99px;padding:3px 10px;margin-bottom:8px;}
+.v-ask{font-size:15.5px;font-weight:800;color:var(--ink-2);line-height:1.65;
+  margin-bottom:11px;}
+.v-ask b{color:#5B3FD9;font-weight:900;}
+.v-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.v-opt{display:flex;align-items:center;justify-content:center;gap:7px;
+  min-height:52px;padding:9px 8px;border-radius:14px;cursor:pointer;
+  background:#F8F6FF;border:2.5px solid var(--line);box-shadow:0 3px 0 var(--line-2);
+  font-family:inherit;font-size:18px;font-weight:900;color:var(--ink-2);
+  transition:transform .15s,box-shadow .15s,background .15s,border-color .15s;}
+.v-opt:hover:not(:disabled){background:#F1ECFF;border-color:#C4B5FD;
+  box-shadow:0 4px 0 #C4B5FD;transform:translateY(-2px);}
+.v-opt:active:not(:disabled){transform:translateY(1px);box-shadow:0 1px 0 #C4B5FD;}
+.v-opt:disabled{cursor:default;}
+.v-opt.wrong{background:#FFF6EC;border-color:#FFD9AB;box-shadow:0 3px 0 #FFD9AB;
+  color:#b06a10;text-decoration:line-through;}
+.v-opt.ok{background:linear-gradient(135deg,#E4FBEE,#F2FFF7);border-color:#7DE7A8;
+  box-shadow:0 3px 0 #7DE7A8;color:#17914F;}
+.v-fb{margin-top:11px;font-size:13.5px;line-height:1.8;font-weight:700;
+  padding:11px 13px;border-radius:12px;display:none;}
+.v-fb.show{display:block;animation:fadeUp .22s ease;}
+.v-fb.ok{background:#E4FBEE;color:#17914F;}
+.v-fb.no{background:#FFF3E0;color:#B26A00;}
+
+.v-actions{display:flex;gap:9px;}
+.v-actions .mini-btn{flex:1 1 0;min-height:46px;}
+
+.v-done{background:linear-gradient(135deg,#F0FCF5,#FBFFFD);border:2.5px solid #B6EFCC;
+  border-radius:20px;padding:14px 16px;box-shadow:0 4px 0 rgba(46,213,115,.14);
+  animation:fadeUp .25s ease;}
+.v-done-h{font-size:15.5px;font-weight:900;color:#17914F;margin-bottom:8px;}
+.v-done-big{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px;
+  letter-spacing:.5px;}
+.v-done-big b{color:#17914F;}
+.v-done-check{font-size:12.5px;font-weight:800;color:#3E8E63;line-height:1.9;
+  background:#fff;border-radius:12px;padding:9px 12px;}
+.v-done-note{margin-top:8px;font-size:12.5px;font-weight:700;color:#5E9E7C;}
+
+@media(max-width:600px){
+  .v-lv{font-size:12px;min-height:42px;}
+  .v-stage{padding:12px 4px;border-radius:20px;}
+  .vs{--vc:27px;--vb:14px;--vr:33px;}
+  .vs-cell{font-size:16px;}
+  .v-coach{padding:12px 13px;border-radius:20px;}
+  .v-ask{font-size:14.5px;}
+  .v-opt{min-height:50px;font-size:17px;}
+  .v-problem .qtext{font-size:15.5px;}
+}
+
+/* ============ 分级渲染：三档 + 动效开关（和闯关页同一套标准） ============ */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after{
+  animation-duration:.001ms !important;animation-iteration-count:1 !important;
+  transition-duration:.001ms !important;
+}
+
+@keyframes vOptIn{
+  from{opacity:0;transform:translate3d(0,9px,0);}
+  to{opacity:1;transform:none;}
+}
+@keyframes vCellIn{
+  from{opacity:0;transform:scale(.55);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes vCoachIn{
+  from{opacity:0;transform:translate3d(0,12px,0);}
+  to{opacity:1;transform:none;}
+}
+
+/* high：选项依次滑入、新填的格子落定弹一下、讲解区换步时浮入 */
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="high"]:not([data-motion="off"]) .v-opt{
+    animation:vOptIn .3s cubic-bezier(.22,1,.36,1) both;
+    animation-delay:calc(var(--i,0) * 42ms);
+  }
+  html[data-perf="high"]:not([data-motion="off"]) .vs-cell.filled{
+    animation:vCellIn .26s cubic-bezier(.34,1.5,.64,1);
+  }
+  html[data-perf="high"]:not([data-motion="off"]) #vPlaying.swap{animation:vCoachIn .26s cubic-bezier(.22,1,.36,1);}
+  html[data-perf="high"]:not([data-motion="off"]) .vs-cell.blank.qm.lit{animation:vsBlink 1.5s ease-in-out infinite, vCellIn .2s ease both;}
+}
+/* mid：只留一次短入场 */
+@media(prefers-reduced-motion:no-preference){
+  html[data-perf="mid"]:not([data-motion="off"]) .v-opt{animation:vOptIn .18s ease both;}
+}
+/* low：装饰性动画全砍，答对/答错的状态颜色照旧 */
+html[data-perf="low"] .v-opt,
+html[data-perf="low"] .vs-cell.filled,
+html[data-perf="low"] .vs-cell.blank.qm.lit{animation:none !important;background:#FFF3D6;}
+
+/* 阴影分级 */
+html[data-perf="mid"] .v-stage,
+html[data-perf="mid"] .v-coach,
+html[data-perf="mid"] .card{box-shadow:0 2px 0 rgba(124,92,255,.10);}
+html[data-perf="low"] .v-stage,
+html[data-perf="low"] .v-coach,
+html[data-perf="low"] .card,
+html[data-perf="low"] .v-levels{box-shadow:none;border:2px solid var(--line-2);}
+html[data-perf="low"] body{background-attachment:scroll;}
+
+/* 按下去的手感 */
+.v-opt:active,.v-lv:active,.mini-btn:active{transform:scale(.972);}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="v-hero">
+    <span class="v-hero-ico">✏️</span>
+    <div>
+      <h1>竖式练习台</h1>
+      <p>四年级上册 · 除数是两位数的除法</p>
+    </div>
+  </div>
+
+  <div class="v-levels" id="vLevels"></div>
+  <div class="v-stat" id="vStat"></div>
+
+  <div class="card v-problem">
+    <div class="meta">
+      <span class="tag" id="vTag">四上 · 除法竖式</span>
+      <span class="counter" id="vCounter"></span>
+    </div>
+    <div class="qtext" id="vText"></div>
+  </div>
+
+  <div class="v-stage">
+    <div class="vs" id="vGrid"></div>
+  </div>
+
+  <div class="v-coach" id="vCoach">
+    <div class="v-track"><div class="v-track-fill" id="vTrackFill"></div></div>
+    <div id="vPlaying">
+      <div class="v-step-tag" id="vStepTag"></div>
+      <div class="v-ask" id="vAsk"></div>
+      <div class="v-opts" id="vOpts"></div>
+      <div class="v-fb" id="vFb"></div>
+    </div>
+    <div id="vDone" style="display:none"></div>
+  </div>
+
+  <div class="v-actions">
+    <button class="mini-btn" id="vRestart">↺ 重做本题</button>
+    <button class="mini-btn primary" id="vNew">🔄 换一题</button>
+  </div>
+
+  <p class="v-foot">口诀：试商 → 乘 → 减 → 比余数 → 落下一位，一遍一遍走，越走越顺。</p>
+</div>
+
+<script>
+/* =========================================================
+   分级渲染 + 动效分级（和闯关页同一套标准）
+   ⚠️ 判弱机别按 ≤4 核 / ≤4G：iOS Safari 恒报 4 核、Chrome 的
+      deviceMemory 封顶 8 —— 只有 ≤2 才算 low。
+   ========================================================= */
+/* ===== 渲染与动画两个维度，各三级 ===== */
+/* 站台会把同样的偏好写进 localStorage；直接双击打开这个文件时也照样生效。
+   渲染 高级/默认/流畅 → html[data-perf]=high/mid/low
+   动画 全量/默认/关闭 → html[data-motion]=on/off
+   ⚠️ 只读一次静态线索（核心数/内存/省流量），不起定时器、不跑 rAF 循环。
+   ⚠️ 判弱机只认 ≤2：iOS Safari 恒报 4 核、Chrome 的 deviceMemory 封顶 8，
+      按 ≤4 判会把好机器一起降级。 */
+(function detectPerf() {
+  var PERF_BY = ['high', 'mid', 'low'];
+  var pressure = 0, reduced = false;
+  try {
+    var cores = navigator.hardwareConcurrency || 4;
+    var mem = navigator.deviceMemory || 4;
+    var conn = navigator.connection || {};
+    var saveData = conn.saveData === true;
+    var slowNet = /^(slow-)?2g$/.test(String(conn.effectiveType || ''));
+    pressure = (cores <= 2 || mem <= 2 || saveData || slowNet) ? 2 : ((cores <= 4 || mem <= 4) ? 1 : 0);
+    reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  } catch (e) {}
+
+  function pref(key, allowed, dflt) {
+    try {
+      var v = localStorage.getItem('math4a.' + key);
+      if (v === null) return dflt;
+      v = String(v).replace(/^"|"$/g, '');
+      if (allowed.indexOf(v) >= 0) return v;
+      if (key === 'motion') {                 /* 旧版本只存 on/off */
+        if (v === 'on') return 'full';
+        if (v === 'off') return 'off';
+      }
+    } catch (e) {}
+    return dflt;
+  }
+
+  var rPref = pref('render', ['high', 'auto', 'smooth'], 'auto');
+  var mPref = pref('motion', ['full', 'auto', 'off'], 'auto');
+
+  var perf = rPref === 'high' ? 'high' : (rPref === 'smooth' ? 'low' : PERF_BY[pressure]);
+  var motion = mPref === 'full' ? 'on'
+             : (mPref === 'off' ? 'off' : (reduced || pressure >= 2 ? 'off' : 'on'));
+
+  var root = document.documentElement;
+  root.dataset.render = rPref;
+  root.dataset.motionPref = mPref;      /* 注意：data-motion 是解析后的结果 */
+  root.dataset.perf = perf;
+  root.dataset.motion = motion;
+  document.body.dataset.perf = perf;
+  document.body.dataset.motion = motion;
+  window.__perf = perf;
+  window.__motion = motion;
+})();
+
+
+/* =========================================================
+   音效（Web Audio 合成，零外链）
+   ========================================================= */
+let audioCtx = null;
+let soundEnabled = true;
+
+function ensureAudio() {
+  if (!soundEnabled) return false;
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { soundEnabled = false; return false; }
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    return true;
+  } catch (e) { soundEnabled = false; return false; }
+}
+
+function playNote(freq, dur, type, vol, delay) {
+  if (!ensureAudio()) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    const now = audioCtx.currentTime + (delay || 0);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(vol || 0.15, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    osc.start(now);
+    osc.stop(now + dur + 0.05);
+  } catch (e) {}
+}
+
+const SFX = {
+  correct() {
+    playNote(523.25, 0.10, 'sine', 0.16, 0);
+    playNote(659.25, 0.10, 'sine', 0.16, 0.07);
+    playNote(783.99, 0.16, 'sine', 0.16, 0.14);
+  },
+  wrong() {
+    playNote(349.23, 0.14, 'triangle', 0.12, 0);
+    playNote(261.63, 0.22, 'triangle', 0.12, 0.09);
+  },
+  success() {
+    playNote(523.25, 0.10, 'sine', 0.18, 0);
+    playNote(659.25, 0.10, 'sine', 0.18, 0.08);
+    playNote(783.99, 0.10, 'sine', 0.18, 0.16);
+    playNote(1046.5, 0.30, 'sine', 0.18, 0.24);
+  },
+  perfect() {
+    playNote(523.25, 0.09, 'sine', 0.20, 0);
+    playNote(659.25, 0.09, 'sine', 0.20, 0.07);
+    playNote(783.99, 0.09, 'sine', 0.20, 0.14);
+    playNote(1046.5, 0.09, 'sine', 0.20, 0.21);
+    playNote(1318.5, 0.35, 'sine', 0.20, 0.28);
+  },
+  click() { playNote(880, 0.035, 'sine', 0.06, 0); }
+};
+
+/* =========================================================
+   小工具
+   ========================================================= */
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function shuffleAll(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+const $ = id => document.getElementById(id);
+/* localStorage 全部带工具前缀 math4a. —— 和站台里其它工具共用同一个域 */
+const LS = {
+  get(k, fb) {
+    try { const s = localStorage.getItem('math4a.' + k); return s === null ? fb : JSON.parse(s); }
+    catch (e) { return fb; }
+  },
+  set(k, v) { try { localStorage.setItem('math4a.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+/* =========================================================
+   竖式练习台
+   把「试商 → 乘 → 减 → 落下」切成一小步一小步，学生在竖式格子里
+   一格一格看着数字长出来，同一套动作反复练，手感就出来了。
+   ========================================================= */
+const VERT_LEVELS = [
+  { key: 1, name: '商一位数', tag: '入门' },
+  { key: 2, name: '商两位数', tag: '熟练' },
+  { key: 3, name: '商三位数', tag: '挑战' }
+];
+
+let vertLevel = LS.get('vertLevel', 2);
+if (!VERT_LEVELS.some(l => l.key === vertLevel)) vertLevel = 2;
+let vertStat = LS.get('vertStat', null);
+if (!vertStat || typeof vertStat.done !== 'number') vertStat = { done: 0, perfect: 0 };
+let vertQ = null;
+let vertNo = 0;
+
+/* ---------- 长除法模型：只在纸上真算一遍，得到每一步该出现的数 ---------- */
+function vertDivModel(a, b) {
+  const ds = String(a).split('').map(Number);
+  const n = ds.length;
+  const rounds = [];
+  let cur = 0, started = false;
+  for (let i = 0; i < n; i++) {
+    cur = cur * 10 + ds[i];
+    const q = Math.floor(cur / b);
+    if (!started) {
+      if (q === 0) continue;      /* 最高位还不够除，这一位不写商 */
+      started = true;
+    }
+    const prod = q * b;
+    const rem = cur - prod;
+    rounds.push({ qCol: i + 1, q, cur, prod, rem });
+    cur = rem;
+  }
+  return { a, b, ds, n, rounds };
+}
+
+/* ---------- 出题 ---------- */
+function vertMakeProblem() {
+  const attempt = () => {
+    let b, qLo, qHi;
+    if (vertLevel === 1) { b = randInt(12, 89); qLo = 2; qHi = 9; }
+    else if (vertLevel === 2) { b = randInt(12, 61); qLo = 10; qHi = 99; }
+    else { b = randInt(12, 41); qLo = 100; qHi = 999; }
+
+    const hi = Math.min(qHi, Math.floor(9999 / b));
+    if (hi < qLo) return null;
+    const q = randInt(qLo, hi);
+    /* 商中间出现 0 会让「落下」这一步看起来别扭，不拿它来练 */
+    if (String(q).indexOf('0') >= 0) return null;
+
+    const r = Math.random() < 0.3 ? 0 : randInt(1, b - 1);
+    const a = b * q + r;
+    if (vertLevel === 1 && a < 20) return null;
+
+    const model = vertDivModel(a, b);
+    if (!model || !model.rounds.length) return null;
+    if (model.rounds.length !== String(q).length) return null;
+    if (model.rounds.some(x => x.q === 0)) return null;
+    /* 中间某一步余数为 0 时，竖式里要写成「0 加落下的数」，先避开 */
+    if (model.rounds.slice(0, -1).some(x => x.rem === 0)) return null;
+    return { a, b, q, r, model };
+  };
+  for (let i = 0; i < 80; i++) {
+    const got = attempt();
+    if (got) return got;
+  }
+  const model = vertDivModel(598, 26);
+  return { a: 598, b: 26, q: 23, r: 0, model };
+}
+
+/* ---------- 四个选项：正确项 + 三个「像错的」干扰项 ---------- */
+function vertOpts(correct, cands) {
+  const c = String(correct);
+  const used = [c];
+  const out = [];
+  shuffleAll(cands.map(String)).forEach(x => {
+    if (out.length >= 3) return;
+    if (!/^\d+$/.test(x) || used.indexOf(x) >= 0) return;
+    used.push(x); out.push(x);
+  });
+  let guard = 0;
+  const base = Number(c);
+  while (out.length < 3 && guard < 60) {
+    const nv = String(Math.max(0, base + randInt(-12, 12)));
+    if (used.indexOf(nv) < 0) { used.push(nv); out.push(nv); }
+    guard++;
+  }
+  return shuffleAll([c, ...out]);
+}
+
+/* ---------- 把答案格子按顺序编成"步" ---------- */
+function vertRowProd(k) { return 3 + k * 2; }
+function vertRowRem(k) { return 4 + k * 2; }
+
+function vertDigits(str, r, endCol) {
+  const arr = String(str).split('');
+  const start = endCol - arr.length + 1;
+  return arr.map((d, i) => ({ r, c: start + i, d }));
+}
+
+function vertBuildSlots(p) {
+  const b = p.b;
+  const rounds = p.model.rounds;
+  const slots = [];
+
+  rounds.forEach((rd, k) => {
+    const isLast = k === rounds.length - 1;
+    const curStr = String(rd.cur);
+    const prodStr = String(rd.prod);
+    const remStr = String(rd.rem);
+
+    const qCands = [];
+    [rd.q - 1, rd.q + 1, rd.q - 2, rd.q + 2].forEach(v => {
+      if (v >= 1 && v <= 9) qCands.push(v);
+    });
+    slots.push({
+      kind: 'quo',
+      cells: [{ r: 1, c: rd.qCol, d: String(rd.q) }],
+      ans: String(rd.q),
+      opts: vertOpts(rd.q, qCands),
+      ask: `<b>${curStr}</b> 里面最多有几个 <b>${b}</b>？商就写几。`,
+      hint: `试商：${b} 乘几最接近 ${curStr}，又不超过 ${curStr}。`,
+      ok: `对！商是 ${rd.q}。`
+    });
+
+    slots.push({
+      kind: 'mul',
+      cells: vertDigits(prodStr, vertRowProd(k), rd.qCol),
+      ans: prodStr,
+      opts: vertOpts(rd.prod, [rd.prod + b, rd.prod - b, rd.prod + 10, rd.prod - 10, rd.prod + 1]),
+      ask: `把商和除数相乘：<b>${rd.q} × ${b}</b> 得多少？`,
+      hint: `这一步算「商 × 除数」，结果写在 ${curStr} 的下面。`,
+      ok: `对！${rd.q} × ${b} = ${prodStr}。`
+    });
+
+    slots.push({
+      kind: 'sub',
+      cells: vertDigits(remStr, vertRowRem(k), rd.qCol),
+      ans: remStr,
+      opts: vertOpts(rd.rem, [rd.rem + b, b - rd.rem, rd.rem + 10, rd.rem - 10, rd.rem + 1]),
+      ask: `<b>${curStr} − ${prodStr}</b> 得多少？`,
+      hint: `相减得到余数。记住：余数一定要比除数 ${b} 小。`,
+      ok: rd.rem === 0
+        ? `对！${curStr} − ${prodStr} = 0，正好除尽。`
+        : `对！${curStr} − ${prodStr} = ${remStr}，${remStr} 比 ${b} 小，没问题。`
+    });
+
+    if (!isLast) {
+      const nextDigit = p.model.ds[rd.qCol];
+      const nextCur = String(rounds[k + 1].cur);
+      const dCands = [];
+      for (let v = 0; v <= 9; v++) if (v !== nextDigit) dCands.push(v);
+      slots.push({
+        kind: 'drop',
+        cells: [{ r: vertRowRem(k), c: rd.qCol + 1, d: String(nextDigit) }],
+        ans: String(nextDigit),
+        opts: vertOpts(nextDigit, dCands),
+        ask: `把被除数的下一位落下来，应该落 <b>几</b>？`,
+        hint: `除完一位，要把下一位落下来接着除。`,
+        ok: `对！落下 ${nextDigit}，${remStr} 和 ${nextDigit} 合起来是 ${nextCur}，接着除。`
+      });
+    }
+  });
+
+  slots.forEach((s, i) => { s.step = i + 1; });
+  return slots;
+}
+
+/* ---------- 新题 ---------- */
+function vertNewQuestion() {
+  const core = vertMakeProblem();
+  vertNo++;
+  vertQ = {
+    a: core.a, b: core.b, q: core.q, r: core.r, model: core.model,
+    slots: [],
+    st: { idx: 0, filled: {}, tried: {}, wrongCount: 0, solved: false, fb: null, justFilled: -1 }
+  };
+  vertQ.slots = vertBuildSlots(vertQ);
+  vertRender();
+}
+
+function vertRestart() {
+  if (!vertQ) return;
+  vertQ.st = { idx: 0, filled: {}, tried: {}, wrongCount: 0, solved: false, fb: null, justFilled: -1 };
+  SFX.click();
+  vertRender();
+}
+
+/* ---------- 渲染：竖式网格 ---------- */
+function vertRenderGrid() {
+  const p = vertQ, st = p.st;
+  const bStr = String(p.b);
+  const m = bStr.length, n = p.model.n;
+  const rounds = p.model.rounds;
+  const grid = $('vGrid');
+  if (!grid) return;
+
+  grid.style.gridTemplateColumns =
+    `repeat(${m},var(--vc)) var(--vb) repeat(${n},var(--vc))`;
+
+  const maxRow = 2 + rounds.length * 2;
+  let html = '';
+  const cell = (r, c, text, cls) => {
+    html += `<div class="vs-cell ${cls}" style="grid-row:${r};grid-column:${c}">${text}</div>`;
+  };
+
+  /* 除数 */
+  bStr.split('').forEach((d, i) => cell(2, i + 1, d, 'is-divisor'));
+
+  /* 括号：拐角 + 往下那条竖线 */
+  cell(2, m + 1, '', 'is-bracket-top');
+  for (let r = 3; r <= maxRow; r++) cell(r, m + 1, '', 'is-bracket');
+
+  /* 被除数 */
+  p.model.ds.forEach((d, i) => cell(2, m + 2 + i, d, 'is-dividend'));
+
+  /* 答案格子 */
+  p.slots.forEach((s, si) => {
+    const baseCls = s.kind === 'quo' ? 'is-quo'
+                  : s.kind === 'mul' ? 'is-prod'
+                  : 'is-rem';
+    s.cells.forEach((c, ci) => {
+      const last = ci === s.cells.length - 1;
+      const filled = !!st.filled[si];
+      let cls = baseCls;
+      let text = c.d;
+      if (!filled) {
+        cls += ' blank' + (last ? ' qm' : '') + (last && si === st.idx ? ' lit' : '');
+        text = '';
+      } else if (si === st.justFilled) {
+        cls += ' filled';
+      }
+      cell(c.r, m + 1 + c.c, text, cls);
+    });
+  });
+
+  grid.innerHTML = html;
+}
+
+/* ---------- 渲染：下方讲解区 ---------- */
+function vertRenderCoach() {
+  const p = vertQ, st = p.st;
+  const total = p.slots.length;
+  const fill = $('vTrackFill');
+  if (fill) fill.style.width = Math.round(st.idx / total * 100) + '%';
+
+  const play = $('vPlaying'), done = $('vDone');
+  if (!play || !done) return;
+
+  if (st.solved) {
+    play.style.display = 'none';
+    done.style.display = '';
+    const rem = p.r;
+    const check = rem
+      ? `验算：${p.b} × ${p.q} + ${rem} = ${p.a} ✔`
+      : `验算：${p.b} × ${p.q} = ${p.a} ✔`;
+    done.innerHTML = `
+      <div class="v-done">
+        <div class="v-done-h">✅ 竖式做完啦</div>
+        <div class="v-done-big">${p.a} ÷ ${p.b} = <b>${p.q}</b>${rem ? ` …… <b>${rem}</b>` : ''}</div>
+        <div class="v-done-check">${check}<br>有余数的除法，余数一定要比除数 ${p.b} 小。</div>
+        ${st.wrongCount === 0
+          ? '<div class="v-done-note">一次做对，这一套动作已经熟了 👍</div>'
+          : `<div class="v-done-note">中间改过 ${st.wrongCount} 次，再做一遍就更稳了。</div>`}
+      </div>
+      <button class="next-big" id="vNextBig" style="margin-top:10px"><span>下一题 →</span></button>`;
+    const nb = $('vNextBig');
+    if (nb) nb.addEventListener('click', () => { SFX.click(); vertNewQuestion(); });
+    return;
+  }
+
+  done.style.display = 'none';
+  play.style.display = '';
+
+  const s = p.slots[st.idx];
+  if (!s) return;
+  const tag = $('vStepTag'), ask = $('vAsk'), opts = $('vOpts'), fb = $('vFb');
+  tag.textContent = `第 ${st.idx + 1} / ${total} 步`;
+  ask.innerHTML = s.ask;
+
+  const tried = st.tried[st.idx] || [];
+  opts.innerHTML = s.opts.map((t, i) =>
+    `<button class="v-opt${tried.indexOf(i) >= 0 ? ' wrong' : ''}" data-vopt="${i}" style="--i:${i}"
+       ${tried.indexOf(i) >= 0 ? 'disabled' : ''}>${t}</button>`).join('');
+
+  if (st.fb) {
+    fb.className = 'v-fb show ' + st.fb.t;
+    fb.innerHTML = st.fb.h;
+  } else {
+    fb.className = 'v-fb';
+    fb.innerHTML = '';
+  }
+}
+
+function vertRender() {
+  if (!vertQ) return;
+  const p = vertQ, st = p.st;
+  const t = $('vText'), c = $('vCounter'), tg = $('vTag');
+  if (tg) tg.textContent = '四上 · 除法竖式';
+  if (c) c.textContent = `第 ${vertNo} 题 · ${VERT_LEVELS.find(l => l.key === vertLevel).name}`;
+  if (t) {
+    t.innerHTML = st.solved
+      ? `用竖式计算 <b>${p.a} ÷ ${p.b}</b>，并验算。`
+      : `用竖式计算 <b>${p.a} ÷ ${p.b}</b>。跟着步骤填竖式。`;
+  }
+  vertRenderGrid();
+  vertRenderCoach();
+  st.justFilled = -1;
+}
+
+/* ---------- 答题 ---------- */
+function vertAnswer(optIdx) {
+  const p = vertQ, st = p.st;
+  if (!p || st.solved) return;
+  const s = p.slots[st.idx];
+  if (!s) return;
+  if ((st.tried[st.idx] || []).indexOf(optIdx) >= 0) return;
+
+  if (s.opts[optIdx] === s.ans) {
+    st.filled[st.idx] = true;
+    st.justFilled = st.idx;
+    st.fb = { t: 'ok', h: '✔ ' + s.ok };
+    st.idx++;
+    SFX.correct();
+    if (st.idx >= p.slots.length) vertFinish();
+  } else {
+    st.tried[st.idx] = st.tried[st.idx] || [];
+    st.tried[st.idx].push(optIdx);
+    st.wrongCount++;
+    st.fb = { t: 'no', h: '✘ ' + s.hint };
+    SFX.wrong();
+  }
+  vertRender();
+}
+
+function vertFinish() {
+  const p = vertQ, st = p.st;
+  st.solved = true;
+  vertStat.done++;
+  if (st.wrongCount === 0) vertStat.perfect++;
+  LS.set('vertStat', vertStat);
+  vertRenderStat();
+  if (st.wrongCount === 0) SFX.perfect(); else SFX.success();
+}
+
+function vertRenderStat() {
+  const el = $('vStat');
+  if (!el) return;
+  el.innerHTML =
+    `<span>已完成 <b>${vertStat.done}</b> 题</span>` +
+    `<span>一次做对 <b>${vertStat.perfect}</b> 题</span>` +
+    `<span class="spacer"></span>` +
+    `<span>同级还剩无数题，慢慢练</span>`;
+}
+
+function vertRenderLevels() {
+  const el = $('vLevels');
+  if (!el) return;
+  el.innerHTML = VERT_LEVELS.map(l =>
+    `<button class="v-lv${l.key === vertLevel ? ' on' : ''}" data-vlv="${l.key}">
+       ${l.name}<b>${l.tag}</b></button>`).join('');
+}
+
+function vertEnter() {
+  vertRenderLevels();
+  vertRenderStat();
+  if (!vertQ) vertNewQuestion();
+  else vertRender();
+}
+
+/* ---------- 事件 ---------- */
+(function bindVertical() {
+  const lv = $('vLevels');
+  if (lv) lv.addEventListener('click', e => {
+    const btn = e.target.closest('.v-lv');
+    if (!btn) return;
+    const k = +btn.dataset.vlv;
+    if (k === vertLevel) return;
+    vertLevel = k;
+    LS.set('vertLevel', vertLevel);
+    SFX.click();
+    vertRenderLevels();
+    vertNo = 0;
+    vertNewQuestion();
+  });
+
+  const opts = $('vOpts');
+  if (opts) opts.addEventListener('click', e => {
+    const btn = e.target.closest('.v-opt');
+    if (!btn || btn.disabled) return;
+    vertAnswer(+btn.dataset.vopt);
+  });
+
+  const rs = $('vRestart');
+  if (rs) rs.addEventListener('click', vertRestart);
+  const nw = $('vNew');
+  if (nw) nw.addEventListener('click', () => { SFX.click(); vertNewQuestion(); });
+})();
+
+
+/* =========================================================
+   启动
+   ========================================================= */
+vertEnter();
+</script>
+</body>
+</html></template>
+
+<script>
+/* =========================================================
+   站台：目录 ⇄ 工具
+   设置分两个维度，各三级（学生大多用手机，默认档自己看设备压力）：
+     · 渲染  高级 / 默认 / 流畅   → html[data-perf] = high / mid / low
+     · 动画  全量 / 默认 / 关闭   → html[data-motion] = on / off
+   高级 / 全量 是强制最高，不看设备；默认档才做自动判断。
+   ⚠️ 判弱机只认 ≤2 核 / ≤2G / 省流量：iOS Safari 恒报 4 核、
+      Chrome 的 deviceMemory 封顶 8，按 ≤4 判会把好机器一起降级。
+   ⚠️ 检测只读一次静态线索，不起定时器、不跑 rAF 循环 —— 监测本身不能占用资源。
+   ========================================================= */
+(function () {
+  var stage = document.getElementById('stage');
+  var home = document.getElementById('home');
+  var panel = document.getElementById('panel');
+  var mask = document.getElementById('panelMask');
+  var menuBtn = document.getElementById('menuBtn');
+  var toastEl = document.getElementById('stToast');
+  var NAMES = { math: '数学思维闯关', vert: '竖式练习台' };
+
+  /* ---------- 设备压力：读一次就走 ---------- */
+  var SIG = (function () {
+    var cores = navigator.hardwareConcurrency || 4;
+    var mem = navigator.deviceMemory || 4;
+    var conn = navigator.connection || {};
+    var saveData = conn.saveData === true;
+    var slowNet = /^(slow-)?2g$/.test(String(conn.effectiveType || ''));
+    var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var pressure = (cores <= 2 || mem <= 2 || saveData || slowNet) ? 2
+                 : ((cores <= 4 || mem <= 4) ? 1 : 0);   /* 2=吃紧 1=一般 0=宽裕 */
+    return { cores: cores, mem: mem, pressure: pressure, reduced: reduced };
+  })();
+  var PERF_BY_PRESSURE = ['high', 'mid', 'low'];
+
+  function loadPref(key, allowed, dflt) {
+    try {
+      var v = localStorage.getItem('math4a.' + key);
+      if (v !== null) {
+        v = String(v).replace(/^"|"$/g, '');
+        if (allowed.indexOf(v) >= 0) return v;
+        /* 旧版本只存过 on/off，迁一下 */
+        if (key === 'motion') {
+          if (v === 'on') return 'full';
+          if (v === 'off') return 'off';
+        }
+      }
+    } catch (e) {}
+    return dflt;
+  }
+  var RENDER_PREF = loadPref('render', ['high', 'auto', 'smooth'], 'auto');
+  var MOTION_PREF = loadPref('motion', ['full', 'auto', 'off'], 'auto');
+
+  function resolvedRender() {
+    if (RENDER_PREF === 'high') return 'high';
+    if (RENDER_PREF === 'smooth') return 'low';
+    return PERF_BY_PRESSURE[SIG.pressure];
+  }
+  function resolvedMotion() {
+    if (MOTION_PREF === 'full') return 'on';
+    if (MOTION_PREF === 'off') return 'off';
+    if (SIG.reduced) return 'off';                 /* 系统偏好优先 */
+    return SIG.pressure >= 2 ? 'off' : 'on';
+  }
+
+  function applySettings() {
+    var de = document.documentElement;
+    de.dataset.render = RENDER_PREF;
+    de.dataset.motionPref = MOTION_PREF;
+    de.dataset.perf = resolvedRender();
+    de.dataset.motion = resolvedMotion();
+    paintSettings();
+    if (frame) syncSettingsIn(frame, 0);
+  }
+
+  function paintSettings() {
+    var sr = document.getElementById('segRender');
+    var sm = document.getElementById('segMotion');
+    if (sr) Array.prototype.forEach.call(sr.children, function (b) {
+      b.classList.toggle('on', b.dataset.v === RENDER_PREF);
+      b.setAttribute('aria-pressed', b.dataset.v === RENDER_PREF ? 'true' : 'false');
+    });
+    if (sm) Array.prototype.forEach.call(sm.children, function (b) {
+      b.classList.toggle('on', b.dataset.v === MOTION_PREF);
+      b.setAttribute('aria-pressed', b.dataset.v === MOTION_PREF ? 'true' : 'false');
+    });
+    var note = document.getElementById('psetNote');
+    if (note) {
+      var pr = SIG.pressure >= 2 ? '设备吃紧' : (SIG.pressure === 1 ? '设备一般' : '设备宽裕');
+      note.textContent = '默认档：按设备压力自动调节（当前' + pr + '）→ 渲染 ' +
+        ({ high: '高级', mid: '中', low: '流畅' })[resolvedRender()] +
+        ' · 动画 ' + (resolvedMotion() === 'on' ? '开' : '关');
+    }
+  }
+
+  /* 把结果推进 iframe，两个模块与站台保持一致 */
+  function syncSettingsIn(el, tries) {
+    try {
+      var d = el.contentDocument;
+      if (d && d.documentElement) {
+        d.documentElement.dataset.render = RENDER_PREF;
+        d.documentElement.dataset.perf = resolvedRender();
+        d.documentElement.dataset.motion = resolvedMotion();
+        return;
+      }
+    } catch (e) {}
+    if ((tries || 0) < 8) setTimeout(function () { syncSettingsIn(el, (tries || 0) + 1); }, 180);
+  }
+
+  /* ---------- 提示条 ---------- */
+  var toastTimer = null;
+  function toast(text, ms) {
+    if (!toastEl) return;
+    toastEl.textContent = text;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 1600);
+  }
+
+  /* ---------- 抽屉 ---------- */
+  function setMenu(on) {
+    panel.classList.toggle('open', on);
+    mask.classList.toggle('on', on);
+    menuBtn.classList.toggle('open', on);
+    menuBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    document.body.classList.toggle('panel-open', on);
+  }
+  function markItems(key) {
+    var all = panel.querySelectorAll('.pitem[data-tool]');
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.toggle('on', all[i].dataset.tool === key);
+    }
+  }
+
+  /* ---------- 工具切换 ---------- */
+  var frame = null;
+  var current = null;
+  var veil = null;
+
+  function veilOn() {
+    if (!veil) {
+      veil = document.createElement('div');
+      veil.className = 'view-loading';
+      veil.setAttribute('role', 'status');
+      veil.setAttribute('aria-live', 'polite');
+      veil.innerHTML = '<div class="tl-card"><span class="tl-dot"></span>' +
+        '<b>正在准备工具…</b><i class="tl-bar"><em></em></i>' +
+        '<small>第一次进入要解析整份代码，稍等一下</small></div>';
+      stage.appendChild(veil);
+    }
+    veil.classList.add('on');
+    clearTimeout(veil._t);
+    veil._t = setTimeout(veilOff, 6000);
+  }
+  function veilOff() {
+    if (!veil) return;
+    clearTimeout(veil._t);
+    veil.classList.remove('on');
+  }
+
+  function showTool(key) {
+    var tpl = document.getElementById('tpl-' + key);
+    if (!tpl) return;
+    if (current === key) { setMenu(false); return; }
+
+    if (frame) {
+      var old = frame;
+      old.classList.add('out');
+      setTimeout(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 230);
+      frame = null;
+    }
+
+    veilOn();
+    var el = document.createElement('iframe');
+    el.className = 'tool-frame pending';
+    el.setAttribute('title', NAMES[key] || key);
+    el.srcdoc = tpl.innerHTML;
+    stage.appendChild(el);
+    frame = el;
+
+    var shown = false;
+    var put = function () {
+      if (shown) return;
+      shown = true;
+      el.classList.remove('pending');
+      veilOff();
+      syncSettingsIn(el, 0);
+    };
+    el.addEventListener('load', function () { setTimeout(put, 40); });
+    setTimeout(put, 1800);
+
+    home.classList.remove('in');
+    home.style.display = 'none';
+    document.body.classList.add('tool-open');
+    current = key;
+    markItems(key);
+    setMenu(false);
+    toast('🎯 ' + (NAMES[key] || key));
+  }
+
+  function goHome() {
+    renderStats();
+    if (frame && frame.parentNode) frame.parentNode.removeChild(frame);
+    frame = null;
+    current = null;
+    veilOff();
+    home.style.display = '';
+    home.classList.remove('in');
+    void home.offsetWidth;
+    home.classList.add('in');
+    document.body.classList.remove('tool-open');
+    markItems(null);
+    setMenu(false);
+    home.scrollTop = 0;
+    toast('🏠 目录', 1200);
+  }
+
+  /* ---------- 首页统计 ---------- */
+  function renderStats() {
+    var box = document.getElementById('hstats');
+    if (!box) return;
+    var bits = [];
+    function grab(k) { try { return JSON.parse(localStorage.getItem('math4a.' + k)); } catch (e) { return null; } }
+    var wb = grab('wrongBook');
+    if (wb && wb.length) bits.push('<span>📕 待重做错题 <b>' + wb.length + '</b> 道</span>');
+    var vs = grab('vertStat');
+    if (vs && vs.done) bits.push('<span>✏️ 竖式已完成 <b>' + vs.done + '</b> 题</span>');
+    var hs = grab('history');
+    if (hs && hs.length) bits.push('<span>📊 累计练习 <b>' + hs.length + '</b> 题</span>');
+    box.innerHTML = bits.length ? bits.join('')
+      : '<span class="empty">还没有练习记录，选一个开始吧</span>';
+  }
+
+  /* ---------- 全屏 ---------- */
+  var fsEl = function () {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  };
+  function fsSupported() {
+    return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  }
+  function paintFs() {
+    var btn = document.getElementById('fsBtn');
+    if (!btn) return;
+    var on = !!fsEl();
+    btn.classList.toggle('off', !on);
+    var hint = document.getElementById('fsHint');
+    if (hint) hint.textContent = on ? '已开启' : '未开启';
+    btn.title = on ? '退出全屏' : '全屏显示';
+  }
+  function toggleFs() {
+    var el = document.documentElement;
+    if (fsEl()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      var r = el.requestFullscreen ? el.requestFullscreen()
+            : (el.webkitRequestFullscreen ? el.webkitRequestFullscreen() : null);
+      if (r && r.catch) r.catch(function () { toast('这台设备不让全屏'); });
+    }
+  }
+
+  /* ---------- 横屏（把舞台转 90°） ---------- */
+  function paintLand() {
+    var btn = document.getElementById('landBtn');
+    if (!btn) return;
+    var on = document.body.classList.contains('land');
+    btn.classList.toggle('off', !on);
+    var hint = document.getElementById('landHint');
+    if (hint) hint.textContent = on ? '横屏中' : '竖屏';
+    btn.title = on ? '转回竖屏' : '把练习区转 90°，横过来用';
+  }
+  function toggleLand() {
+    var on = !document.body.classList.contains('land');
+    document.body.classList.toggle('land', on);
+    paintLand();
+    toast(on ? '🔄 已横屏（竖着拿手机用）' : '📱 已转回竖屏', 1600);
+  }
+
+  /* ---------- 绑定 ---------- */
+  menuBtn.addEventListener('click', function () {
+    setMenu(!panel.classList.contains('open'));
+  });
+  mask.addEventListener('click', function () { setMenu(false); });
+  document.getElementById('homeItem').addEventListener('click', goHome);
+
+  var items = panel.querySelectorAll('.pitem[data-tool]');
+  for (var i = 0; i < items.length; i++) {
+    (function (b, idx) {
+      b.style.setProperty('--i', idx);
+      b.classList.add('anim-in');
+      b.addEventListener('click', function () { showTool(b.dataset.tool); });
+    })(items[i], i);
+  }
+  var brand = panel.querySelector('.brand');
+  if (brand) brand.classList.add('anim-in');
+
+  var cards = home.querySelectorAll('.card[data-tool]');
+  for (var j = 0; j < cards.length; j++) {
+    (function (b, idx) {
+      b.style.setProperty('--i', idx);
+      b.addEventListener('click', function () { showTool(b.dataset.tool); });
+    })(cards[j], j);
+  }
+
+  /* 渲染 / 动画 两个三段控件 */
+  function bindSeg(id, onChange) {
+    var seg = document.getElementById(id);
+    if (!seg) return;
+    seg.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-v]');
+      if (!b || b.classList.contains('on')) return;
+      onChange(b.dataset.v);
+    });
+  }
+  bindSeg('segRender', function (v) {
+    RENDER_PREF = v;
+    try { localStorage.setItem('math4a.render', v); } catch (e) {}
+    applySettings();
+  });
+  bindSeg('segMotion', function (v) {
+    MOTION_PREF = v;
+    try { localStorage.setItem('math4a.motion', v); } catch (e) {}
+    applySettings();
+  });
+
+  var fsBtn = document.getElementById('fsBtn');
+  if (!fsSupported()) {
+    if (fsBtn) fsBtn.hidden = true;      /* 不支持就别留一个点了没反应的按钮 */
+  } else {
+    fsBtn.addEventListener('click', toggleFs);
+    document.addEventListener('fullscreenchange', paintFs);
+    document.addEventListener('webkitfullscreenchange', paintFs);
+  }
+  var landBtn = document.getElementById('landBtn');
+  if (landBtn) landBtn.addEventListener('click', toggleLand);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setMenu(false);
+  });
+
+  /* ---------- 启动 ---------- */
+  renderStats();
+  applySettings();
+  paintFs();
+  paintLand();
+  requestAnimationFrame(function () {
+    home.classList.add('in');
+    var bm = document.getElementById('bootMask');
+    if (bm) {
+      bm.classList.add('off');
+      setTimeout(function () { if (bm.parentNode) bm.parentNode.removeChild(bm); }, 320);
+    }
+  });
+
+  window.__st = {
+    perf: function () { return document.documentElement.dataset.perf; },
+    motion: function () { return document.documentElement.dataset.motion; },
+    sig: SIG
+  };
+})();
 </script>
 </body>
 </html>

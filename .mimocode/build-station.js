@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DIR = 'C:\\Users\\Administrator\\Desktop\\数学思维闯关';
-const STATION = path.join(DIR, '数学思维站台.html');
+const STATION = path.join(DIR, 'index.html');   /* 站台就是站点入口 */
 const MAP = [
   ['tpl-math', path.join(DIR, '数学思维闯关.html')],
   ['tpl-vert', path.join(DIR, '竖式练习台.html')]
