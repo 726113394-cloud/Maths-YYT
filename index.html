@@ -2550,12 +2550,33 @@ const FIG = (function () {
       o += '<path d="' + gA.path + '" fill="none" stroke="' + GIVEN + '" stroke-width="1.4"/>';
       o += txt(gA.x, gA.y, apex + '°', GIVEN);
       if (P5) {
-        o += '<circle cx="' + P5.x.toFixed(1) + '" cy="' + P5.y.toFixed(1) + '" r="2.6" fill="' + ASK + '"/>';
-        o += txt(P5.x + 13, P5.y + 4, '?', ASK, 15);
-        /* 四个被平分的小角标上 1..4 */
-        const gB = angleAt(B1, A1, P5, 13), gC = angleAt(C1, P5, A1, 13);
-        o += txt(gB.x - 8, gB.y, '1', INK, 10);
-        o += txt(gC.x + 8, gC.y, '3', INK, 10);
+        /* 一个顶点被平分后是**两个**角：∠1 在 AB 与平分线之间、∠2 在平分线与 BC 之间，
+           C 那边是 ∠3、∠4。之前只标了 1 和 3，把 2、4 弄丢了。
+           用"两边单位向量相加"找半角的中间方向，比算角度再取中点安全（不绕 ±π）。 */
+        const u = (from, to) => {
+          const dx = to.x - from.x, dy = to.y - from.y;
+          const d = Math.hypot(dx, dy) || 1;
+          return { x: dx / d, y: dy / d };
+        };
+        const half = (V, P1, Pm, P2, R, t1, t2) => {
+          const d1 = u(V, P1), dm = u(V, Pm), d2 = u(V, P2);
+          const m1 = { x: d1.x + dm.x, y: d1.y + dm.y };
+          const m2 = { x: dm.x + d2.x, y: dm.y + d2.y };
+          const n1 = Math.hypot(m1.x, m1.y) || 1, n2 = Math.hypot(m2.x, m2.y) || 1;
+          let out = '';
+          out += txt(V.x + m1.x / n1 * R, V.y + m1.y / n1 * R + 4, t1, GIVEN, 11);
+          out += txt(V.x + m2.x / n2 * R, V.y + m2.y / n2 * R + 4, t2, GIVEN, 11);
+          return out;
+        };
+        /* B 处：AB ↔ 平分线 = ∠1，平分线 ↔ BC = ∠2 */
+        o += half(B1, A1, P5, C1, 30, '1', '2');
+        /* C 处：BC ↔ 平分线 = ∠3，平分线 ↔ CA = ∠4 */
+        o += half(C1, B1, P5, A1, 30, '3', '4');
+        /* 交点处：∠5 是朝下张开的那个角（B-P-C），画弧 + 标 ?，不含糊 */
+        o += '<circle cx="' + P5.x.toFixed(1) + '" cy="' + P5.y.toFixed(1) + '" r="2.4" fill="' + ASK + '"/>';
+        const gP = angleAt(P5, B1, C1, 16);
+        o += '<path d="' + gP.path + '" fill="none" stroke="' + ASK + '" stroke-width="1.4" stroke-dasharray="3 2"/>';
+        o += txt(gP.x, gP.y + 2, '?', ASK, 15);
       }
       return svg(o, W, H);
     }
@@ -8749,6 +8770,7 @@ body{
   background-attachment:fixed;-webkit-font-smoothing:antialiased;
 }
 .wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px;}
+@media (min-width:820px){ .wrap{max-width:min(1180px,96vw);padding:24px 24px 64px;} }
 
 .card{background:var(--card);border-radius:24px;box-shadow:var(--shadow-2);}
 .mini-btn{border:none;background:#fff;color:#7C5CFF;font-size:14.5px;font-weight:800;
