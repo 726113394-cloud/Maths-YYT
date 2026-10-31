@@ -1308,6 +1308,49 @@ html[data-motion="off"] .facts-fab.urgent .fab-ico{animation:none;}
   background:#fff;border-radius:20px;border:2.5px solid #FFE3A8;
   box-shadow:0 4px 0 #FFE3A8,0 12px 26px rgba(255,200,100,.18);}
 .pk-bar.on{display:block;}
+
+/* ===== PK 是给大屏用的：手机上的几块横条全部让位 ===== */
+body[data-pk="1"] .tab-nav,
+body[data-pk="1"] .score-bar,
+body[data-pk="1"] .tool-bar,
+body[data-pk="1"] .hero{display:none !important;}
+body[data-pk="1"] .wrap{padding-top:14px;}
+body[data-pk="1"] .pk-bar{margin-bottom:12px;}
+
+.pk-exit-btn{
+  min-height:44px;padding:9px 16px;border:none;border-radius:12px;
+  font-family:inherit;font-size:14px;font-weight:900;cursor:pointer;
+  background:#fff;color:#C2410C;box-shadow:0 3px 0 rgba(194,65,12,.2);
+  transition:transform .15s;
+}
+.pk-exit-btn:active{transform:scale(.96);}
+
+/* ===== PK 主体：左题右统计，下一题放在右侧 ===== */
+@media (min-width:760px){
+  /* ⚠️ renderPkRace 用的是内联 display:block，不加 !important 压不住 */
+  body[data-pk="1"] #pkRace{
+    display:grid !important;grid-template-columns:minmax(0,1fr) 330px;
+    gap:14px;align-items:start;
+  }
+  body[data-pk="1"] #pkOpts{grid-column:1;grid-row:1;}
+  body[data-pk="1"] .pk-race-timer{grid-column:1;grid-row:2;}
+  body[data-pk="1"] #pkPads{grid-column:2;grid-row:1;}
+  body[data-pk="1"] .pk-side-next{grid-column:2;grid-row:2;}
+  body[data-pk="1"] #pkResult{grid-column:1 / -1;}
+  body[data-pk="1"] .pk-side-next .next-big{min-height:60px;font-size:18px;}
+}
+.pk-side-next{display:none;}
+body[data-pk="1"] .pk-side-next{display:block;}
+body[data-pk="1"] .pk-side-next .next-big{margin-top:2px;}
+.pk-side-next .next-hint{text-align:center;}
+
+/* ===== PK 确认弹窗 ===== */
+.pk-confirm{padding:6px 2px 2px;text-align:center;}
+.pk-confirm-ico{font-size:40px;line-height:1;margin-bottom:8px;}
+.pk-confirm h2{margin:0 0 10px;font-size:19px;font-weight:900;color:#4B3A6B;}
+.pk-confirm-p{margin:0;font-size:13.5px;line-height:2;font-weight:700;
+  color:#6B6385;text-align:left;}
+.pk-confirm-p b{color:#6B4CE6;}
 .pk-bar-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .pk-bar-head .pk-title{font-size:15px;font-weight:900;color:var(--ink-2);}
 .pk-bar-head .pk-meta{font-size:12.5px;font-weight:800;color:var(--muted);}
@@ -1740,6 +1783,7 @@ html[data-motion="off"] .fw{display:none;}
         </span>
         <span class="spacer"></span>
         <button class="pk-add" id="pkAddPlayer">➕ 添加玩家</button>
+        <button class="pk-exit-btn" id="pkExit">⏏ 退出 PK</button>
       </div>
     </div>
 
@@ -1805,6 +1849,10 @@ html[data-motion="off"] .fw{display:none;}
           <span class="pk-race-text" id="pkRaceText">--</span>
         </div>
         <div class="pk-pads" id="pkPads"></div>
+        <div class="pk-side-next">
+          <button class="next-big" id="pkNext">下一题 →</button>
+          <div class="next-hint" id="pkNextHint">本题结算后就能翻页</div>
+        </div>
         <div class="pk-result" id="pkResult"></div>
       </div>
 
@@ -8240,6 +8288,19 @@ function renderPkResult() {
   const b = $('nextBig');
   if (b) b.addEventListener('click', pkNextRound);
 }
+/* 本题结算完才允许翻页：没结算就翻页会跳过抢答 */
+function paintPkNext() {
+  const b = $('pkNext'), h = $('pkNextHint');
+  if (!b) return;
+  const ready = !!pkRace && !!pkRace.resolved;
+  const last = pkRound >= PK_ROUNDS;
+  b.disabled = !ready;
+  b.textContent = last ? '看结果 🏆' : '下一题 →';
+  b.style.opacity = ready ? '1' : '.45';
+  if (h) h.textContent = ready ? (last ? '全部答完，看看谁赢了' : '还剩 ' + (PK_ROUNDS - pkRound) + ' 题')
+                               : '本题结算后就能翻页';
+}
+
 function pkNextRound() {
   SFX.click();
   if (pkRound >= PK_ROUNDS) { openPkResult(); return; }
@@ -8261,6 +8322,7 @@ function renderPkRace() {
       <span class="pk-opt-text">${t}${p.unit ? `<span class="ans-unit">${p.unit}</span>` : ''}</span></div>`
   ).join('');
   renderPkStatus();
+  paintPkNext();
 }
 function renderPkBar() {
   if (!pkMode) return;
@@ -8314,8 +8376,21 @@ function setPkMode(on) {
   pkMode = on;
   document.body.dataset.pk = on ? '1' : '0';   /* 桌面/一体机据此切成宽屏布局 */
   $('pkToggle').classList.toggle('on', on);
+  const ex = $('pkExit');
   $('pkToggle').textContent = on ? '🎮 PK' : '🎮';
   $('pkBar').classList.toggle('on', on);
+  const _exb = $('pkExit');
+  if (_exb) {
+    if (!_exb.dataset.bound) {
+      _exb.dataset.bound = '1';
+      _exb.addEventListener('click', () => { SFX.click(); setPkMode(false); });
+    }
+  }
+  const _nx = $('pkNext');
+  if (_nx && !_nx.dataset.bound) {
+    _nx.dataset.bound = '1';
+    _nx.addEventListener('click', () => { if (!_nx.disabled) pkNextRound(); });
+  }
   $('goalBar').style.display = on ? 'none' : (selectedUnits.length ? 'block' : 'none');
   closePkResult();
   /* 清掉上一局的残留 */
@@ -8362,7 +8437,36 @@ function openPkResult() {
   $('pkExit').addEventListener('click', () => { SFX.click(); setPkMode(false); });
 }
 
-$('pkToggle').addEventListener('click', () => { SFX.click(); setPkMode(!pkMode); });
+$('pkToggle').addEventListener('click', () => {
+  SFX.click();
+  if (pkMode) { setPkMode(false); return; }
+  askPkConfirm();
+});
+
+/* PK 是给大屏用的：两个人挤一部手机，格子小、抢按钮容易点错。
+   所以进之前弹一次说明，让老师自己决定。 */
+function askPkConfirm() {
+  const m = $('pkModal'), card = $('pkModalCard');
+  if (!m || !card) { setPkMode(true); return; }
+  card.innerHTML = `
+    <div class="pk-confirm">
+      <div class="pk-confirm-ico">🖥️</div>
+      <h2>PK 是给大屏用的</h2>
+      <p class="pk-confirm-p">
+        同题竞速要 <b>几个人围着一块大屏抢答</b>：平板、电脑、投影、一体机都可以。<br>
+        手机屏幕太窄，几个人挤着点按钮容易点错，也看不清别人的格子。<br>
+        <b>建议把手机横过来 + 全屏</b>，或者换到电脑/投影上玩。
+      </p>
+      <div class="pk-modal-actions">
+        <button class="pk-again" id="pkConfirmGo">知道了，开始 PK</button>
+        <button class="pk-exit" id="pkConfirmNo">回去单人答题</button>
+      </div>
+    </div>`;
+  m.classList.add('on');
+  const go = $('pkConfirmGo'), no = $('pkConfirmNo');
+  if (go) go.addEventListener('click', () => { m.classList.remove('on'); setPkMode(true); });
+  if (no) no.addEventListener('click', () => { m.classList.remove('on'); });
+}
 $('pkAddPlayer').addEventListener('click', addPkPlayer);
 document.querySelectorAll('.pk-limit-btn').forEach(b => {
   b.addEventListener('click', () => {
