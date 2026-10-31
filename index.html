@@ -8839,7 +8839,7 @@ body{
 .v-stage{background:#fff;border-radius:22px;padding:16px 8px;margin-bottom:10px;
   box-shadow:var(--shadow-2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .vs{display:grid;justify-content:center;align-items:center;
-  --vc:30px;--vb:16px;--vr:34px;grid-auto-rows:var(--vr);
+  --vc:30px;--vb:11px;--vr:34px;grid-auto-rows:var(--vr);
   /* 淡横线当方格纸：空格子表示「等着填」，不是坏掉了 */
   background-image:repeating-linear-gradient(to bottom,
     transparent 0,transparent calc(var(--vr) - 1px),
@@ -8852,7 +8852,7 @@ body{
 .vs-cell.is-dividend{border-top:2.5px solid #7C5CFF;color:var(--ink);}
 .vs-cell.is-bracket{border-right:2.5px solid #7C5CFF;}
 .vs-cell.is-bracket-top{border-right:2.5px solid #7C5CFF;
-  border-top:2.5px solid #7C5CFF;border-top-right-radius:10px;}
+  border-top:2.5px solid #7C5CFF;border-top-right-radius:5px;}
 .vs-cell.is-quo{color:#E07B2A;}
 .vs-cell.is-prod{border-bottom:2px solid #BEB2E6;}
 .vs-cell.is-rem{color:#1FA85A;}
@@ -8916,7 +8916,7 @@ body{
 @media(max-width:600px){
   .v-lv{font-size:12px;min-height:42px;}
   .v-stage{padding:12px 4px;border-radius:20px;}
-  .vs{--vc:27px;--vb:14px;--vr:33px;}
+  .vs{--vc:27px;--vb:10px;--vr:33px;}
   .vs-cell{font-size:16px;}
   .v-coach{padding:12px 13px;border-radius:20px;}
   .v-ask{font-size:14.5px;}
@@ -9375,16 +9375,13 @@ function vertRestart() {
 }
 
 /* ---------- 渲染：竖式网格 ---------- */
-function vertRenderGrid() {
-  const p = vertQ, st = p.st;
+/* 把竖式渲染抽成纯函数：给一份 p/st，吐出列模板和格子 HTML。
+   单人页和 PK 的每个玩家面板都调它，两边画法永远一致。 */
+function gridHTML(p, st) {
   const bStr = String(p.b);
   const m = bStr.length, n = p.model.n;
   const rounds = p.model.rounds;
-  const grid = $('vGrid');
-  if (!grid) return;
-
-  grid.style.gridTemplateColumns =
-    `repeat(${m},var(--vc)) var(--vb) repeat(${n},var(--vc))`;
+  const cols = `repeat(${m},var(--vc)) var(--vb) repeat(${n},var(--vc))`;
 
   const maxRow = 2 + rounds.length * 2;
   let html = '';
@@ -9397,7 +9394,18 @@ function vertRenderGrid() {
 
   /* 括号：拐角 + 往下那条竖线 */
   cell(2, m + 1, '', 'is-bracket-top');
-  for (let r = 3; r <= maxRow; r++) cell(r, m + 1, '', 'is-bracket');
+  /* 竖线只画到"已经写到"的那一行：没填的格子下面拖一条长尾巴，看着就像画错了 */
+  let lastUsed = 2;
+  if (st) {
+    p.slots.forEach((sl, si) => {
+      if (si < st.idx) sl.cells.forEach(c => { if (c.r > lastUsed) lastUsed = c.r; });
+    });
+    const cur0 = p.slots[st.idx];
+    if (cur0) cur0.cells.forEach(c => { if (c.r > lastUsed) lastUsed = c.r; });
+  } else {
+    lastUsed = maxRow;
+  }
+  for (let r = 3; r <= Math.min(maxRow, lastUsed); r++) cell(r, m + 1, '', 'is-bracket');
 
   /* 被除数 */
   p.model.ds.forEach((d, i) => cell(2, m + 2 + i, d, 'is-dividend'));
@@ -9421,8 +9429,16 @@ function vertRenderGrid() {
       cell(c.r, m + 1 + c.c, text, cls);
     });
   });
+  return { cols: cols, html: html };
+}
 
-  grid.innerHTML = html;
+function vertRenderGrid() {
+  const p = vertQ, st = p ? p.st : null;
+  const grid = $('vGrid');
+  if (!grid || !p) return;
+  const g = gridHTML(p, st);
+  grid.style.gridTemplateColumns = g.cols;
+  grid.innerHTML = g.html;
 }
 
 /* ---------- 渲染：下方讲解区 ---------- */
