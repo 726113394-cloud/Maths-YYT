@@ -1108,6 +1108,22 @@ html[data-motion="off"] .facts-fab.urgent .fab-ico{animation:none;}
 
 .step.active .step-body{padding:0 16px 16px 16px;}
 
+/* ===== 多选题：方框勾选 + 检验按钮 ===== */
+.opt.mopt{border-color:#DDD4FF;}
+.opt.mopt .opt-key.chk{font-size:15px;border-radius:8px;color:#8B7FD0;}
+.opt.mopt.on{background:linear-gradient(135deg,#EFE9FF,#FBF7FF);border-color:#8B6BFF;
+  box-shadow:0 3px 0 #B9A9F0;}
+.opt.mopt.on .opt-key.chk{background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+  border-color:#6B4CE6;color:#fff;box-shadow:0 2px 0 var(--purple-deep);}
+.opt.mopt.on .opt-text{color:#4E35C4;font-weight:800;}
+.chk-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.chk-btn{border:none;border-radius:14px;min-height:52px;padding:12px 22px;
+  font-family:inherit;font-size:15px;font-weight:900;letter-spacing:.5px;color:#fff;
+  cursor:pointer;background:linear-gradient(135deg,#8B6BFF,#6B4CE6);
+  box-shadow:0 4px 0 var(--purple-deep);transition:transform .15s,box-shadow .15s;}
+.chk-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 var(--purple-deep);}
+.chk-btn:disabled{opacity:.45;cursor:default;box-shadow:0 3px 0 rgba(107,76,230,.3);}
+.chk-hint{flex:1;min-width:150px;font-size:12px;font-weight:700;color:var(--muted);line-height:1.6;}
 .opts{margin-top:2px;}
 .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
   min-height:52px;padding:13px 16px;margin-bottom:10px;border-radius:16px;cursor:pointer;
@@ -2855,6 +2871,20 @@ function textWrongs(correct, list) {
   return out;
 }
 function S2(q, correct, wrongs, extra) { return S(q, correct, textWrongs(correct, wrongs), extra); }
+
+/* 多选步骤：把几个条件列出来，勾选之后点「检验」才判对错。
+   选项顺序**不打乱**（①②③ 本身有编号含义），rightSet 存正确项的原始下标。 */
+function SM(q, options, rightSet, extra) {
+  const e = extra || {};
+  return {
+    multi: true, q: q, options: options.slice(),
+    rightSet: rightSet.slice().sort((a, b) => a - b),
+    answer: rightSet[0],                    /* 兼容旧逻辑里读 answer 的地方 */
+    correct: e.ok || '对，就是这样！',
+    wrong: e.no || '再想想：哪些条件真的用得上？',
+    reveals: e.reveals || []
+  };
+}
 
 /* 情景素材：人物 / 本地地名，各处复用，让题干不至于每次都一个样 */
 const SC_NAME = ['小明', '小红', '小刚', '丽丽', '琪琪', '兵兵', '淘淘', '丫丫',
@@ -5728,12 +5758,17 @@ const problemTemplates = [
             `平均每${s.mw}分到多少${s.unit}？<br>` +
             `<b>先选择合适的条件，再解答。</b><br>` +
             `① 一共有 ${groups} ${gUnit}获奖　② ${s.one} ${price} 元　③ 每个${s.gw}有 ${per} ${s.mw}`,
-      facts: [`一共 ${total} ${s.unit}`, `有 ${groups} ${s.gw}获奖`, `每个班 ${per} ${s.mw}`, '单价是没用的条件'],
+      facts: [`一共 ${total} ${s.unit}`, `有 ${groups} ${gUnit}获奖`, `每个${s.gw}有 ${per} ${s.mw}`],
       steps: [
-        S2('要求「平均每人分到多少」，哪两个条件用得上？', '①和③',
-          ['①和②', '②和③', '①、②、③都用得上'],
-          { ok: '对！总数 ÷ 班级数 ÷ 每班人数，单价帮不上忙。',
-            no: '问的是"每人分到几本"，跟价钱没关系；要知道总共有多少、分给多少个班、每班多少人。' }),
+        /* 不告诉学生"两个"——用得上几个让他自己判断。
+           条件按 ①②③ 的原顺序给，不洗牌，勾完点「检验」。 */
+        SM('要解决这个问题，下面哪几个条件用得上？把它们勾出来，再点「检验」。',
+          [`① 一共有 ${groups} ${gUnit}获奖`,
+           `② ${s.one} ${price} 元`,
+           `③ 每个${s.gw}有 ${per} ${s.mw}`],
+          [0, 2],
+          { ok: `对！只要 ① 和 ③：先按班级分，再按人分。单价那条帮不上忙。`,
+            no: '问的是"每人分到多少"，跟价钱没关系；想一想：总数要分给多少个班、每班又有多少人。' }),
         S2(`第一步：先算一个班分到多少${s.unit}，算式是哪一个？`, `${total} ÷ ${groups}`,
           [`${total} ÷ ${per}`, `${total} × ${groups}`, `${groups} ÷ ${per}`],
           { ok: `对！${total} ÷ ${groups}。`, no: '把总数平均分给各个班，用总数除以班级数。' }),
@@ -6873,6 +6908,8 @@ function makeState(problem) {
     chosen: problem.steps.map(() => null),
     tried: problem.steps.map(() => []),
     expanded: problem.steps.map(() => false),
+    picked: problem.steps.map(() => []),   /* 多选题当前勾了哪几项 */
+    checked: problem.steps.map(() => false), /* 多选题是否已经点过「检验」 */
     solved: false,
     hadWrong: false,
     timedOut: false,
@@ -7490,7 +7527,18 @@ function renderSteps() {
     const el = document.createElement('div');
     el.className = 'step active';
     el.dataset.step = i;
-    const optsHtml = s.options.map((text, idx) => {
+    const optsHtml = s.multi ? (function () {
+      /* 多选题：方框勾选（可勾多个），勾完再点「检验」才判对错 */
+      const picked = st.picked[i] || [];
+      const html = s.options.map((text, idx) =>
+        `<button class="opt mopt${picked.indexOf(idx) >= 0 ? ' on' : ''}"
+           data-step="${i}" data-opt="${idx}" style="--i:${idx}"
+           aria-pressed="${picked.indexOf(idx) >= 0}">
+           <span class="opt-key chk">${picked.indexOf(idx) >= 0 ? '✓' : ''}</span>
+           <span class="opt-text">${text}</span>
+         </button>`).join('');
+      return html;
+    })() : s.options.map((text, idx) => {
       const isWrong = st.tried[i].indexOf(idx) >= 0;
       return `<button class="opt${isWrong ? ' wrong' : ''}" data-step="${i}" data-opt="${idx}"
                 style="--i:${idx}" ${isWrong ? 'disabled' : ''}>
@@ -7499,6 +7547,14 @@ function renderSteps() {
               </button>`;
     }).join('');
     const fb = st.tried[i].length ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
+    const chkBar = s.multi
+      ? `<div class="chk-bar">
+           <button class="chk-btn" data-step="${i}" ${(st.picked[i] || []).length ? '' : 'disabled'}>
+             检验勾选的条件
+           </button>
+           <span class="chk-hint">勾选你觉得用得上的条件（可以勾多个），再点检验</span>
+         </div>`
+      : '';
     el.innerHTML = `
       <div class="step-head">
         <span class="step-num">${i + 1}</span>
@@ -7506,6 +7562,7 @@ function renderSteps() {
       </div>
       <div class="step-body">
         <div class="opts">${optsHtml}</div>
+        ${chkBar}
         ${fb}
       </div>`;
     wrap.appendChild(el);
@@ -7662,10 +7719,75 @@ function showFb(type, html) {
    选项点击
    ========================================================= */
 document.getElementById('steps').addEventListener('click', e => {
+  /* 多选题：先勾选，再点「检验」才算答 */
+  const mo = e.target.closest('.mopt');
+  if (mo && !mo.disabled) {
+    const si = +mo.dataset.step, oi = +mo.dataset.opt;
+    const st = questions[current] && questions[current].state;
+    if (!st || si !== st.stepIdx) return;
+    const arr = st.picked[si] || (st.picked[si] = []);
+    const at = arr.indexOf(oi);
+    if (at >= 0) arr.splice(at, 1); else arr.push(oi);
+    st.checked[si] = false;
+    SFX.click();
+    renderSteps();
+    return;
+  }
+  const ck = e.target.closest('.chk-btn');
+  if (ck && !ck.disabled) { handleMulti(+ck.dataset.step); return; }
+
   const btn = e.target.closest('.opt');
   if (!btn || btn.disabled) return;
   handleChoose(+btn.dataset.step, +btn.dataset.opt);
 });
+
+/* 多选题点「检验」：勾的集合和正确集合完全一致才算对 */
+function handleMulti(stepIdx) {
+  const q = questions[current];
+  if (!q) return;
+  const p = q.problem, st = q.state;
+  if (stepIdx !== st.stepIdx || st.solved) return;
+  const s = p.steps[stepIdx];
+  if (!s || !s.multi) return;
+  const now = (st.picked[stepIdx] || []).slice().sort((a, b) => a - b);
+  if (now.length === 0) { renderSteps(); return; }
+  st.checked[stepIdx] = true;
+
+  const same = now.length === s.rightSet.length &&
+               now.every((v, i) => v === s.rightSet[i]);
+  if (same) {
+    st.chosen[stepIdx] = s.answer;
+    st.stepIdx++;
+    SFX.correct();
+    addScore(10, false);
+    incCombo();
+    renderFacts(); renderSteps(); renderAnswer(); renderNav();
+    if (p.noAnswer && st.stepIdx >= p.steps.length) { finalizeCorrect(q); return; }
+    requestAnimationFrame(() => {
+      const input = $('ansInput');
+      const next = document.querySelector('#steps .step.active');
+      const target = input || next;
+      if (target) {
+        const y = target.getBoundingClientRect().top + window.scrollY - (input ? 220 : 110);
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    });
+  } else {
+    st.hadWrong = true;
+    resetCombo();
+    SFX.wrong();
+    if (!st.tried[stepIdx].length) {
+      addWrongRecord(q, {
+        stepIdx: stepIdx + 1,
+        stepQ: s.q,
+        wrongChoice: now.map(i => i + 1).join('、') + '（勾选的条件）',
+        correctChoice: s.rightSet.map(i => i + 1).join('、')
+      });
+    }
+    if (st.tried[stepIdx].indexOf(-1) < 0) st.tried[stepIdx].push(-1);  /* 标记错过，用于显示提示 */
+    renderSteps();
+  }
+}
 
 function handleChoose(stepIdx, optIdx) {
   const q = questions[current];
