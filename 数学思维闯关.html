@@ -2034,7 +2034,9 @@ const UNITS = [
   { key: '探索', name: '第六单元 · 探索乐园', short: '第六单元', sub: '植树 · 锯木 · 找规律', icon: '🧩' },
   { key: '拓展', group: 'ext', name: '拓展学习 · 指南针与方向', short: '指南针', sub: '方向辨认 · 钟面方位 · 时间推算', icon: '🧭' },
   { key: '几何', group: 'ext', name: '几何拓展 · 图形与周长专练', short: '几何拓展',
-    sub: '三角形的角 · 数图形 · 梯形周长 · 靠墙围栏', icon: '📐' }
+    sub: '三角形的角 · 数图形 · 梯形周长 · 靠墙围栏', icon: '📐' },
+  { key: '选条件', group: 'ext', name: '思维拓展 · 先选条件再解答', short: '选条件',
+    sub: '多余条件 · 两步推理', icon: '🧠' }
 ];
 const UNIT_MAP = {};
 UNITS.forEach(u => { UNIT_MAP[u.key] = u; });
@@ -4960,6 +4962,55 @@ const problemTemplates = [
       answer: q, unit: '',
       praise: '你会照着「试商 → 乘 → 减 → 比余数」的顺序做竖式了！',
       wrongTip: `把 ${b} 看作 ${v} 试商，再乘回去、相减、比余数；余数比除数大就调商。`
+    };
+  }
+},
+
+/* ---------- 计算 3：先选条件再解答（卷子上的新题型） ----------
+   给三个条件，其中一个是没用的（单价、颜色这类），让学生先挑出用得上的两条再算。
+   两步除法：总量 → 每组 → 每人。数值都凑成整除，不给学生添算数负担。 */
+{
+  unit: '选条件', kp: '选条件再解答',
+  gen() {
+    const SCENES = [
+      { thing: '作业本', unit: '本', gw: '班', mw: '名环保小标兵', one: '每个作业本' },
+      { thing: '铅笔', unit: '支', gw: '班', mw: '名学生', one: '每支铅笔' },
+      { thing: '图书', unit: '本', gw: '班', mw: '名学生', one: '每本图书' },
+      { thing: '矿泉水', unit: '瓶', gw: '班', mw: '名学生', one: '每瓶矿泉水' },
+      { thing: '练习本', unit: '本', gw: '小组', mw: '名同学', one: '每个练习本' }
+    ];
+    const s = pick(SCENES);
+    const groups = randInt(4, 20);
+    let per = randInt(6, 20);
+    if (per === groups) per = per > 10 ? per - 1 : per + 1;   /* 两个数一样，算式会撞成同一串 */
+    const each = randInt(2, 9);
+    const total = groups * per * each;
+    const price = randInt(2, 8);
+    const gUnit = '个' + s.gw;                                  /* 个班 / 个小组 */
+    return {
+      tag: '四上 · 先选条件再解答',
+      text: `学校准备了 ${total} ${s.unit}${s.thing}，要平均分给获奖的班级。` +
+            `平均每${s.mw}分到多少${s.unit}？<br>` +
+            `<b>先选择合适的条件，再解答。</b><br>` +
+            `① 一共有 ${groups} ${gUnit}获奖　② ${s.one} ${price} 元　③ 每个${s.gw}有 ${per} ${s.mw}`,
+      facts: [`一共 ${total} ${s.unit}`, `有 ${groups} ${s.gw}获奖`, `每个班 ${per} ${s.mw}`, '单价是没用的条件'],
+      steps: [
+        S2('要求「平均每人分到多少」，哪两个条件用得上？', '①和③',
+          ['①和②', '②和③', '①、②、③都用得上'],
+          { ok: '对！总数 ÷ 班级数 ÷ 每班人数，单价帮不上忙。',
+            no: '问的是"每人分到几本"，跟价钱没关系；要知道总共有多少、分给多少个班、每班多少人。' }),
+        S2(`第一步：先算一个班分到多少${s.unit}，算式是哪一个？`, `${total} ÷ ${groups}`,
+          [`${total} ÷ ${per}`, `${total} × ${groups}`, `${groups} ÷ ${per}`],
+          { ok: `对！${total} ÷ ${groups}。`, no: '把总数平均分给各个班，用总数除以班级数。' }),
+        S2(`第二步：再算每个${s.mw.replace(/^名/, '')}分到多少${s.unit}，算式是哪一个？`,
+          `${total} ÷ ${groups} ÷ ${per}`,
+          [`${total} ÷ ${per}`, `${total} ÷ ${groups} × ${per}`, `${per} ÷ ${groups}`],
+          { ok: `对！${total} ÷ ${groups} ÷ ${per}，算出来填进下面的框里吧！`,
+            no: '先把总数分给各班算出每班的，再把每班的分给每个人——连着除两次。' })
+      ],
+      answer: each, unit: s.unit,
+      praise: '你分得清哪个条件有用、哪个条件是干扰项了！',
+      wrongTip: `总共 ${total} ${s.unit}，先 ÷ ${groups} 求出每班 ${per * each} ${s.unit}，再 ÷ ${per} 求出每人 ${each} ${s.unit}。单价 ${price} 元是多余的。`
     };
   }
 },
