@@ -1592,6 +1592,54 @@ const FIG = (function () {
       return svg(o, W, H);
     },
 
+    /* 平行四边形：标一个角，另一个角画 ?（邻角互补） */
+    paraAngles: function (a) {
+      const W = 268, H = 176, pad = 40;
+      const bw = W - pad * 2, bh = 86;
+      const x0 = pad + 20, y0 = 46, x1 = x0 + bw - 20, y1 = y0 + bh;
+      const P = {
+        A: { x: x0, y: y1 }, B: { x: x1, y: y1 },
+        C: { x: x1 + 20, y: y0 }, D: { x: x0 + 20, y: y0 }
+      };
+      let o = '<path d="' + ln(P.A, P.B) + ln(P.B, P.C) + ln(P.C, P.D) + ln(P.D, P.A) +
+        '" fill="none" stroke="' + EDGE + '" stroke-width="2" stroke-linejoin="round"/>';
+      /* 两组对边各画一个平行标记 */
+      const mark = (p, q) => {
+        const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
+        const ang = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+        return '<path d="M' + (mx - 5).toFixed(1) + ' ' + my.toFixed(1) + 'l10 0" ' +
+          'transform="rotate(' + ang.toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1) + ')" ' +
+          'stroke="' + MARK + '" stroke-width="1.6"/>';
+      };
+      o += mark(P.D, P.C) + mark(P.A, P.B);
+      const gA = angleAt(P.A, P.D, P.B, 17), gB = angleAt(P.B, P.A, P.C, 17);
+      o += '<path d="' + gA.path + '" fill="none" stroke="' + GIVEN + '" stroke-width="1.5"/>';
+      o += '<path d="' + gB.path + '" fill="none" stroke="' + ASK + '" stroke-width="1.5" stroke-dasharray="3 2"/>';
+      o += txt(gA.x, gA.y, a + '°', GIVEN, 12.5);
+      o += txt(gB.x, gB.y, '?', ASK, 15);
+      o += txt(P.D.x + 2, P.D.y - 10, 'A', INK, 11);
+      o += txt(P.C.x + 8, P.C.y - 10, 'B', INK, 11);
+      o += txt(P.B.x + 4, P.B.y + 15, 'C', INK, 11);
+      o += txt(P.A.x - 8, P.A.y + 15, 'D', INK, 11);
+      return svg(o, W, H);
+    },
+
+    /* 一条由 n 个小正方形拼成的长条（数长方形用） */
+    strip: function (n) {
+      const W = 300, H = 128, pad = 26;
+      const cw = Math.min(56, (W - pad * 2) / n);
+      const total = cw * n;
+      const x0 = (W - total) / 2, y0 = 44, ch = 46;
+      let o = '';
+      for (let i = 0; i < n; i++) {
+        o += '<rect x="' + (x0 + i * cw).toFixed(1) + '" y="' + y0 + '" width="' + cw.toFixed(1) +
+          '" height="' + ch + '" fill="rgba(124,92,255,.07)" stroke="' + EDGE +
+          '" stroke-width="1.8"/>';
+      }
+      o += txt(W / 2, y0 + ch + 22, '一共 ' + n + ' 个小正方形，拼成一条', GIVEN, 11.5);
+      return svg(o, W, H);
+    },
+
     /* 数图形：从顶点向对边引 n 条线段 */
     fan: function (n) {
       const W = 250, H = 176;
@@ -5655,6 +5703,200 @@ const problemTemplates = [
       answer, unit: '°',
       praise: '你把「内角和」用在小三角形上，一步步拆到底，很厉害！',
       wrongTip: `底角 = (180 − ${a}) ÷ 2 = ${base}°；∠2 = ∠3 = ${base} ÷ 2 = ${half}°；∠5 = 180 − ${half} − ${half} = ${answer}°。`
+    };
+  }
+},
+
+/* ---------- 平行四边形的邻角（互补） ---------- */
+{
+  unit: '几何', kp: '平行四边形的邻角',
+  gen() {
+    const a = randInt(35, 145);           /* 给的那一个角 */
+    const answer = 180 - a;               /* 与它相邻的角 = 180 − a */
+    const who = pick(SC_NAME);
+    const big = a > 90;
+    return {
+      tag: '四上 · 平行四边形的角',
+      figure: FIG.paraAngles(a),
+      text: `${who} 量出平行四边形 ABCD 的一个角是 ${a}°。和它相邻的那个角是多少度？`,
+      facts: [`一个角是 ${a}°`, '平行四边形的对边互相平行', '两直线平行，同旁内角互补'],
+      steps: [
+        S2('平行四边形的两组对边有什么关系？', '分别互相平行',
+          ['互相垂直', '长度一定相等', '没有固定关系'],
+          { ok: '对！两组对边分别平行，这是平行四边形的定义。', no: '平行四边形的两组对边分别平行。' }),
+        S2('两条平行线之间，同旁的两个内角加起来是多少度？', 180, numWrongs(180, [90, 360]),
+          { ok: '对！同旁内角互补，和是 180°。', no: '两直线平行，同旁内角的和是 180°。' }),
+        S2('求相邻的那个角，算式是哪一个？', `180 − ${a}`,
+          [`${a} − 180`, `360 − ${a}`, `180 + ${a}`],
+          { ok: `对！用 180 − ${a}。填进下面的框里吧！`, no: '相邻两角合起来是 180°，减掉已知的那个。' })
+      ],
+      answer, unit: '°',
+      praise: `你发现了吧：平行四边形相邻的两个角和是 180°，${big ? '一个钝角配一个锐角' : '一个锐角配一个钝角'}。`,
+      wrongTip: `相邻两角互补：180 − ${a} = ${answer}°。（对角才相等，都是 ${a}°）`
+    };
+  }
+},
+
+/* ---------- 等腰三角形：顶角是底角的几倍 ---------- */
+{
+  unit: '几何', kp: '顶角与底角的倍数',
+  gen() {
+    const k = pick([2, 3, 4, 7, 8]);      /* 180 ÷ (k+2) 必须整除 */
+    const base = 180 / (k + 2);
+    const apex = base * k;
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 等腰三角形',
+      figure: FIG.isoApex(apex),
+      text: `一个等腰三角形的顶角是一个底角的 ${k} 倍。它的一个底角是多少度？`,
+      facts: ['两个底角相等', `顶角 = 底角 × ${k}`, '三角形内角和是 180°'],
+      steps: [
+        S2('设一个底角是 1 份，顶角是几份？', `${k} 份`,
+          [`1 份`, `${k + 1} 份`, `${k + 2} 份`],
+          { ok: `对！顶角是底角的 ${k} 倍，就是 ${k} 份。`, no: `顶角 = 底角 × ${k}，所以顶角是 ${k} 份。` }),
+        S2('两个底角加一个顶角，一共是几份？', k + 2,
+          [k, k + 1, k + 3],
+          { ok: `对！1 + 1 + ${k} = ${k + 2} 份。`, no: `两个底角各 1 份，顶角 ${k} 份，合起来 ${k + 2} 份。` }),
+        S2(`这 ${k + 2} 份合起来是 180°，求 1 份，算式是哪一个？`, `180 ÷ ${k + 2}`,
+          [`180 ÷ ${k}`, `180 − ${k + 2}`, `180 × ${k + 2}`],
+          { ok: `对！180 ÷ ${k + 2}。填进下面的框里吧！`, no: `把 180° 平均分成 ${k + 2} 份，用除法。` })
+      ],
+      answer: base, unit: '°',
+      praise: `你把「几倍」变成「几份」，再用 180° 平均分，思路很干净！`,
+      wrongTip: `底角是 1 份，顶角 ${k} 份，一共 ${k + 2} 份：180 ÷ ${k + 2} = ${base}°，顶角就是 ${apex}°。`
+    };
+  }
+},
+
+/* ---------- 数长方形：长条里一共有几个长方形 ---------- */
+{
+  unit: '几何', kp: '数长方形',
+  gen() {
+    const n = randInt(3, 6);
+    const answer = n * (n + 1) / 2;
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 数图形',
+      figure: FIG.strip(n),
+      text: `${who} 把 ${n} 个同样的小正方形拼成一条。数一数：这条图形里一共有多少个长方形？`,
+      facts: [`一共 ${n} 个小正方形`, '大小长方形都要数进去', '按"由几个小格拼成"分类数'],
+      steps: [
+        S2('由 1 个小正方形组成的长方形有几个？', n, numWrongs(n, [n + 1, n - 1]),
+          { ok: `对！就是 ${n} 个。`, no: '每个小正方形本身也是一个长方形。' }),
+        S2('由 2 个小正方形拼成的长方形有几个？', n - 1, numWrongs(n - 1, [n, n - 2]),
+          { ok: `对！相邻两格拼起来，有 ${n - 1} 个。`, no: '相邻的两格才能拼，越往右越少一个。' }),
+        S2('怎样数才不重不漏？', '按由几个小格组成分类，一类一类数完再加起来',
+          ['只数最大的那一个', '随便数，数到几算几', '只数最小的那些'],
+          { ok: `对！${n} + ${n - 1} + … + 1，把各类加起来。填进下面的框里吧！`, no: '按"由几个小格拼成"分类，逐类数完再加。' })
+      ],
+      answer, unit: '个',
+      praise: '你会分类数图形了，不重不漏！',
+      wrongTip: `${n} + ${n - 1} + … + 1 = ${answer} 个。（${n} 个小格能拼出的长方形总数就是 ${n}×${n + 1}÷2）`
+    };
+  }
+},
+
+/* ---------- 方向：钟点方向反推（选择题） ---------- */
+{
+  unit: '拓展', kp: '选择题·钟点找方向', form: 'choice', noAnswer: true,
+  gen() {
+    const DIRS = ['北', '东', '南', '西'];
+    const iF = randInt(0, 3);
+    const step = pick([1, 2, 3]);
+    const target = (iF + step) % 4;
+    const hour = step * 3;
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 拓展学习',
+      figure: FIG.clockFace(iF, target),
+      text: `${SC} 面向${DIRS[iF]}方，并把${DIRS[iF]}方定为 12 点钟方向。那么 ${hour} 点钟方向是哪个方向？`,
+      facts: [`面向${DIRS[iF]}方，${DIRS[iF]}方 = 12 点钟方向`, '钟面上每 3 小时转一个直角'],
+      steps: [
+        S2(`${hour} 点钟方向，是从 12 点钟方向顺时针转过几个直角？`, step,
+          [1, 2, 3, 4].filter(n => n !== step).slice(0, 3),
+          { ok: `对！每 3 小时一个直角，${hour} 点就是 ${step} 个直角。`, no: `12 ÷ 3 = 4 个直角一圈，${hour} 点占 ${step} 个。` }),
+        S2(`从${DIRS[iF]}方顺时针转过 ${step} 个直角，落在哪个方向？`, DIRS[target],
+          DIRS.filter((_, i) => i !== target),
+          { ok: `对！东→南→西→北按顺时针排，走 ${step} 步就是${DIRS[target]}方。`, no: `按东南西北顺时针数 ${step} 步。` })
+      ],
+      answer: 0, unit: '',
+      praise: '你会在钟面和一个方向之间来回换算了！',
+      wrongTip: `每 3 小时一个直角：从${DIRS[iF]}方的 12 点顺时针数，${hour} 点钟方向就是${DIRS[target]}方。`
+    };
+  }
+},
+
+/* ---------- 方向：转过几个直角之后面向哪儿（选择题） ---------- */
+{
+  unit: '拓展', kp: '选择题·转向后的方向', form: 'choice', noAnswer: true,
+  gen() {
+    const DIRS = ['北', '东', '南', '西'];
+    const iF = randInt(0, 3);
+    const turns = randInt(1, 3);
+    const right = Math.random() < 0.5;
+    const tgt = ((iF + (right ? turns : -turns)) % 4 + 4) % 4;
+    const SC = pick(SC_NAME);
+    return {
+      tag: '四上 · 拓展学习',
+      text: `${SC} 站在操场上，面向${DIRS[iF]}方。他${right ? '向右' : '向左'}转了 ${turns} 个直角，` +
+            `现在面向哪个方向？（向右转是顺时针，向左转是逆时针）`,
+      facts: [`原来面向${DIRS[iF]}方`, `转了 ${turns} 个直角`, '一个直角是一圈的四分之一'],
+      steps: [
+        S2('一个直角是一圈的几分之一？', '四分之一',
+          ['二分之一', '三分之一', '一整个'],
+          { ok: '对！360 ÷ 4 = 90°，一个直角是四分之一圈。', no: '一圈 360°，一个直角 90°，是四分之一。' }),
+        S2(`${right ? '向右' : '向左'}转 ${turns} 个直角，到了哪个方向？`, DIRS[tgt],
+          DIRS.filter((_, i) => i !== tgt),
+          { ok: `对！${right ? '顺时针' : '逆时针'}数 ${turns} 步就是${DIRS[tgt]}方。`,
+            no: `${right ? '向东→南→西→北顺时针' : '向西→南→东→北逆时针'}数 ${turns} 步。` })
+      ],
+      answer: 0, unit: '',
+      praise: '你把转向换算成直角个数，方向就不会转晕了！',
+      wrongTip: `${right ? '向右转 = 顺时针' : '向左转 = 逆时针'}，转 ${turns} 个直角：${DIRS[iF]}方 → ${DIRS[tgt]}方。`
+    };
+  }
+},
+
+/* ---------- 方向：用太阳和影子辨方向（选择题） ---------- */
+{
+  unit: '拓展', kp: '选择题·太阳辨方向', form: 'choice', noAnswer: true,
+  gen() {
+    const morning = Math.random() < 0.5;
+    /* 早晨太阳在东方，影子朝西；傍晚太阳在西边，影子朝东 */
+    const sun = morning ? '东' : '西';
+    const shadow = morning ? '西' : '东';
+    const SC = pick(SC_NAME);
+    const mode = randInt(0, 2);
+    let text, correct, wrongs, fact;
+    if (mode !== 0) {
+      /* 问影子朝哪 */
+      text = `${SC} 在${morning ? '早晨' : '傍晚'}的操场上，太阳正好在他正前方。他的影子朝哪个方向？`;
+      correct = `${sun}方的反方向，也就是${shadow}方`;
+      wrongs = [`和太阳一样，朝${sun}方`, `朝${morning ? '南' : '北'}方`, '说不准，要看站的位置'];
+      fact = `${morning ? '早晨太阳在东边' : '傍晚太阳在西边'}，影子总在太阳的反方向`;
+    } else {
+      text = `${SC} 在${morning ? '早晨' : '傍晚'}面对太阳站着。他的右手边是哪个方向？`;
+      correct = morning ? '南方' : '北方';
+      wrongs = morning ? ['北方', '东方', '西方'] : ['南方', '东方', '西方'];
+      fact = `${morning ? '早晨太阳在东，面对东方时右手是南' : '傍晚太阳在西，面对西方时右手是北'}`;
+    }
+    return {
+      tag: '四上 · 拓展学习',
+      text,
+      facts: [`${morning ? '早晨' : '傍晚'}的太阳在${sun}方`, '影子在太阳的反方向'],
+      steps: [
+        S2(`${morning ? '早晨' : '傍晚'}的太阳在哪个方向？`, `${sun}方`,
+          [`${shadow}方`, '正南', '正北'],
+          { ok: `对！${morning ? '早晨太阳从东方升起' : '傍晚太阳落向西方'}。`, no: `${morning ? '早晨太阳在东边' : '傍晚太阳在西边'}。` }),
+        S2('影子在哪一边？', '在太阳的反方向',
+          ['和太阳同一边', '永远朝南', '永远朝北'],
+          { ok: '对！光被挡住才有影子，影子总落在背光的那一边。', no: '影子是背光的那一面，和太阳方向相反。' }),
+        S2(mode !== 0 ? '那他的影子朝哪个方向？' : '那他的右手边是哪个方向？', correct, wrongs,
+          { ok: '对！', no: `先想太阳在哪：${fact}。` })
+      ],
+      answer: 0, unit: '',
+      praise: '你会用太阳和影子辨方向了，野外也用得上！',
+      wrongTip: fact
     };
   }
 },
