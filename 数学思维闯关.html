@@ -6158,7 +6158,21 @@ let paperWrong = 0;                   /* 整卷里答错的题数 */
 let paperDone = false;                /* 整卷是否已经交卷结算 */
 
 let selectedUnits = [];
-let formFilter = 'base';   /* 大题：base=填空·解决问题 / choice=选择题 / judge=判断题并说理 */
+/* 大题改成多选：默认三种都发，出题时随机混合（tplQueue 本身就是打乱的）。
+   想专练一种就把另外两种取消勾选。 */
+const FORM_KEYS = ['base', 'choice', 'judge'];
+let formSel = (function () {
+  try {
+    const raw = localStorage.getItem('math4a.forms');
+    if (raw) {
+      const arr = JSON.parse(raw);
+      const ok = FORM_KEYS.filter(k => arr.indexOf(k) >= 0);
+      if (ok.length) return ok;
+    }
+  } catch (e) {}
+  return FORM_KEYS.slice();
+})();
+function saveForms() { try { localStorage.setItem('math4a.forms', JSON.stringify(formSel)); } catch (e) {} }
 let questions = [];       /* [{tpl, problem, state}] */
 let current = 0;
 let tplQueue = [];
@@ -6194,7 +6208,7 @@ function poolTemplates() {
       sp.unit === t.unit && (sp.form || 'base') === formOf(t)));
   }
   if (selectedUnits.length === 0) return [];
-  return problemTemplates.filter(t => selectedUnits.indexOf(t.unit) >= 0 && formOf(t) === formFilter);
+  return problemTemplates.filter(t => selectedUnits.indexOf(t.unit) >= 0 && formSel.indexOf(formOf(t)) >= 0);
 }
 
 function nextTemplate(pool) {
@@ -6299,19 +6313,29 @@ const FORM_DEFS = [
 ];
 function formOf(t) { return t.form || 'base'; }
 function countByUnit(key) {
-  return problemTemplates.filter(t => t.unit === key && formOf(t) === formFilter).length;
+  return problemTemplates.filter(t => t.unit === key && formSel.indexOf(formOf(t)) >= 0).length;
 }
 
 function renderFormChips() {
   const wrap = $('formChips');
   if (!wrap) return;
   wrap.innerHTML = FORM_DEFS.map(f =>
-    `<button class="form-chip${f.key === formFilter ? ' on' : ''}" data-form="${f.key}"
-      aria-pressed="${f.key === formFilter}"><b>${f.name}</b><span>${f.sub}</span></button>`).join('');
+    `<button class="form-chip${formSel.indexOf(f.key) >= 0 ? ' on' : ''}" data-form="${f.key}"
+      aria-pressed="${formSel.indexOf(f.key) >= 0}"><b>${f.name}</b><span>${f.sub}</span></button>`).join('');
   wrap.querySelectorAll('[data-form]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (paperMode) exitPaper();          /* 换大题就说明不做这套卷了 */
-      formFilter = btn.dataset.form;
+      const k = btn.dataset.form;
+      const at = formSel.indexOf(k);
+      if (at >= 0) {
+        /* 至少留一种，全取消就没题了 */
+        if (formSel.length === 1) return;
+        formSel.splice(at, 1);
+      } else {
+        formSel.push(k);
+      }
+      formSel = FORM_KEYS.filter(x => formSel.indexOf(x) >= 0);
+      saveForms();
       SFX.click();
       renderFormChips();
       renderUnitChips();
@@ -6379,8 +6403,11 @@ function syncUnitUI() {
     const joined = selectedUnits.map(k => UNIT_MAP[k].short || UNIT_MAP[k].name).join('、');
     label = joined.length <= 16 ? joined : `已选 ${total} 个单元`;
   }
-  const fdef = FORM_DEFS.find(f => f.key === formFilter);
-  $('unitLabel').textContent = (formFilter === 'base' ? '' : fdef.name + ' · ') + label;
+  /* 大题是多选的，标签上把选了几种说清楚 */
+  const formNames = FORM_DEFS.filter(f => formSel.indexOf(f.key) >= 0).map(f => f.name);
+  const formTag = formSel.length === FORM_KEYS.length ? '全部大题 · '
+                : (formSel.length === 1 ? formNames[0] + ' · ' : formSel.length + ' 种大题 · ');
+  $('unitLabel').textContent = formTag + label;
 
   document.querySelectorAll('#unitChips [data-unit]').forEach(btn => {
     const on = selectedUnits.indexOf(btn.dataset.unit) >= 0;
