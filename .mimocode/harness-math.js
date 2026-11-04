@@ -1,4 +1,4 @@
-﻿/* 闯关页自测：灯泡抽屉 + 已完成步骤胶囊压缩 */
+/* 闯关页自测：灯泡抽屉 + 已完成步骤胶囊压缩 */
 var out = [];
 var ok = function (name, cond, extra) {
   out.push((cond ? 'PASS ' : 'FAIL ') + name + (extra !== undefined ? ' :: ' + extra : ''));
@@ -29,6 +29,17 @@ try {
   ok('抽屉里先提示还没找到条件', q('#factsList').textContent.indexOf('还没有找到已知条件') >= 0);
   q('#factsClose').click();
   ok('点关闭收起', !q('#factsBox').classList.contains('open'));
+
+  /* 后面几条断言（未解锁步骤 / 答题区解锁 / 填最终答案）要求这道题既有 ≥2 个步骤、
+     又有一个最终答案框。判断题、比大小、选条件、画图这类「做完即答完」的题型
+     （problem.noAnswer）本来就没有答案框 —— 先把当前题换成合适的一道，
+     别让断言跟着出题随机飘 */
+  var guardPick = 0;
+  while (questions[current] &&
+         (questions[current].problem.steps.length < 2 || questions[current].problem.noAnswer) &&
+         guardPick++ < 40) {
+    q('#changeBtn').click();
+  }
 
   var st = questions[current];
   ok('初始没有已完成胶囊', document.querySelectorAll('#steps .done-strip').length === 0);

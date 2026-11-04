@@ -1,4 +1,4 @@
-﻿/* 站台自测：渲染/动画双维度三级 + 全屏/横屏 + 按钮尺寸 */
+/* 站台自测：渲染/动画双维度三级 + 全屏/横屏 + 按钮尺寸 */
 var out = [];
 var ok = function (n, c, x) { out.push((c ? 'PASS ' : 'FAIL ') + n + (x !== undefined ? ' :: ' + x : '')); };
 var info = function (s) { out.push('INFO ' + s); };
@@ -22,7 +22,8 @@ function safe(tag, fn) {
 }
 
 safe('初始', function () {
-  ok('data-render 默认是 auto', de.dataset.render === 'auto', de.dataset.render);
+  /* 首次默认已经定成「渲染流畅」（smooth），不是 auto —— 老断言写的是 auto，一直是红的 */
+  ok('data-render 默认是 smooth', de.dataset.render === 'smooth', de.dataset.render);
   ok('data-motionPref 默认是 auto', de.dataset.motionPref === 'auto', de.dataset.motionPref);
   ok('data-perf 已解析成三档之一', ['high', 'mid', 'low'].indexOf(de.dataset.perf) >= 0, de.dataset.perf);
   ok('data-motion 已解析成 on/off', de.dataset.motion === 'on' || de.dataset.motion === 'off', de.dataset.motion);

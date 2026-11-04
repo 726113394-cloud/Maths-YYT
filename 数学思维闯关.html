@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -165,7 +165,10 @@ body{
   padding:9px 14px;border:2.5px solid var(--line);background:#F8F6FF;
   border-radius:14px;font-family:inherit;font-size:14.5px;font-weight:800;
   color:var(--purple);cursor:pointer;transition:.18s;
-  box-shadow:0 3px 0 var(--line-2);max-width:100%;}
+  box-shadow:0 3px 0 var(--line-2);max-width:100%;
+  /* min-width:0 不能少：label 是 nowrap，不给它收缩余量的话
+     单元名一长就把右边的 📄🎮🔊⏱ 挤出屏幕（按钮被裁一半） */
+  min-width:0;flex:0 1 auto;}
 .unit-btn:hover{background:#F1ECFF;}
 .unit-btn.open{background:linear-gradient(135deg,var(--purple-2),var(--purple));
   color:#fff;border-color:transparent;box-shadow:0 3px 0 var(--purple-deep);}
@@ -456,6 +459,39 @@ html[data-motion="off"] .facts-fab.urgent .fab-ico{animation:none;}
 .gcell:active{transform:scale(.94);}
 .gcell.on{background:linear-gradient(135deg,#A78BFA,#7C5CFF);box-shadow:inset 0 0 0 1px #6B4CE6;}
 html[data-perf="low"] .gcell.on{background:#7C5CFF;}
+/* ===== 统计表（题干预览里那张表，跟在题干下面） ===== */
+.qtable-wrap{margin-top:12px;overflow-x:auto;}
+.qtable{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
+  background:#fff;border:1.5px solid #E4DDFF;border-radius:12px;overflow:hidden;}
+.qtable th,.qtable td{border-right:1.5px solid #E4DDFF;border-bottom:1.5px solid #E4DDFF;
+  padding:9px 4px;text-align:center;line-height:1.3;}
+.qtable tr th:last-child,.qtable tr td:last-child{border-right:none;}
+.qtable tbody tr:last-child th,.qtable tbody tr:last-child td{border-bottom:none;}
+.qtable thead th{background:#F4F1FF;color:#4E35C4;font-weight:900;font-size:13px;}
+.qtable tbody th{background:#FAF8FF;color:var(--ink-2);font-weight:800;font-size:13px;white-space:nowrap;}
+.qtable td{font-weight:900;color:var(--ink);}
+.qtable .tblank{color:#E07B2A;font-size:16px;font-weight:900;}
+/* ===== 制图拖拽：把每根条形拖到正确高度 ===== */
+.bchart{margin-top:12px;padding:12px 10px 10px;border-radius:16px;background:#F8F6FF;
+  border:2px solid #E4DDFF;}
+.bchart-plot{position:relative;height:160px;margin-left:30px;display:flex;gap:6px;}
+.bchart-ln{position:absolute;left:0;right:0;border-top:1px dashed #D8CFF6;pointer-events:none;}
+.bchart-ln.base{border-top:2.5px solid #6B5FA8;}
+.bchart-ln i{position:absolute;left:-27px;top:-8px;font-style:normal;font-size:10.5px;
+  font-weight:800;color:#9A8FC7;}
+.bcol{flex:1;position:relative;display:flex;align-items:flex-end;touch-action:none;
+  cursor:ns-resize;}
+.bcol .bfill{width:100%;border-radius:5px 5px 0 0;
+  background:linear-gradient(180deg,#B8A4FF,#7C5CFF);box-shadow:inset 0 0 0 1px #6B4CE6;}
+html[data-perf="low"] .bcol .bfill{background:#7C5CFF;}
+.bchart-labs{display:flex;gap:6px;margin:8px 0 0 30px;}
+.bchart-labs span{flex:1;text-align:center;font-size:12.5px;font-weight:800;color:var(--ink-2);}
+.bchart-steps{display:flex;gap:6px;margin:8px 0 0 30px;}
+.bchart-steps div{flex:1;display:flex;gap:4px;}
+.bchart-steps button{flex:1;border:none;border-radius:8px;min-height:30px;padding:4px 0;
+  background:#EFE9FF;color:#5B3FD9;font-family:inherit;font-size:14px;font-weight:900;
+  cursor:pointer;box-shadow:0 2px 0 #DDD4FF;transition:transform .12s,box-shadow .12s;}
+.bchart-steps button:active{transform:translateY(1px);box-shadow:none;}
 .opts{margin-top:2px;}
 .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
   min-height:52px;padding:13px 16px;margin-bottom:10px;border-radius:16px;cursor:pointer;
@@ -2325,6 +2361,18 @@ function SM(q, options, rightSet, extra) {
     wrong: e.no || '再想想：哪些条件真的用得上？',
     reveals: e.reveals || []
   };
+}
+
+/* 统计表：跟在题干下面那张表（放在 problem.after 里，不走 hl()，否则属性里的数字会被包成 <b>）。
+   cols 是各项目的列名，vals 是每列的数，blankIdx 是要挖成 □ 的那一列（0 起，等于 cols.length 时挖「合计」）。 */
+function statTable(cols, vals, rowName, blankIdx) {
+  const total = vals.reduce((a, b) => a + b, 0);
+  const cells = cols.map((c, i) =>
+    `<td>${i === blankIdx ? '<span class="tblank">□</span>' : vals[i]}</td>`).join('') +
+    `<td>${blankIdx === cols.length ? '<span class="tblank">□</span>' : total}</td>`;
+  return `<div class="qtable-wrap"><table class="qtable">` +
+    `<thead><tr><th>活动项目</th>${cols.map(c => `<th>${c}</th>`).join('')}<th>合计</th></tr></thead>` +
+    `<tbody><tr><th>${rowName}</th>${cells}</tr></tbody></table></div>`;
 }
 
 /* 情景素材：人物 / 本地地名，各处复用，让题干不至于每次都一个样 */
@@ -5500,6 +5548,113 @@ const problemTemplates = [
   }
 },
 
+/* ---------- 统计表填空（卷子「六、统计」里的填表题） ---------- */
+{
+  unit: '平均数', kp: '统计表填空',
+  gen() {
+    const ALL = ['跳绳', '踢毽', '打球', '跑步', '跳远', '下棋'];
+    const cols = shuffleAll(ALL).slice(0, 3);
+    /* 三项人数不能相等：□ 的答案撞上表里另一个数，看着像抄错了，也容易被蒙对 */
+    let vals;
+    do { vals = cols.map(() => randInt(8, 24)); } while (new Set(vals).size !== vals.length);
+    const sum = vals.reduce((a, b) => a + b, 0);
+    const mode = pick(['sum', 'part']);
+    const who = pick(SC_NAME);
+    let answer, blankIdx, text, facts, steps, tip;
+
+    if (mode === 'sum') {
+      answer = sum;
+      blankIdx = cols.length;                 /* 挖「合计」那一格 */
+      text = `${who} 班同学最喜欢的课外活动人数统计表如下（每人只选一项）。` +
+             `<b>表里「合计」这一格还没填，□ 处的数是多少人？</b>`;
+      facts = cols.map((c, i) => `${c} ${vals[i]} 人`).concat(['「合计」那一格还没填']);
+      steps = [
+        S2('「合计」这一格表示什么？', '各项人数的总和',
+          ['各项里最多的那一个', '各项人数的平均数', '一共有几项'],
+          { ok: '对！合计就是所有项目加在一起。', no: '「合计」是把每一项都加起来的那个数。' }),
+        S2('求合计的算式是哪一个？', vals.join(' + '),
+          [`${vals[0]} × ${vals[1]}`, `${sum} − ${vals[0]}`,
+           `${Math.max.apply(null, vals)} − ${Math.min.apply(null, vals)}`],
+          { ok: '对！三项全部加起来。填进下面的框里吧！', no: '合计要把每一项都加上，一个都不能漏。' })
+      ];
+      tip = `合计：${vals.join(' + ')} = ${sum}（人）。`;
+    } else {
+      const k = randInt(0, 2);
+      answer = vals[k];
+      blankIdx = k;
+      const others = sum - answer;
+      const rest = cols.filter((_, i) => i !== k);
+      text = `${who} 班同学最喜欢的课外活动人数统计表被墨水弄脏了一格。` +
+             `<b>□ 处的数是多少人？</b>`;
+      facts = [`合计 ${sum} 人`].concat(
+        cols.map((c, i) => i === k ? `「${c}」这一格看不清了` : `${c} ${vals[i]} 人`));
+      steps = [
+        S2('知道合计和另外几项，要求剩下这一项，用什么方法？', '用合计减去另外几项的和',
+          ['把合计平均分成三份', '把合计加上另外几项', '用最多的一项减最少的一项'],
+          { ok: '对！合计是这几项的和，去掉已知的几项就得到剩下的。',
+            no: '合计是这几项加起来的结果，去掉已知的几项就剩它了。' }),
+        S2('另外几项一共是多少人？', others, numWrongs(others, [sum, others + 2, others - 2]),
+          { ok: `对！${rest.join('、')} 加起来是 ${others} 人。`, no: '把另外几项的人数加一遍。' }),
+        S2('求 □ 的算式是哪一个？', `${sum} − ${others}`,
+          [`${sum} + ${others}`, `${others} − ${sum}`, `${sum} ÷ 3`],
+          { ok: '对！合计减去另外几项的和。填进下面的框里吧！', no: '用合计减去另外几项的和。' })
+      ];
+      tip = `□ = ${sum} − ${others} = ${answer}（人）。`;
+    }
+
+    return {
+      tag: '四上 · 统计表',
+      after: statTable(cols, vals, '人数（人）', blankIdx),
+      text, facts, steps,
+      answer, unit: '人',
+      praise: '你会看统计表了：合计是加起来，缺的一格用合计减出来！',
+      wrongTip: tip
+    };
+  }
+},
+
+/* ---------- 条形统计图制图（拖拽条形，点检验才判） ----------
+   统计表跟在题干下面，下面是一张只有坐标线的空图：学生把四根条形拖到
+   和表格里人数一样高。不显示条形顶上的数字 —— 显示了就变成"对着数字拖"，
+   读刻度和数格子这一层就练不到了。拖不准可以用 − + 一格一格调。 */
+{
+  unit: '平均数', kp: '条形统计图制图', noAnswer: true,
+  gen() {
+    const ALL = ['跳绳', '踢毽', '打球', '跑步', '跳远', '下棋'];
+    const cols = shuffleAll(ALL).slice(0, 4);
+    /* 四人的人数互不相同：条条一样高，读图和制图都看不出差别 */
+    let vals;
+    do { vals = cols.map(() => randInt(3, 11)); } while (new Set(vals).size !== vals.length);
+    const sum = vals.reduce((a, b) => a + b, 0);
+    const mx = Math.max.apply(null, vals);
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 制统计图',
+      after: statTable(cols, vals, '人数（人）', -1),
+      text: `${who} 班同学最喜欢的课外活动人数统计表如下（每人只选一项）。` +
+            `<b>请根据这张统计表，把下面的条形统计图补充完整。</b>`,
+      facts: cols.map((c, i) => `${c} ${vals[i]} 人`),
+      steps: [
+        S2(`条形统计图里一格表示 1 人。人数最多的那一项是 ${mx} 人，条形要画到第几格？`, mx,
+          numWrongs(mx, [mx + 1, mx - 1, sum]),
+          { ok: `对！一格 1 人，${mx} 人就从最下面往上数 ${mx} 格。`,
+            no: '一格表示 1 人，几人人就往上画几格。' }),
+        S2('四项人数一共有多少人？', sum, numWrongs(sum, [mx, sum + 1, sum - 1]),
+          { ok: `对！一共 ${sum} 人，画完可以对着合计检查。`, no: '把四项人数全部加起来。' }),
+        {
+          bars: true, labels: cols, need: vals, max: 12,
+          q: '把四根条形拖到正确的高度（拖不准就点下面的 − + 一格一格调），画好后点「检验我画的统计图」。',
+          correct: '对！四根条形的高度和统计表里的人数一样，条形统计图就画对了。',
+          wrong: '还没有全对。对着统计表一根一根数：从横线往上，1 格就是 1 人。'
+        }
+      ],
+      answer: sum, unit: '人',
+      praise: '你会根据统计表画条形统计图了，高度和人数对得上！',
+      wrongTip: `各条形高度：${cols.map((c, i) => `${c} ${vals[i]} 格`).join('，')}（一格表示 1 人）。`
+    };
+  }
+},
+
 /* ---------- 计算 3：先选条件再解答（卷子上的新题型） ----------
    给三个条件，其中一个是没用的（单价、颜色这类），让学生先挑出用得上的两条再算。
    两步除法：总量 → 每组 → 每人。数值都凑成整除，不给学生添算数负担。 */
@@ -7004,12 +7159,16 @@ function handleTimeout() {
   st.timedOut = true; st.solved = true; st.timeUsed = TIME_LIMIT;
   doneCount++;
   SFX.timeout();
+  /* 最后一步是画图（方格纸 / 条形图）时没有 options，读选项会炸 */
+  const lastS = q.problem.steps[q.problem.steps.length - 1];
   addWrongRecord(q, {
     stepIdx: st.stepIdx + 1,
     stepQ: '超时未完成',
     wrongChoice: '（超时）',
-    correctChoice: q.problem.noAnswer && q.problem.steps.length
-      ? String(q.problem.steps[q.problem.steps.length - 1].options[q.problem.steps[q.problem.steps.length - 1].answer])
+    correctChoice: q.problem.noAnswer
+      ? ((lastS && lastS.options && lastS.answer !== undefined)
+          ? String(lastS.options[lastS.answer])
+          : '把图按题目要求画完整')
       : q.problem.answer + (q.problem.unit ? ' ' + q.problem.unit : '')
   });
   addHistoryRecord(q, 0, false, TIME_LIMIT);
@@ -7186,8 +7345,9 @@ function render() {
   $('tag').textContent = p.tag;
   $('counter').textContent = `第 ${current + 1} / ${questions.length} 题`;
   /* PK 只显示题干，选择题/判断题的问题句要补上，否则看不出在问什么 */
-  /* 配图放在题干上面：先看图再看字，符合读题习惯 */
-  $('qtext').innerHTML = (p.figure ? p.figure : '') + hl(p.text) +
+  /* 配图放在题干上面：先看图再看字，符合读题习惯。
+     p.after 是题干**下面**那块（统计表），不能走 hl()：属性里的数字会被包成 <b>。 */
+  $('qtext').innerHTML = (p.figure ? p.figure : '') + hl(p.text) + (p.after ? p.after : '') +
     (pkMode && p.noAnswer && p.steps[0] ? '<br><b>' + hl(p.steps[0].q) + '</b>' : '');
   renderFacts();
   renderPkRace();                 /* PK 显示竞速区，单人自动隐藏 */
@@ -7271,6 +7431,25 @@ function unTilt() {
   });
 }
 
+/* 制图拖拽：条形高度只有一份真身，就存在 st.picked（"第几根:高度"）。
+   0 高度不留记录 —— 一根都没画时「检验」按钮应该还是灰的。 */
+function barGet(arr, k) {
+  for (let n = 0; n < arr.length; n++) {
+    const p = String(arr[n]).split(':');
+    if (+p[0] === k) return +p[1];
+  }
+  return 0;
+}
+function barSet(arr, k, v) {
+  for (let n = 0; n < arr.length; n++) {
+    if (+String(arr[n]).split(':')[0] === k) {
+      if (v <= 0) arr.splice(n, 1); else arr[n] = k + ':' + v;
+      return;
+    }
+  }
+  if (v > 0) arr.push(k + ':' + v);
+}
+
 function renderSteps() {
   const q = questions[current]; if (!q) return;
   const p = q.problem, st = q.state;
@@ -7301,7 +7480,9 @@ function renderSteps() {
       panel.className = 'done-panel';
       panel.innerHTML = `
         <div class="done-panel-q">第 ${i + 1} 步 · ${s.q}</div>
-        <div class="chosen-line">你的选择：<b>${pickIdx !== null ? LETTER[pickIdx] + '. ' + pickText : '—'}</b></div>
+        <div class="chosen-line">${(s.grid || s.bars)
+          ? '你的画法：<b>检验通过</b>'
+          : `你的选择：<b>${pickIdx !== null ? LETTER[pickIdx] + '. ' + pickText : '—'}</b>`}</div>
         <div class="fb-inline ok">✔ ${s.correct}</div>`;
       wrap.appendChild(panel);
     }
@@ -7338,6 +7519,34 @@ function renderSteps() {
       }
       html += '</div>';
       return html;
+    })() : s.bars ? (function () {
+      /* 条形统计图：坐标线 + 四根可拖的条形 + 每根下面一对 −+ 微调按钮。
+         高度只存在 st.picked（格式 "第几根:高度"），和方格纸共用同一套状态。 */
+      const arr = st.picked[i] || [];
+      let lines = '';
+      for (let v = 0; v <= s.max; v++) {
+        lines += '<div class="bchart-ln' + (v === 0 ? ' base' : '') +
+          '" style="bottom:' + (v / s.max * 100) + '%">' +
+          (v % 2 === 0 ? '<i>' + v + '</i>' : '') + '</div>';
+      }
+      let colsH = '', labsH = '', stepH = '';
+      s.labels.forEach((lb, k) => {
+        const h = barGet(arr, k);
+        colsH += '<div class="bcol mbar" data-step="' + i + '" data-k="' + k + '" ' +
+          'role="slider" aria-label="' + lb + '" aria-valuemin="0" aria-valuemax="' + s.max +
+          '" aria-valuenow="' + h + '">' +
+          '<div class="bfill" style="height:' + (h / s.max * 100) + '%"></div></div>';
+        labsH += '<span>' + lb + '</span>';
+        stepH += '<div>' +
+          '<button class="bstep" data-step="' + i + '" data-k="' + k + '" data-d="-1"' +
+          ' aria-label="' + lb + ' 减一格">−</button>' +
+          '<button class="bstep" data-step="' + i + '" data-k="' + k + '" data-d="1"' +
+          ' aria-label="' + lb + ' 加一格">+</button></div>';
+      });
+      return '<div class="bchart">' +
+        '<div class="bchart-plot">' + lines + colsH + '</div>' +
+        '<div class="bchart-labs">' + labsH + '</div>' +
+        '<div class="bchart-steps">' + stepH + '</div></div>';
     })() : s.multi ? (function () {
       const picked = st.picked[i] || [];
       const html = s.options.map((text, idx) =>
@@ -7357,12 +7566,14 @@ function renderSteps() {
               </button>`;
     }).join('');
     const fb = st.tried[i].length ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
-    const chkBar = (s.multi || s.grid)
+    const chkBar = (s.multi || s.grid || s.bars)
       ? `<div class="chk-bar">
            <button class="chk-btn" data-step="${i}" ${(st.picked[i] || []).length ? '' : 'disabled'}>
-             ${s.grid ? '检验我画的图形' : '检验勾选的条件'}
+             ${s.grid ? '检验我画的图形' : s.bars ? '检验我画的统计图' : '检验勾选的条件'}
            </button>
-           <span class="chk-hint">${s.grid ? '在方格纸上涂出题目要求的图形，涂完点检验' : '勾选你觉得用得上的条件（可以勾多个），再点检验'}</span>
+           <span class="chk-hint">${s.grid ? '在方格纸上涂出题目要求的图形，涂完点检验'
+             : s.bars ? '把每根条形拖到统计表里的人数值，拖不准就点 − +，画好点检验'
+             : '勾选你觉得用得上的条件（可以勾多个），再点检验'}</span>
          </div>`
       : '';
     /* 带提示的题（比较大小这类）：一个灯泡按钮，点开才显示换算关系，
@@ -7489,11 +7700,15 @@ function renderAnswer() {
   }
 
   if (p.noAnswer) {
-    /* 选择题 / 判断题：选完就是答完，不用再填数字 */
+    /* 选择题 / 判断题 / 画图题：最后一步做完就是答完，不用再填数字。
+       画图题的收尾动作是「检验我画的图」，不是「选出正确答案」，文案要跟着变 */
+    const draw = p.steps.some(s => s.grid || s.bars);
     card.classList.add('locked');
     inner.innerHTML = st.stepIdx >= p.steps.length
       ? `<div class="lock-msg">✔ 这道题已经完成，点下面的「下一题」继续</div>`
-      : `<div class="lock-msg">🔒 这道题只要选出正确答案，<br>不用算最后的结果</div>`;
+      : (draw
+          ? `<div class="lock-msg">🔒 这道题把图画好、点「检验」通过，<br>就完成了，不用算最后的结果</div>`
+          : `<div class="lock-msg">🔒 这道题只要选出正确答案，<br>不用算最后的结果</div>`);
     return;
   }
 
@@ -7538,6 +7753,24 @@ function showFb(type, html) {
    选项点击
    ========================================================= */
 document.getElementById('steps').addEventListener('click', e => {
+  /* 制图：每根条形下面的 −+ 微调，一次一格 */
+  const bs = e.target.closest('.bstep');
+  if (bs) {
+    const si = +bs.dataset.step, k = +bs.dataset.k, d = +bs.dataset.d;
+    const cur = questions[current];
+    const bst = cur && cur.state;
+    if (!bst || si !== bst.stepIdx) return;
+    const bsStep = cur.problem.steps[si];
+    if (!bsStep || !bsStep.bars) return;
+    const arr = bst.picked[si] || (bst.picked[si] = []);
+    let v = barGet(arr, k) + d;
+    if (v < 0) v = 0;
+    if (v > bsStep.max) v = bsStep.max;
+    barSet(arr, k, v);
+    SFX.click();
+    renderSteps();
+    return;
+  }
   /* 多选题：先勾选，再点「检验」才算答 */
   const mo = e.target.closest('.mopt');
   if (mo && !mo.disabled) {
@@ -7576,6 +7809,58 @@ document.getElementById('steps').addEventListener('click', e => {
   handleChoose(+btn.dataset.step, +btn.dataset.opt);
 });
 
+/* ---------- 制图拖拽：按住条形上下拖，高度跟着手指走 ----------
+   指针事件挂在 document 上：手指滑出那根柱子也不会断。
+   拖动中只改这根柱子的 style.height，不整块重渲染（重建 DOM 会掉帧），
+   松手再渲染一次，把「检验」按钮的可用状态同步上。 */
+let barDrag = null;
+
+function barDragTo(clientY) {
+  if (!barDrag) return;
+  const cur = questions[current];
+  const st = cur && cur.state;
+  if (!st || barDrag.si !== st.stepIdx) return;
+  const s = cur.problem.steps[barDrag.si];
+  if (!s || !s.bars) return;
+  const r = barDrag.plot.getBoundingClientRect();
+  if (!r.height) return;
+  let v = Math.round((r.bottom - clientY) / r.height * s.max);
+  if (v < 0) v = 0;
+  if (v > s.max) v = s.max;
+  const arr = st.picked[barDrag.si] || (st.picked[barDrag.si] = []);
+  barSet(arr, barDrag.k, v);
+  const fill = barDrag.col.querySelector('.bfill');
+  if (fill) fill.style.height = (v / s.max * 100) + '%';
+  barDrag.col.setAttribute('aria-valuenow', v);
+  const chk = document.querySelector('#steps .step.active .chk-btn');
+  if (chk) chk.disabled = !(st.picked[barDrag.si] || []).length;
+}
+
+document.getElementById('steps').addEventListener('pointerdown', e => {
+  const col = e.target.closest('.mbar');
+  if (!col) return;
+  const cur = questions[current];
+  const st = cur && cur.state;
+  const si = +col.dataset.step;
+  if (!st || si !== st.stepIdx) return;
+  barDrag = { si: si, k: +col.dataset.k, plot: col.parentNode, col: col };
+  e.preventDefault();
+  barDragTo(e.clientY);
+});
+document.addEventListener('pointermove', e => {
+  if (barDrag) barDragTo(e.clientY);
+});
+document.addEventListener('pointerup', () => {
+  if (!barDrag) return;
+  barDrag = null;
+  renderSteps();
+});
+document.addEventListener('pointercancel', () => {
+  if (!barDrag) return;
+  barDrag = null;
+  renderSteps();
+});
+
 /* 多选题点「检验」：勾的集合和正确集合完全一致才算对 */
 function handleMulti(stepIdx) {
   const q = questions[current];
@@ -7583,15 +7868,19 @@ function handleMulti(stepIdx) {
   const p = q.problem, st = q.state;
   if (stepIdx !== st.stepIdx || st.solved) return;
   const s = p.steps[stepIdx];
-  if (!s || (!s.multi && !s.grid)) return;
+  if (!s || (!s.multi && !s.grid && !s.bars)) return;
   const now = (st.picked[stepIdx] || []).slice().sort((a, b) => a - b);
   if (now.length === 0) { renderSteps(); return; }
   st.checked[stepIdx] = true;
 
   /* 方格纸：涂出来的必须是一整块矩形（不能缺角、不能画两处），
-     尺寸等于题目要求（长宽可以互换） */
+     尺寸等于题目要求（长宽可以互换）。
+     条形统计图：四根条形的高度都要和统计表里的人数一样。 */
   let same;
-  if (s.grid) {
+  if (s.bars) {
+    const arr = st.picked[stepIdx] || [];
+    same = s.need.every((v, k) => barGet(arr, k) === v);
+  } else if (s.grid) {
     const cells = now.map(k => String(k).split(':').map(Number));
     const rs = cells.map(c => c[0]), cs = cells.map(c => c[1]);
     const r0 = Math.min.apply(null, rs), r1 = Math.max.apply(null, rs);
@@ -7633,8 +7922,14 @@ function handleMulti(stepIdx) {
       addWrongRecord(q, {
         stepIdx: stepIdx + 1,
         stepQ: s.q,
-        wrongChoice: now.map(i => i + 1).join('、') + '（勾选的条件）',
-        correctChoice: s.rightSet.map(i => i + 1).join('、')
+        /* 画图类不能把 "行:列" / "第几根:高度" 当选项编号拼出去，
+           错题本里会出现 "1:41、2:3" 这种看不懂的东西 */
+        wrongChoice: s.grid ? '方格纸上涂的图形不符合要求'
+                   : s.bars ? '条形画的高度和统计表里的人数值对不上'
+                   : now.map(i => i + 1).join('、') + '（勾选的条件）',
+        correctChoice: s.grid ? '在方格纸上涂出一整块矩形，长和宽按题目要求'
+                     : s.bars ? '把每根条形拖到和统计表里的人数一样高'
+                     : s.rightSet.map(i => i + 1).join('、')
       });
     }
     if (st.tried[stepIdx].indexOf(-1) < 0) st.tried[stepIdx].push(-1);  /* 标记错过，用于显示提示 */
@@ -7839,8 +8134,10 @@ const FW = (function () {
 function finalizeCorrect(q) {
   const p = q.problem, st = q.state;
   const lastStep = p.steps[p.steps.length - 1];
+  /* 画图类步骤（方格纸 / 条形图）没有 options，读最后一步的选项会炸 */
   const shown = p.noAnswer
-    ? (lastStep ? String(lastStep.options[lastStep.answer]) : '')
+    ? (lastStep && lastStep.options && lastStep.answer !== undefined
+        ? String(lastStep.options[lastStep.answer]) : '')
     : `${p.answer}${p.unit ? ' ' + p.unit : ''}`;
   st.solved = true;
   /* 答案已经填完，灯泡不用再闪了（finalizeCorrect 之后不一定再走 renderAnswer） */
