@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -437,6 +437,17 @@ html[data-motion="off"] .facts-fab.urgent .fab-ico{animation:none;}
 .chk-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 var(--purple-deep);}
 .chk-btn:disabled{opacity:.45;cursor:default;box-shadow:0 3px 0 rgba(107,76,230,.3);}
 .chk-hint{flex:1;min-width:150px;font-size:12px;font-weight:700;color:var(--muted);line-height:1.6;}
+/* ===== 提示按钮（比较大小等专项刷题用） ===== */
+.hint-bar{margin-top:12px;}
+.hint-btn{border:1.5px dashed #FFD08A;border-radius:12px;min-height:44px;padding:8px 16px;
+  background:#FFFCF3;color:#B26A00;font-family:inherit;font-size:13.5px;font-weight:900;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .12s;}
+.hint-btn:hover{background:#FFF6E4;border-color:#FFB84D;}
+.hint-btn:active{transform:scale(.97);}
+.hint-btn.on{background:#FFEFD2;border-style:solid;border-color:#FFB84D;}
+.hint-panel{margin-top:10px;padding:12px 15px;border-radius:14px;background:#FFF9EE;
+  border:1.5px solid #FFE3A8;color:#8a5a00;font-size:13.5px;font-weight:700;line-height:1.85;}
+.hint-panel b{color:#B26A00;}
 .opts{margin-top:2px;}
 .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
   min-height:52px;padding:13px 16px;margin-bottom:10px;border-radius:16px;cursor:pointer;
@@ -2125,6 +2136,8 @@ const UNITS = [
     sub: '三角形的角 · 数图形 · 梯形周长 · 靠墙围栏', icon: '📐' },
   { key: '选条件', group: 'ext', name: '思维拓展 · 先选条件再解答', short: '选条件',
     sub: '多余条件 · 两步推理', icon: '🧠' },
+  { key: '比大小', name: '比较大小 · 专项刷题', short: '比大小',
+    sub: '单位比较 · 大数比较 · 算式比较', icon: '⚖️' },
   { key: '数字谜', group: 'ext', name: '思维拓展 · 数字谜与推理', short: '数字谜',
     sub: '数的组成 · 数字推理', icon: '🔢' }
 ];
@@ -2210,6 +2223,20 @@ function textWrongs(correct, list) {
   return out;
 }
 function S2(q, correct, wrongs, extra) { return S(q, correct, textWrongs(correct, wrongs), extra); }
+
+/* 三选一（>、<、= 这种只有三种答案的题）。
+   不能走 S()：它固定凑四个选项，只有两个干扰项时会被补上「？」。 */
+function S3(q, correct, wrongs, extra) {
+  const c = String(correct);
+  const e = extra || {};
+  const pool = [c].concat(wrongs.map(String).filter(w => w !== c));
+  const opts = shuffleAll(pool);
+  return {
+    q: q, options: opts, answer: opts.indexOf(c),
+    correct: e.ok || '对！', wrong: e.no || '再想想。',
+    hint: e.hint || '', reveals: e.reveals || []
+  };
+}
 
 /* 多选步骤：把几个条件列出来，勾选之后点「检验」才判对错。
    选项顺序**不打乱**（①②③ 本身有编号含义），rightSet 存正确项的原始下标。 */
@@ -5070,6 +5097,89 @@ const problemTemplates = [
   }
 },
 
+/* ---------- 比较大小（专项刷题板块，三选一 + 提示按钮） ---------- */
+{
+  unit: '比大小', kp: '比较大小', form: 'choice', noAnswer: true,
+  gen() {
+    const mode = pick(['unit', 'bignum', 'expr']);
+    let left = '', right = '', ans = '=', hint = '', why = '';
+
+    if (mode === 'unit') {
+      /* 单位换算比较：先化成同一个单位 */
+      const fams = [
+        { big: '吨', small: '千克', r: 1000 },
+        { big: '升', small: '毫升', r: 1000 },
+        { big: '米', small: '厘米', r: 100 },
+        { big: '千克', small: '克', r: 1000 },
+        { big: '分米', small: '厘米', r: 10 },
+        { big: '米', small: '分米', r: 10 }
+      ];
+      const f = pick(fams);
+      const k = randInt(2, 9);
+      const conv = k * f.r;
+      const delta = pick([-f.r, -10, 0, 10, f.r]);
+      const other = Math.max(1, conv + delta);
+      left = `${k} ${f.big}`;
+      right = `${other} ${f.small}`;
+      ans = conv > other ? '>' : (conv < other ? '<' : '=');
+      hint = `1 ${f.big} = ${f.r} ${f.small}。先把 ${k} ${f.big} 化成 ${f.small}：${k} × ${f.r} = ${conv} ${f.small}，再和 ${other} ${f.small} 比。`;
+      why = `${k} ${f.big} = ${conv} ${f.small}，所以 ${left} ${ans} ${right}。`;
+    } else if (mode === 'bignum') {
+      /* 大数比较：改写 / 带「万」字 */
+      const w = randInt(3, 90);
+      const rest = randInt(0, 9999);
+      const N = w * 10000 + rest;
+      if (Math.random() < 0.5) {
+        left = `${N}`;
+        right = `${w} 万${rest ? ' ' + rest : ''}`;
+        ans = '=';
+        hint = '把带「万」字的数改写成普通写法再比：几万就是几后面加 4 个 0。';
+        why = `${w} 万${rest ? ' ' + rest : ''} 就是 ${N}，两边相等。`;
+      } else {
+        const d = pick([-1, 1]) * (randInt(1, 9) * 10000 + randInt(0, 999));
+        const M = Math.max(1, N + d);
+        left = `${N}`;
+        right = `${Math.floor(M / 10000)} 万${M % 10000 ? ' ' + (M % 10000) : ''}`;
+        ans = N > M ? '>' : '<';
+        hint = '都改写成普通写法，再从最高位开始一位一位比。';
+        why = `${right} 改写成 ${M}，${N} ${ans} ${M}。`;
+      }
+    } else {
+      /* 算式比较：用积 / 商的变化规律，不必真算 */
+      const a = randInt(12, 60), b = randInt(3, 9);
+      const c = randInt(12, 60);
+      if (Math.random() < 0.5) {
+        left = `${a} × ${b}`;
+        right = `${b} × ${a}`;
+        ans = '=';
+        hint = '交换两个因数的位置，积不变（乘法交换律）。';
+        why = `交换因数位置积不变：${a} × ${b} = ${b} × ${a}。`;
+      } else {
+        const d = b + pick([1, 2, 3]);
+        left = `${a} ÷ ${b}`;
+        right = `${a} ÷ ${d}`;
+        ans = '>';
+        hint = '被除数一样时，除数越大，商反而越小。';
+        why = `被除数都是 ${a}，${b} < ${d}，所以 ${a} ÷ ${b} > ${a} ÷ ${d}。`;
+      }
+    }
+
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 比较大小',
+      text: `在 ○ 里填上「>」「<」或「=」。<br><b>${left}　○　${right}</b>`,
+      facts: [`左边：${left}`, `右边：${right}`],
+      steps: [
+        S3('○ 里应该填什么？', ans, ans === '=' ? ['>', '<'] : ['=', ans === '>' ? '<' : '>'],
+          { ok: `对！${why}`, no: '先把两边化成同一种形式，再一位一位比。', hint })
+      ],
+      answer: 0, unit: '',
+      praise: '你会先统一单位 / 形式再比大小了！',
+      wrongTip: why
+    };
+  }
+},
+
 /* ---------- 数字谜：由各位上的数拼出这个数，再验算 ---------- */
 {
   unit: '数字谜', kp: '数字谜·数的组成',
@@ -7078,6 +7188,14 @@ function renderSteps() {
            <span class="chk-hint">勾选你觉得用得上的条件（可以勾多个），再点检验</span>
          </div>`
       : '';
+    /* 带提示的题（比较大小这类）：一个灯泡按钮，点开才显示换算关系，
+       不点不剧透 */
+    const hintBar = s.hint
+      ? `<div class="hint-bar">
+           <button class="hint-btn" type="button" data-hint="${i}">💡 提示</button>
+           <div class="hint-panel" data-panel="${i}" style="display:none">${s.hint}</div>
+         </div>`
+      : '';
     el.innerHTML = `
       <div class="step-head">
         <span class="step-num">${i + 1}</span>
@@ -7086,6 +7204,7 @@ function renderSteps() {
       <div class="step-body">
         <div class="opts">${optsHtml}</div>
         ${chkBar}
+        ${hintBar}
         ${fb}
       </div>`;
     wrap.appendChild(el);
@@ -7258,6 +7377,19 @@ document.getElementById('steps').addEventListener('click', e => {
   }
   const ck = e.target.closest('.chk-btn');
   if (ck && !ck.disabled) { handleMulti(+ck.dataset.step); return; }
+
+  /* 灯泡提示：点一下展开/收起，不点就不剧透 */
+  const hb = e.target.closest('.hint-btn');
+  if (hb) {
+    const pn = document.querySelector('.hint-panel[data-panel="' + hb.dataset.hint + '"]');
+    if (pn) {
+      const show = pn.style.display === 'none';
+      pn.style.display = show ? 'block' : 'none';
+      hb.classList.toggle('on', show);
+      SFX.click();
+    }
+    return;
+  }
 
   const btn = e.target.closest('.opt');
   if (!btn || btn.disabled) return;
