@@ -2295,6 +2295,30 @@ const FIG = (function () {
       return svg(o, W, H);
     },
 
+    /* 条形统计图：卷子「六、统计」那一类 */
+    barChart: function (labels, values, unit) {
+      const W = 300, H = 196, padL = 32, padB = 34, padT = 26;
+      const n = values.length;
+      const mx = Math.max.apply(null, values) || 1;
+      const plotW = W - padL - 14, plotH = H - padT - padB;
+      const bw = Math.max(14, plotW / n * 0.52);
+      let o = '<path d="M' + padL + ' ' + (H - padB) + 'L' + padL + ' ' + padT +
+        'M' + padL + ' ' + (H - padB) + 'L' + (W - 14) + ' ' + (H - padB) +
+        '" stroke="' + EDGE + '" stroke-width="1.6" fill="none"/>';
+      values.forEach(function (v, i) {
+        const cx = padL + plotW * (i + 0.5) / n;
+        const h = Math.max(3, v / mx * plotH);
+        const y = H - padB - h;
+        o += '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + y.toFixed(1) +
+          '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" ' +
+          'fill="rgba(124,92,255,.55)" stroke="#6B4CE6" stroke-width="1.2"/>';
+        o += txt(cx, y - 7, String(v), GIVEN, 11);
+        o += txt(cx, H - padB + 15, labels[i], INK, 10.5);
+      });
+      if (unit) o += txt(padL - 4, padT - 10, unit, MARK, 10);
+      return svg(o, W, H);
+    },
+
     /* 平行四边形：标一个角，另一个角画 ?（邻角互补） */
     paraAngles: function (a) {
       const W = 268, H = 176, pad = 40;
@@ -5727,6 +5751,91 @@ const problemTemplates = [
       answer: q, unit: '',
       praise: '你会照着「试商 → 乘 → 减 → 比余数」的顺序做竖式了！',
       wrongTip: `把 ${b} 看作 ${v} 试商，再乘回去、相减、比余数；余数比除数大就调商。`
+    };
+  }
+},
+
+/* ---------- 统计图读图（卷子「六、统计」那一类） ---------- */
+{
+  unit: '平均数', kp: '统计图读图',
+  gen() {
+    const ALL = ['跳绳', '踢毽', '打球', '跑步', '跳远'];
+    const labs = shuffleAll(ALL).slice(0, 4);
+    let vals;
+    const mode = pick(['total', 'diff', 'avg']);
+    if (mode === 'avg') {
+      /* 平均分要除得尽：先凑出能被 4 整除的和 */
+      let sum = 0;
+      vals = labs.map(() => randInt(6, 22));
+      sum = vals.reduce((a, b) => a + b, 0);
+      const rest = sum % 4;
+      if (rest) vals[3] += (4 - rest);
+    } else {
+      vals = labs.map(() => randInt(5, 24));
+      /* 最大值必须唯一，否则「最多的比最少的多几」会有两个答案 */
+      const mx = Math.max.apply(null, vals);
+      if (vals.filter(v => v === mx).length > 1) {
+        const i = vals.indexOf(mx);
+        vals[i] = mx + 3;
+      }
+    }
+    const sum = vals.reduce((a, b) => a + b, 0);
+    const mx = Math.max.apply(null, vals);
+    const mn = Math.min.apply(null, vals);
+    const iMax = vals.indexOf(mx), iMin = vals.indexOf(mn);
+    const who = pick(SC_NAME);
+
+    let text, answer, tip, steps;
+    if (mode === 'total') {
+      answer = sum;
+      text = `下图是${who} 班上同学最喜欢的体育活动人数统计图。一共有多少人参加调查？`;
+      tip = `把四根条形上的数加起来：${vals.join(' + ')} = ${sum} 人。`;
+      steps = [
+        S2('统计图里每根条形上的数字表示什么？', '那一项的人数',
+          ['那一项的分数', '那一项的名字', '没有任何意思'],
+          { ok: '对！条形上的数字就是这一项的人数。', no: '条形的高度和标在顶上的数字，都表示这一项的人数。' }),
+        S2('要求"一共有多少人"，该用哪个算式？', vals.join(' + '),
+          [`${mx} − ${mn}`, `${vals[0]} × ${vals[1]}`, vals.slice().reverse().join(' + ')],
+          { ok: '对！把四项人数全部加起来。填进下面的框里吧！', no: '求总数就把各项都加起来。' })
+      ];
+    } else if (mode === 'diff') {
+      answer = mx - mn;
+      text = `下图是${who} 班上同学最喜欢的体育活动人数统计图。人数最多的那一项比最少的多多少人？`;
+      tip = `最多是${labs[iMax]} ${mx} 人，最少是${labs[iMin]} ${mn} 人：${mx} − ${mn} = ${answer} 人。`;
+      steps = [
+        S2('人数最多的是哪一项？', labs[iMax], labs.filter((_, i) => i !== iMax),
+          { ok: `对！最高那根是${labs[iMax]}，${mx} 人。`, no: '条形最高、数字最大的那一项人数最多。' }),
+        S2('人数最少的是哪一项？', labs[iMin],
+          [labs[iMax]].concat(labs.filter((_, i) => i !== iMin && i !== iMax)).slice(0, 3),
+          { ok: `对！最矮那根是${labs[iMin]}，${mn} 人。`, no: '条形最矮的那一项人数最少。' }),
+        S2('求"多多少人"，算式是哪一个？', `${mx} − ${mn}`,
+          [`${mx} + ${mn}`, `${mn} − ${mx}`, `${sum} − ${mx}`],
+          { ok: '对！用最多的减最少的。填进下面的框里吧！', no: '比多比少，用大数减小数。' })
+      ];
+    } else {
+      answer = sum / 4;
+      text = `下图是${who} 班上同学最喜欢的体育活动人数统计图。平均每项有多少人？`;
+      tip = `先求总人数 ${vals.join(' + ')} = ${sum} 人，再平均分成 4 份：${sum} ÷ 4 = ${answer} 人。`;
+      steps = [
+        S2('先求四项一共有多少人，算式是哪一个？', vals.join(' + '),
+          [`${mx} − ${mn}`, `${mx} × 4`, `${sum} ÷ 4`],
+          { ok: '对！先加起来。', no: '求平均数要先知道总数。' }),
+        S2('一共有多少人？', sum, numWrongs(sum, [sum + 4, sum - 4, mx]),
+          { ok: `对！${sum} 人。`, no: `把四项人数加起来：${vals.join(' + ')} = ${sum}。` }),
+        S2('再求平均每项多少人，算式是哪一个？', `${sum} ÷ 4`,
+          [`${sum} × 4`, `${sum} ÷ ${mx}`, `${mx} ÷ 4`],
+          { ok: '对！总人数平均分成 4 份。填进下面的框里吧！', no: '平均分成 4 份，用总数除以项数。' })
+      ];
+    }
+
+    return {
+      tag: '四上 · 统计图',
+      figure: FIG.barChart(labs, vals, '人'),
+      text,
+      facts: [`四项人数分别是 ${vals.join('、')} 人`],
+      steps, answer, unit: '人',
+      praise: '你会从条形统计图里读数、算总数和平均数了！',
+      wrongTip: tip
     };
   }
 },
