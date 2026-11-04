@@ -1135,6 +1135,14 @@ html[data-motion="off"] .facts-fab.urgent .fab-ico{animation:none;}
 .hint-panel{margin-top:10px;padding:12px 15px;border-radius:14px;background:#FFF9EE;
   border:1.5px solid #FFE3A8;color:#8a5a00;font-size:13.5px;font-weight:700;line-height:1.85;}
 .hint-panel b{color:#B26A00;}
+/* ===== 方格纸（画图形题） ===== */
+.paper-grid{display:grid;gap:2px;padding:6px;border-radius:14px;background:#F4F1FF;
+  border:2px solid #E4DDFF;margin-top:8px;touch-action:manipulation;}
+.gcell{aspect-ratio:1/1;min-height:26px;border:none;border-radius:4px;background:#fff;
+  box-shadow:inset 0 0 0 1px #EAE4FA;cursor:pointer;transition:background .12s,box-shadow .12s;}
+.gcell:active{transform:scale(.94);}
+.gcell.on{background:linear-gradient(135deg,#A78BFA,#7C5CFF);box-shadow:inset 0 0 0 1px #6B4CE6;}
+html[data-perf="low"] .gcell.on{background:#7C5CFF;}
 .opts{margin-top:2px;}
 .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
   min-height:52px;padding:13px 16px;margin-bottom:10px;border-radius:16px;cursor:pointer;
@@ -5784,6 +5792,46 @@ const problemTemplates = [
   }
 },
 
+/* ---------- 方格纸画图形（卷子「四、动手操作」那一类） ---------- */
+{
+  unit: '几何', kp: '方格纸画图形',
+  gen() {
+    const mode = pick(['rect', 'square']);
+    const COLS = 9, ROWS = 6;
+    let w, h, shape;
+    if (mode === 'square') {
+      const a = randInt(2, 4);
+      w = a; h = a; shape = `边长 ${a} 厘米的正方形`;
+    } else {
+      w = randInt(3, 5);
+      h = randInt(2, 4);
+      if (w === h) h = (h === 2 ? 3 : 2);      /* 长宽不等才是长方形 */
+      shape = `长 ${w} 厘米、宽 ${h} 厘米的长方形`;
+    }
+    const who = pick(SC_NAME);
+    return {
+      tag: '四上 · 动手操作',
+      text: `方格纸上每一小格的边长表示 1 厘米。请你在方格纸上涂出一个<b>${shape}</b>。`,
+      facts: ['每小格边长 1 厘米', `要画的是${shape}`],
+      steps: [
+        S2(`长 ${w} 厘米的一条边，要占几个小格？`, w, numWrongs(w, [h, w + 1, w - 1]),
+          { ok: `对！1 格 1 厘米，${w} 厘米就是 ${w} 格。`, no: '每小格边长 1 厘米，几厘米就占几格。' }),
+        S2(`这个图形一共要涂多少个小格？`, w * h, numWrongs(w * h, [w + h, w * h + w, w * 2]),
+          { ok: `对！${w} × ${h} = ${w * h} 格。`, no: '行数乘列数就是格子总数。' }),
+        {
+          grid: true, cols: COLS, rows: ROWS, needW: w, needH: h,
+          q: `把${shape}涂出来（${w} 格 × ${h} 格），涂好后点「检验我画的图形」。`,
+          correct: `对！${w} 格 × ${h} 格，一个角都没缺。`,
+          wrong: `要涂成一个完整的矩形：${w} 格 × ${h} 格（长宽可以横着放也可以竖着放），不能缺角、也不能分成两块。`
+        }
+      ],
+      answer: w * h, unit: '格',
+      praise: '你会在方格纸上按尺寸画图形了，还数清了它占多少格！',
+      wrongTip: `${shape}要涂 ${w} × ${h} = ${w * h} 个小格，涂成完整的一块矩形。`
+    };
+  }
+},
+
 /* ---------- 比较大小（专项刷题板块，三选一 + 提示按钮） ---------- */
 {
   unit: '比大小', kp: '比较大小', form: 'choice', noAnswer: true,
@@ -7848,7 +7896,22 @@ function renderSteps() {
     const el = document.createElement('div');
     el.className = 'step active';
     el.dataset.step = i;
-    const optsHtml = s.multi ? (function () {
+    const optsHtml = s.grid ? (function () {
+      /* 方格纸：一格一个按钮，点一下涂上、再点擦掉；涂完点检验判定。
+         勾选状态复用 st.picked（存 "行:列"），不需要新的状态字段。 */
+      const picked = st.picked[i] || [];
+      let html = '<div class="paper-grid" style="grid-template-columns:repeat(' + s.cols + ',1fr)">';
+      for (let r = 0; r < s.rows; r++) {
+        for (let c = 0; c < s.cols; c++) {
+          const key = r + ':' + c;
+          const on = picked.indexOf(key) >= 0;
+          html += '<button class="gcell mopt' + (on ? ' on' : '') + '" data-step="' + i +
+            '" data-opt="' + key + '" aria-pressed="' + on + '"></button>';
+        }
+      }
+      html += '</div>';
+      return html;
+    })() : s.multi ? (function () {
       const picked = st.picked[i] || [];
       const html = s.options.map((text, idx) =>
         `<button class="opt mopt${picked.indexOf(idx) >= 0 ? ' on' : ''}"
@@ -7867,12 +7930,12 @@ function renderSteps() {
               </button>`;
     }).join('');
     const fb = st.tried[i].length ? `<div class="fb-inline no">✘ ${s.wrong}</div>` : '';
-    const chkBar = s.multi
+    const chkBar = (s.multi || s.grid)
       ? `<div class="chk-bar">
            <button class="chk-btn" data-step="${i}" ${(st.picked[i] || []).length ? '' : 'disabled'}>
-             检验勾选的条件
+             ${s.grid ? '检验我画的图形' : '检验勾选的条件'}
            </button>
-           <span class="chk-hint">勾选你觉得用得上的条件（可以勾多个），再点检验</span>
+           <span class="chk-hint">${s.grid ? '在方格纸上涂出题目要求的图形，涂完点检验' : '勾选你觉得用得上的条件（可以勾多个），再点检验'}</span>
          </div>`
       : '';
     /* 带提示的题（比较大小这类）：一个灯泡按钮，点开才显示换算关系，
@@ -8051,7 +8114,10 @@ document.getElementById('steps').addEventListener('click', e => {
   /* 多选题：先勾选，再点「检验」才算答 */
   const mo = e.target.closest('.mopt');
   if (mo && !mo.disabled) {
-    const si = +mo.dataset.step, oi = +mo.dataset.opt;
+    const si = +mo.dataset.step;
+    /* 选择题的 data-opt 是数字，方格纸的是 "行:列" —— 不能用 + 强转 */
+    const raw = mo.dataset.opt;
+    const oi = /^\d+$/.test(raw) ? +raw : raw;
     const st = questions[current] && questions[current].state;
     if (!st || si !== st.stepIdx) return;
     const arr = st.picked[si] || (st.picked[si] = []);
@@ -8090,13 +8156,31 @@ function handleMulti(stepIdx) {
   const p = q.problem, st = q.state;
   if (stepIdx !== st.stepIdx || st.solved) return;
   const s = p.steps[stepIdx];
-  if (!s || !s.multi) return;
+  if (!s || (!s.multi && !s.grid)) return;
   const now = (st.picked[stepIdx] || []).slice().sort((a, b) => a - b);
   if (now.length === 0) { renderSteps(); return; }
   st.checked[stepIdx] = true;
 
-  const same = now.length === s.rightSet.length &&
-               now.every((v, i) => v === s.rightSet[i]);
+  /* 方格纸：涂出来的必须是一整块矩形（不能缺角、不能画两处），
+     尺寸等于题目要求（长宽可以互换） */
+  let same;
+  if (s.grid) {
+    const cells = now.map(k => String(k).split(':').map(Number));
+    const rs = cells.map(c => c[0]), cs = cells.map(c => c[1]);
+    const r0 = Math.min.apply(null, rs), r1 = Math.max.apply(null, rs);
+    const c0 = Math.min.apply(null, cs), c1 = Math.max.apply(null, cs);
+    const H = r1 - r0 + 1, W = c1 - c0 + 1;
+    let full = true;
+    for (let r = r0; r <= r1 && full; r++) {
+      for (let c = c0; c <= c1; c++) {
+        if (now.indexOf(r + ':' + c) < 0) { full = false; break; }
+      }
+    }
+    const dimOk = (W === s.needW && H === s.needH) || (W === s.needH && H === s.needW);
+    same = full && dimOk;
+  } else {
+    same = now.length === s.rightSet.length && now.every((v, i) => v === s.rightSet[i]);
+  }
   if (same) {
     st.chosen[stepIdx] = s.answer;
     st.stepIdx++;
