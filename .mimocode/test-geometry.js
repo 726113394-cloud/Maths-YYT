@@ -1,7 +1,14 @@
-﻿/* 校验新增的几何模板：数值是否自洽、选项是否互不相同、正确答案是否唯一 */
+/* 校验新增的几何模板：数值是否自洽、选项是否互不相同、正确答案是否唯一 */
 const fs = require('fs');
+const path = require('path');
 
-const src = fs.readFileSync(process.env.TEMP + '\\math_check4.js', 'utf8');
+/* 直接从模块 HTML 里取那段 <script>，不再依赖 TEMP 里手工导出的中间文件
+   （项目目录一搬家，那种写法就只剩 ENOENT） */
+const HTML = path.join(__dirname, '..', '数学思维闯关.html');
+const rawHtml = fs.readFileSync(HTML, 'utf8');
+const sm = /<script\b[^>]*>([\s\S]*?)<\/script>/i.exec(rawHtml);
+if (!sm) throw new Error('模块里没找到 <script>');
+const src = sm[1];
 
 function grabFn(name) {
   const re = new RegExp('function ' + name + '\\s*\\([\\s\\S]*?\\n\\}');
@@ -45,6 +52,8 @@ const prelude = `
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function shuffleAll(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+/* 配图不参与数值校验：给个万能空壳，模板里调 FIG.xxx(...) 一律回空串 */
+const FIG = new Proxy({}, { get: () => () => '' });
 const SC_NAME = ['小明','小红','小刚','丽丽','琪琪','兵兵'];
 function numWrongs(v, extra) {
   const cands = shuffleAll([v*10,v*2,v+10,v+100,v-10,v+1,Math.round(v/10),v*100].concat(extra||[]));

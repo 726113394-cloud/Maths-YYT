@@ -2,7 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DIR = 'C:\\Users\\Administrator\\Desktop\\数学思维闯关';
+/* 目录跟着脚本走：项目文件夹搬过家，写死绝对路径会直接读不到文件 */
+const DIR = path.join(__dirname, '..');
 const STATION = path.join(DIR, 'index.html');   /* 站台就是站点入口 */
 const MAP = [
   ['tpl-math', path.join(DIR, '数学思维闯关.html')],

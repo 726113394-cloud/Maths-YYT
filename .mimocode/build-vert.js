@@ -1,8 +1,10 @@
 /* 把竖式练习的 CSS / JS 从闯关页抽出来，填进独立页面，避免手抄出错 */
 const fs = require('fs');
+const path = require('path');
 
-const MAIN = 'C:\\Users\\Administrator\\Desktop\\数学思维闯关\\数学思维闯关.html';
-const VERT = 'C:\\Users\\Administrator\\Desktop\\数学思维闯关\\竖式练习台.html';
+const DIR = path.join(__dirname, '..');
+const MAIN = path.join(DIR, '数学思维闯关.html');
+const VERT = path.join(DIR, '竖式练习台.html');
 
 const src = fs.readFileSync(MAIN, 'utf8');
 
