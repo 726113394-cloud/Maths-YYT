@@ -68,9 +68,18 @@ safe('初始', function () {
   q('#segRender button[data-v="high"]').click();
   ok('选高级后 data-perf=high', de.dataset.perf === 'high', de.dataset.perf);
   ok('高级档高亮', q('#segRender button[data-v="high"]').classList.contains('on'));
-  /* 高级档现在是 Gost 那套液态玻璃：blur + saturate，还带跟随光斑 */
-  var bf = getComputedStyle(q('.card')).backdropFilter;
-  ok('高级档给卡片开液态玻璃', /blur\(2[0-9]px\)/.test(bf) && /saturate/.test(bf), bf);
+  /* 高级档现在是 Gost 那套液态玻璃：blur + saturate，还带跟随光斑。
+     但那套 22px 玻璃写在 @media (hover:hover) and (pointer:fine) 里，
+     无头环境这条媒体查询不一定成立（不成立时走 blur(7px) 的降级）。
+     所以这里先看媒体查询，再按对应档位要求 —— 别让断言跟着环境飘。 */
+  var cardEl = q('.card');
+  var bf = cardEl ? getComputedStyle(cardEl).backdropFilter : '';
+  var fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var motionOn = de.dataset.motion !== 'off';
+  /* 液态玻璃的条件是：高级 + 精细指针 + 动效开着，三条缺一条就走 blur(7px) 的降级 */
+  ok('高级档给卡片开玻璃效果',
+    (fine && motionOn) ? (/blur\(2[0-9]px\)/.test(bf) && /saturate/.test(bf)) : /blur\([1-9]\d*px\)/.test(bf),
+    bf + '（精细指针=' + fine + '，动效=' + (motionOn ? '开' : '关') + '）');
   ok('高级档卡片挂了跟随光斑', !!q('.card .glare'));
 
   /* 渲染：流畅 → 强制 low */

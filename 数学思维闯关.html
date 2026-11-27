@@ -6567,19 +6567,79 @@ const problemTemplates = [
   gen() {
     const base = randInt(80, 92);
     const hi = base + randInt(3, 8), lo = base - randInt(3, 8);
+    const n = randInt(4, 6);
+    const don = randInt(3, 9);
     const SC = pick(SC_NAME);
+    /* 老师反馈「同一道选择题反复出现」——以前这个模板只有一道题，只是人名在换。
+       现在是一小池「平均数的意义」判断题，每条都只有一步推理，考的还是同一个知识点。 */
+    const items = [
+      {
+        ask: '评委给的分里有一个特别高、一个特别低。去掉一个最高分和一个最低分以后，剩下的平均分跟原来的平均分比，可能怎样？',
+        ok: '可能变高，也可能变低',
+        bad: ['一定变高', '一定变低', '一定和原来一样'],
+        facts: ['原来的分数里有特别高和特别低的', '去掉一个最高分和一个最低分']
+      },
+      {
+        ask: `一组数的平均数是 ${base}，这组数里一定有一个数正好等于 ${base} 吗？`,
+        ok: '不一定，平均数可能不等于这组数里的任何一个数',
+        bad: ['一定有，平均数就是从这些数里挑出来的', `一定没有，平均数一定比 ${base} 小`, '一定有，而且不止一个'],
+        facts: [`平均数 ${base}`, '平均数 = 总数 ÷ 个数']
+      },
+      {
+        ask: `一组数的平均数是 ${base}，这组数里最大的那个数跟 ${base} 比，一定怎样？`,
+        ok: `一定不小于 ${base}`,
+        bad: [`一定比 ${base} 小`, `一定正好等于 ${base}`, `没法比，和 ${base} 没关系`],
+        facts: ['平均数在最大数和最小数之间', `平均数 ${base}`]
+      },
+      {
+        ask: `${n} 个数的平均数是 ${base}。如果再加一个 ${base} 进来，新的平均数会怎样？`,
+        ok: '和原来一样',
+        bad: ['比原来大', '比原来小', '变成原来的一半'],
+        facts: [`原来 ${n} 个数的平均数是 ${base}`, `添进来的数正好是 ${base}`]
+      },
+      {
+        ask: `${n} 个数的平均数是 ${base}。如果再加一个 ${hi} 进来，新的平均数会怎样？`,
+        ok: '比原来大',
+        bad: ['比原来小', '和原来一样', '没法确定'],
+        facts: [`原来平均数是 ${base}`, `添进来的 ${hi} 比平均数高`]
+      },
+      {
+        ask: `${n} 个数的平均数是 ${base}。如果去掉一个 ${lo}（比平均数低），新的平均数会怎样？`,
+        ok: '比原来大',
+        bad: ['比原来小', '和原来一样', '没法确定'],
+        facts: [`原来平均数是 ${base}`, `去掉的 ${lo} 比平均数低`]
+      },
+      {
+        ask: `甲组 5 人共得 ${base * 5} 分，乙组 4 人共得 ${base * 4} 分。要比较两组的成绩，应该比什么？`,
+        ok: '比平均每人得多少分',
+        bad: ['比两组的总分', '比哪组的人数多', '比两组的最高分'],
+        facts: [`甲组 5 人共 ${base * 5} 分`, `乙组 4 人共 ${base * 4} 分`]
+      },
+      {
+        ask: `一组数的平均数是 ${base}，其中有一个数是 ${hi}。剩下的那些数的平均分会怎样？`,
+        ok: `比 ${base} 低`,
+        bad: [`比 ${base} 高`, `正好等于 ${base}`, `等于 ${hi}`],
+        facts: [`平均数是 ${base}`, `其中有一个数 ${hi} 比平均数大`]
+      },
+      {
+        ask: `小明说：「我们组平均每人捐了 ${don} 元，所以我一定捐了 ${don} 元。」他的说法对吗？`,
+        ok: '不对，平均数不代表每个人都捐这么多',
+        bad: ['对，平均数是每人实际捐的钱数', '对，他正好捐了这么多', '不对，平均数一定比每个人捐的都少'],
+        facts: [`平均每人捐 ${don} 元`, '平均数是「平均下来」的数']
+      }
+    ];
+    const it = pick(items);
     return {
       tag: '四上 · 选择题',
-      text: `${SC} 参加比赛，评委给的分里有一个特别高、一个特别低。去掉一个最高分和一个最低分以后，剩下的平均分跟原来的平均分比，可能怎样？`,
-      facts: ['原来的分数里有特别高和特别低的', '去掉一个最高分和一个最低分'],
+      text: `${SC} 在做平均数的练习：${it.ask}`,
+      facts: it.facts,
       steps: [
-        S2('去掉最高分和最低分以后，平均分跟原来比会怎样？', '可能变高，也可能变低',
-          ['一定变高', '一定变低', '一定和原来一样'],
-          { ok: '对！去掉的那两个数在平均分哪一边，就往哪边变。', no: '去掉的那两个数如果都在平均分上面，平均分就变低；都在下面，就变高。' })
+        S2('答案应该选哪一个？', it.ok, it.bad.slice(),
+          { ok: '对！平均数是「总数 ÷ 份数」，不代表每一个数。', no: '举一组具体的数算一遍，别凭感觉判断。' })
       ],
       answer: 0, unit: '',
-      praise: '你想清楚了「去掉极端分数」会怎样影响平均分！',
-      wrongTip: '平均分被极端分数拉偏；去掉以后会往中间靠，所以可能变高也可能变低。'
+      praise: '你把平均数的意义想清楚了，不会被「平均」两个字骗到！',
+      wrongTip: '平均数 = 总数 ÷ 份数：它可能不等于其中任何一个数，也会被新添进来或去掉的数拉动。'
     };
   }
 },
@@ -6606,22 +6666,52 @@ const problemTemplates = [
 {
   unit: '拓展', kp: '选择题·方向辨析', form: 'choice', noAnswer: true,
   gen() {
-    const DIRS = ['北', '东', '南', '西'];
+    /* 以前永远问「3 点钟在哪一边」，答案永远是右手边，学生记结论就行；
+       现在钟点也变（3/6/9 点）、还分「给钟点问方向」和「给方向问钟点」两种问法。 */
+    const DIRS = ['北', '东', '南', '西'];          /* 顺时针顺序 */
+    const HOURS = [3, 6, 9];
     const iF = randInt(0, 3);
     const facing = DIRS[iF];
     const SC = pick(SC_NAME);
+    const h = pick(HOURS);
+    const stepHour = h / 3;                        /* 顺时针转过几个直角 */
+    const dirOf = (base, k) => DIRS[(base + k) % 4];
+
+    if (Math.random() < 0.5) {
+      const ansDir = dirOf(iF, stepHour);
+      return {
+        tag: '四上 · 选择题',
+        text: `${SC} 站在操场上，面向${facing}方，并把${facing}方定为 12 点钟方向。` +
+              `那么 ${h} 点钟方向是哪个方向？`,
+        facts: [`面向${facing}方 = 12 点钟方向`, '钟面上每过 3 个小时转一个直角'],
+        steps: [
+          S2(`${h} 点钟方向是哪个方向？`, ansDir, DIRS.filter(d => d !== ansDir),
+            { ok: `对！从${facing}方顺时针转 ${h / 3} 个直角，正好是${ansDir}方：${ansDir}方。`,
+              no: `把${facing}方当 12 点，钟面顺时针数：3 点是右手边、6 点是正后方、9 点是左手边。` })
+        ],
+        answer: 0, unit: '',
+        praise: '你会用钟面把方位转过来了！',
+        wrongTip: `12 点是${facing}方，顺时针每个直角一个钟点：${DIRS[(iF + 1) % 4]}方(3点)、` +
+          `${DIRS[(iF + 2) % 4]}方(6点)、${DIRS[(iF + 3) % 4]}方(9点)。所以 ${h} 点是${ansDir}方。`
+      };
+    }
+    const targetDir = dirOf(iF, stepHour);
+    const ansHour = `${h} 点钟`;
     return {
       tag: '四上 · 选择题',
-      text: `${SC} 站在操场上，面向${facing}方，并把${facing}方定为 12 点钟方向。那么 3 点钟方向在他身体的哪一边？`,
+      text: `${SC} 站在操场上，面向${facing}方，并把${facing}方定为 12 点钟方向。` +
+            `那么${targetDir}方在他的几点钟方向？`,
       facts: [`面向${facing}方 = 12 点钟方向`, '钟面上每过 3 个小时转一个直角'],
       steps: [
-        S2('3 点钟方向在他身体的哪一边？', '右手边',
-          ['左手边', '正后方', '正前方'],
-          { ok: '对！钟面上从 12 点到 3 点是顺时针，就是右手边。', no: '钟面上的数字是顺时针排的，12 点往 3 点转，就是往右手边转。' })
+        S2(`${targetDir}方在几点钟方向？`, ansHour,
+          ['3 点钟', '6 点钟', '9 点钟', '12 点钟'].filter(x => x !== ansHour),
+          { ok: `对！从${facing}方顺时针转到${targetDir}方，正好 ${h / 3} 个直角，就是 ${h} 点钟。`,
+            no: `把${facing}方当 12 点，顺时针数：每个直角 3 个小时。` })
       ],
       answer: 0, unit: '',
-      praise: '你会用钟面来判断左右方向了！',
-      wrongTip: '12 点钟方向是正前方，往后转 3 个小时就是右手边，转 6 个小时是正后方，9 个小时是左手边。'
+      praise: '你正着反着都能用钟面说清方向了！',
+      wrongTip: `12 点是${facing}方，顺时针 3 点是${DIRS[(iF + 1) % 4]}方、` +
+        `6 点是${DIRS[(iF + 2) % 4]}方、9 点是${DIRS[(iF + 3) % 4]}方。${targetDir}方是 ${h} 点钟。`
     };
   }
 },
@@ -6689,6 +6779,56 @@ const problemTemplates = [
         claim: '「等腰三角形的两个底角相等。」',
         ok: '对。等腰三角形的两腰相等，两个底角也相等',
         bad: ['不对。等腰三角形只有两条边相等，角不一样', '不对。等腰三角形三个角都相等', '对。不过只有顶角才相等']
+      },
+      {
+        claim: '「等边三角形一定是锐角三角形。」',
+        ok: '对。等边三角形每个角都是 60 度，三个角都是锐角',
+        bad: ['不对。等边三角形也可能是直角三角形', '不对。等边三角形有一个角是钝角', '对。不过等边三角形也可能是钝角三角形']
+      },
+      {
+        claim: '「梯形只有一组对边平行。」',
+        ok: '对。只有一组对边平行的四边形才是梯形',
+        bad: ['不对。梯形的两组对边都平行', '不对。梯形一组平行的边都没有', '对。而且是三组对边平行']
+      },
+      {
+        claim: '「长方形是特殊的平行四边形。」',
+        ok: '对。长方形的两组对边分别平行且相等，符合平行四边形的特征',
+        bad: ['不对。长方形和平行四边形没关系', '不对。平行四边形是特殊的长方形', '对。不过长方形没有直角']
+      },
+      {
+        claim: '「一个三角形里至少有两个锐角。」',
+        ok: '对。就算有一个钝角或直角，剩下两个角也一定是锐角',
+        bad: ['不对。三角形里可能只有一个锐角', '不对。三角形里可能一个锐角都没有', '对。而且三个角都一定是锐角']
+      },
+      {
+        claim: '「钝角三角形的三个角都是钝角。」',
+        ok: '不对。钝角三角形只有一个角是钝角，另外两个角是锐角',
+        bad: ['对。钝角三角形的角都是钝角', '不对。钝角三角形有三个钝角', '对。所以它的内角和比 180 度大']
+      },
+      {
+        claim: '「等腰三角形一定是锐角三角形。」',
+        ok: '不对。等腰三角形的顶角可能是钝角或直角，比如顶角 100 度',
+        bad: ['对。等腰三角形的三个角都是锐角', '不对。等腰三角形一定是直角三角形', '对。等腰三角形不可能有钝角']
+      },
+      {
+        claim: '「三角形任意两条边的和一定大于第三条边。」',
+        ok: '对。这就是能不能围成三角形的判断标准',
+        bad: ['不对。只要两条边加起来等于第三条边也能围成', '不对。短的边加起来小于第三条边也行', '对。不过只对等边三角形成立']
+      },
+      {
+        claim: '「四边形的内角和是 360 度。」',
+        ok: '对。把四边形连一条对角线，正好分成两个三角形，180 × 2 = 360',
+        bad: ['不对。四边形的内角和是 180 度', '不对。四边形的内角和是 540 度', '对。而且五边形也是 360 度']
+      },
+      {
+        claim: '「把一个平行四边形拉一拉，形状变了，周长也变了。」',
+        ok: '不对。拉的时候四条边长度没变，周长就不变，变的只是形状',
+        bad: ['对。形状变了周长一定跟着变', '不对。拉的时候周长会变长', '对。而且拉完面积也不变']
+      },
+      {
+        claim: '「正方形一定是长方形，长方形也一定是正方形。」',
+        ok: '不对。正方形一定是长方形，但长方形不一定是正方形（还得四条边都相等）',
+        bad: ['对。正方形和长方形就是一回事', '不对。长方形一定是正方形，正方形不一定是长方形', '对。只要都有四个直角就行']
       }
     ];
     const it = pick(items);
@@ -6758,6 +6898,42 @@ const problemTemplates = [
         ok: '对。（长 + 宽）× 2 展开就是长 × 2 + 宽 × 2，两种写法一样',
         bad: ['不对。周长只能用（长 + 宽）× 2 算', '不对。长 × 2 + 宽 × 2 算出来是长方形的面积', '对。不过只有正方形才能这么算'],
         facts: ['长方形的周长 =（长 + 宽）× 2']
+      },
+      {
+        claim: '「周长相等的两个图形，面积也一定相等。」',
+        ok: '不对。周长一样，面积可以不一样，比如细长的长方形和接近正方形的长方形',
+        bad: ['对。周长一样，面积一定一样', '不对。周长一样时，面积一定不一样', '对。周长和面积是一回事'],
+        facts: ['周长是一圈的长度，面积是里面的大小']
+      },
+      {
+        claim: '「正方形的边长扩大到原来的 2 倍，周长也扩大到原来的 2 倍。」',
+        ok: '对。周长 = 边长 × 4，边长乘几，周长就乘几',
+        bad: ['不对。周长会扩大到原来的 4 倍', '不对。周长不会变', '对。而且面积也只变 2 倍'],
+        facts: ['正方形周长 = 边长 × 4']
+      },
+      {
+        claim: '「把一个大长方形剪成两个小长方形，两个小长方形的周长加起来，正好等于原来大长方形的周长。」',
+        ok: '不对。剪开以后多出了剪切的那条边，两个小长方形的周长和比原来大',
+        bad: ['对。剪开前后周长一样', '不对。两个小长方形的周长和比原来小', '对。因为总面积没变'],
+        facts: ['剪开会多出新的边']
+      },
+      {
+        claim: '「两个完全一样的长方形拼在一起，拼成的图形周长一定比原来两个长方形的周长和短。」',
+        ok: '对。拼的时候有两条边被藏进去了，不再算周长',
+        bad: ['不对。拼起来周长会更长', '不对。拼起来周长和原来一样', '对。不过要拼成正方形才成立'],
+        facts: ['拼起来被藏在里面的边不算周长']
+      },
+      {
+        claim: '「长方形的长扩大到原来的 2 倍，宽不变，周长会扩大到原来的 2 倍。」',
+        ok: '不对。只有长变 2 倍，宽没变，周长不会正好是 2 倍',
+        bad: ['对。长乘几，周长就乘几', '不对。周长完全不变', '对。因为周长里也有长'],
+        facts: ['长方形周长 =（长 + 宽）× 2']
+      },
+      {
+        claim: '「用一根铁丝先围成长方形，再改成正方形，两次的周长一样长。」',
+        ok: '对。铁丝的长度没变，围出来的图形周长就不变',
+        bad: ['对。改个说法而已，长度会变长', '不对。正方形周长一定更短', '不对。形状变了周长一定变'],
+        facts: ['同一根铁丝，围成什么形状周长都一样']
       }
     ];
     const it = pick(items);
@@ -6792,6 +6968,42 @@ const problemTemplates = [
         ok: '对。每个数都加同一个数，总数就多了若干倍，平均数也跟着加上这个数',
         bad: ['不对。平均数不会变', '不对。平均数会变成原来的 ' + k + ' 倍', '对。不过要除以前面的个数才算得出来'],
         facts: ['平均数 = 总数 ÷ 个数']
+      },
+      {
+        claim: `「一组数的平均数是 ${k * 10}，那么这组数里最大的那个数一定比 ${k * 10} 大。」`,
+        ok: `不对。如果这组数每个都是 ${k * 10}，平均数就是 ${k * 10}，最大的数也不比它大`,
+        bad: [`对。平均数总比最大的数小`, `不对。平均数一定比最大的数大`, `对。${k * 10} 一定不是这组数里的数`],
+        facts: [`平均数 ${k * 10}`, '每个数都一样时，平均数就等于每个数']
+      },
+      {
+        claim: `「给一组数添上一个比平均数大的数，新的平均数会比原来大。」`,
+        ok: '对。添进来的数把总数拉高了，平均数也就变大',
+        bad: ['不对。平均数不会变', '不对。新的平均数会变小', '对。不过要添两个这样的数才成立'],
+        facts: ['平均数 = 总数 ÷ 个数']
+      },
+      {
+        claim: '「人数不同的两个组，直接比两组的总分，就能知道哪组成绩好。」',
+        ok: '不对。人数不同，比总分不公平，要比平均每人得多少分',
+        bad: ['对。总分高的那一组成绩一定好', '不对。人数不同也比总分就行', '对。和平均分是一回事'],
+        facts: ['比成绩要比平均分']
+      },
+      {
+        claim: `「一组数里每个数都减去 1，这组数的平均数也会减去 1。」`,
+        ok: '对。每个数都少 1，总数就少了若干个 1，平均数也跟着少 1',
+        bad: ['不对。平均数不变', '不对。平均数会变成原来的一半', '对。不过只有两个数的时候才成立'],
+        facts: ['平均数 = 总数 ÷ 个数']
+      },
+      {
+        claim: `「平均每人植树 5 棵，就说明一定有人正好植了 5 棵。」`,
+        ok: '不对。平均数只是「平均下来每人 5 棵」，不一定有人正好植 5 棵',
+        bad: ['对。平均数就是最多人种的那个数', '不对。平均数一定比每个人种的都多', '对。否则平均数算不出来'],
+        facts: ['平均数不一定等于其中某一个数']
+      },
+      {
+        claim: '「两个数的平均数是 20，这两个数一定是一个 15、一个 25。」',
+        ok: '不对。只要两个数的和是 40，平均就是 20，可能的组合很多',
+        bad: ['对。平均数是 20 就只有这一种可能', '不对。两个数的平均数不可能是 20', '对。两边的数一定相差 10'],
+        facts: ['平均数 = 总数 ÷ 个数，总数 = 平均数 × 个数']
       }
     ];
     const it = pick(items);
@@ -6826,6 +7038,48 @@ const problemTemplates = [
         ok: '不对。两端都不栽，棵数比间隔数少 1',
         bad: ['对。两端不栽的时候棵数和间隔数一样', '不对。两端都不栽，棵数比间隔数多 1', '对。不管怎么栽，棵数和间隔数都一样'],
         facts: ['两端都栽：棵数 = 间隔数 + 1']
+      },
+      {
+        claim: '「一根木头锯成 5 段，要锯 5 次。」',
+        ok: '不对。锯成 5 段只要锯 4 次，段数比次数多 1',
+        bad: ['对。一段就要锯一次', '不对。锯成 5 段要锯 6 次', '对。段数和次数总是一样多'],
+        facts: ['锯的次数 = 段数 − 1']
+      },
+      {
+        claim: '「在圆形花坛的四周摆一圈花盆，花盆的盆数和间隔数一样多。」',
+        ok: '对。首尾相接，最后一个间隔正好接回第一盆',
+        bad: ['不对。圆形花坛的盆数比间隔数多 1', '不对。圆形花坛的盆数比间隔数少 1', '对。不过只有摆两圈时才对'],
+        facts: ['封闭图形：个数 = 间隔数']
+      },
+      {
+        claim: '「两端都栽树的时候，树的棵数比间隔数多 1。」',
+        ok: '对。两头各多出一棵，所以棵数 = 间隔数 + 1',
+        bad: ['不对。两端都栽时棵数和间隔数一样多', '不对。两端都栽时棵数比间隔数少 1', '对。而且棵数是间隔数的 2 倍'],
+        facts: ['两端都栽：棵数 = 间隔数 + 1']
+      },
+      {
+        claim: '「一根 20 分米的彩带平均分成 5 段，要剪 5 刀。」',
+        ok: '不对。分成 5 段只要剪 4 刀',
+        bad: ['对。分几段就剪几刀', '不对。分成 5 段要剪 6 刀', '对。而且每段长 5 分米'],
+        facts: ['剪的刀数 = 段数 − 1']
+      },
+      {
+        claim: '「在小路一边栽树，只栽一端的时候，树的棵数和间隔数一样多。」',
+        ok: '对。只栽一头，正好一个间隔对应一棵树',
+        bad: ['不对。只栽一端时棵数比间隔数多 1', '不对。只栽一端时棵数比间隔数少 1', '对。不过棵数要是间隔数的 2 倍'],
+        facts: ['只栽一端：棵数 = 间隔数']
+      },
+      {
+        claim: '「从 1 楼走到 4 楼，一共走了 4 层楼。」',
+        ok: '不对。从 1 楼走到 4 楼只走了 3 层',
+        bad: ['对。到 4 楼就是走 4 层', '不对。从 1 楼走到 4 楼要走 5 层', '对。楼层数就是走的层数'],
+        facts: ['走的层数 = 楼层数 − 1']
+      },
+      {
+        claim: '「把一根绳子剪 3 刀，就正好剪成 3 段。」',
+        ok: '不对。每剪一刀多一段，剪 3 刀是 4 段',
+        bad: ['对。剪几刀就是几段', '不对。剪 3 刀是 2 段', '对。而且每段一样长'],
+        facts: ['段数 = 刀数 + 1']
       }
     ];
     const it = pick(items);
@@ -7001,7 +7255,9 @@ const problemTemplates = [
 {
   unit: '几何', kp: '顶角与底角的倍数',
   gen() {
-    const k = pick([2, 3, 4, 7, 8]);      /* 180 ÷ (k+2) 必须整除 */
+    /* k 取遍所有让 180 ÷ (k+2) 除得尽的倍数关系（以前只写了 5 个，
+       学生抽两道就把这套「几倍」记完了） */
+    const k = pick([2, 3, 4, 7, 8, 10, 13, 16]);
     const base = 180 / (k + 2);
     const apex = base * k;
     const who = pick(SC_NAME);
@@ -7125,20 +7381,41 @@ const problemTemplates = [
     /* 早晨太阳在东方，影子朝西；傍晚太阳在西边，影子朝东 */
     const sun = morning ? '东' : '西';
     const shadow = morning ? '西' : '东';
+    const DIRS = ['北', '东', '南', '西'];
+    const iS = DIRS.indexOf(sun);
+    const rightDir = DIRS[(iS + 1) % 4];      /* 面向东时，右手边是南 */
+    const leftDir = DIRS[(iS + 3) % 4];
+    const when = morning ? '早晨' : '傍晚';
     const SC = pick(SC_NAME);
-    const mode = randInt(0, 2);
+    const mode = randInt(0, 4);               /* 以前只有两种问法，加宽到五种 */
     let text, correct, wrongs, fact;
-    if (mode !== 0) {
-      /* 问影子朝哪 */
-      text = `${SC} 在${morning ? '早晨' : '傍晚'}的操场上，太阳正好在他正前方。他的影子朝哪个方向？`;
-      correct = `${sun}方的反方向，也就是${shadow}方`;
-      wrongs = [`和太阳一样，朝${sun}方`, `朝${morning ? '南' : '北'}方`, '说不准，要看站的位置'];
-      fact = `${morning ? '早晨太阳在东边' : '傍晚太阳在西边'}，影子总在太阳的反方向`;
+    if (mode === 0) {
+      text = `${SC} 在${when}的操场上，太阳正好在他正前方。他的影子朝哪个方向？`;
+      correct = `${shadow}方`;
+      wrongs = [`朝${sun}方`, `朝${morning ? '南' : '北'}方`, '说不准，要看站的位置'];
+      fact = `${when}太阳在${sun}边，影子总在太阳的反方向`;
+    } else if (mode === 1) {
+      text = `${SC} 在${when}面对太阳站着。他的右手边是哪个方向？`;
+      correct = `${rightDir}方`;
+      wrongs = [leftDir + '方', sun + '方', shadow + '方'];
+      fact = `${when}太阳在${sun}方，面对${sun}方时右手是${rightDir}方`;
+    } else if (mode === 2) {
+      text = `${SC} 在${when}面对太阳站着。他的左手边是哪个方向？`;
+      correct = `${leftDir}方`;
+      wrongs = [rightDir + '方', sun + '方', shadow + '方'];
+      fact = `${when}太阳在${sun}方，面对${sun}方时左手是${leftDir}方`;
+    } else if (mode === 3) {
+      text = `${SC} 在操场上，发现自己的影子正好朝${shadow}方。这时是一天中的什么时候（太阳在那一边）？`;
+      correct = morning ? '早晨，太阳在东边' : '傍晚，太阳在西边';
+      wrongs = morning
+        ? ['傍晚，太阳在西边', '正午，太阳在头顶', '什么时候都可能']
+        : ['早晨，太阳在东边', '正午，太阳在头顶', '什么时候都可能'];
+      fact = '影子永远在太阳的反方向：影子朝西说明太阳在东';
     } else {
-      text = `${SC} 在${morning ? '早晨' : '傍晚'}面对太阳站着。他的右手边是哪个方向？`;
-      correct = morning ? '南方' : '北方';
-      wrongs = morning ? ['北方', '东方', '西方'] : ['南方', '东方', '西方'];
-      fact = `${morning ? '早晨太阳在东，面对东方时右手是南' : '傍晚太阳在西，面对西方时右手是北'}`;
+      text = `${SC} 在${when}的操场上，太阳正好在他的右手边。他面向哪个方向？`;
+      correct = `${leftDir}方`;
+      wrongs = [`${rightDir}方`, `${sun}方`, `${shadow}方`];
+      fact = `太阳在右手边，说明面向的方向是太阳的逆时针一格`;
     }
     return {
       tag: '四上 · 拓展学习',
@@ -7401,7 +7678,6 @@ function saveForms() { try { localStorage.setItem('math4a.forms', JSON.stringify
 let questions = [];       /* [{tpl, problem, state}] */
 let current = 0;
 let tplQueue = [];
-const seenFingerprints = new Set();
 
 let wrongBook = LS.get('wrongBook', []);
 /* 历史错题：题目粒度、永久保留。删错题 / 清空错题本都动不到它，
@@ -7438,19 +7714,88 @@ function poolTemplates() {
 
 function nextTemplate(pool) {
   tplQueue = tplQueue.filter(t => pool.indexOf(t) >= 0);
-  if (tplQueue.length === 0) tplQueue = shuffleAll(pool);
+  if (tplQueue.length === 0) {
+    tplQueue = shuffleAll(pool);
+    /* 队列刚用完重洗：别让刚做过的那一类紧接着又当第一个
+       （一轮末尾 + 下一轮开头撞成「同一题型连出两题」，看着就像在重复） */
+    const lastQ = questions[questions.length - 1];
+    const n = tplQueue.length;
+    if (lastQ && n > 1 && tplQueue[n - 1] === lastQ.tpl) {
+      const j = Math.floor(Math.random() * (n - 1));
+      tplQueue[n - 1] = tplQueue[j];
+      tplQueue[j] = lastQ.tpl;
+    }
+  }
   return tplQueue.pop();
 }
 
-function makeProblem(tpl) {
-  let p = null, key = '';
-  for (let i = 0; i < 16; i++) {
-    p = tpl.gen();
-    key = tpl.unit + '|' + tpl.kp + '|' + p.text;
-    if (!seenFingerprints.has(key)) break;
+/* =========================================================
+   出题去重
+   老师反馈「老出一样的配数，学生能背答案」。量过之后发现两处真问题：
+   1) 以前只拿题干当指纹 —— 选择题/判断题的题干是固定的，变体全在选项里，
+      等于这类题根本没被去重管住；
+   2) 去重表只在内存里，刷新一下页面就清空，第二天上课又能撞上同一道。
+   现在：指纹取整道题（题干 + 统计表 + 所有选项 + 答案）并哈希后存进
+   localStorage，留最近 400 道；每个题型另有最近 8 道的窗口。
+   ========================================================= */
+const RECENT_KEY = 'math4a.recentProblems';
+const RECENT_MAX = 400;               /* 跨刷新记住最近多少道 */
+const PER_TPL_WINDOW = 8;             /* 同一个题型最近 8 道不重复 */
+const TRIES_PER_Q = 40;               /* 一次出题最多换几个候选 */
+
+function hashStr(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36) + '.' + s.length.toString(36);
+}
+
+/* 整道题的指纹：题干、附加表格、所有步骤的选项/问句、最终答案都算进去。
+   ⚠️ 选项每出一次题都会被打乱顺序，所以这里必须先排序 —— 否则同一道题
+   只是换了个选项排列就会被当成新题，去重等于没做（这条踩过一次）。 */
+function problemFingerprint(tpl, p) {
+  let s = tpl.unit + '|' + tpl.kp + '|' + p.text;
+  if (p.after) s += '|' + p.after;
+  (p.steps || []).forEach(st => {
+    s += '|' + (st.options ? st.options.slice().sort().join('~') : st.q);
+  });
+  return hashStr(s + '|' + p.answer);
+}
+
+let recentProblems = LS.get(RECENT_KEY, []);
+if (!Array.isArray(recentProblems)) recentProblems = [];
+recentProblems = recentProblems.filter(x => typeof x === 'string').slice(-RECENT_MAX);
+let recentSet = new Set(recentProblems);
+const perTplRecent = {};              /* kp → 最近若干道的指纹 */
+
+function rememberProblem(kp, key) {
+  const win = perTplRecent[kp] || (perTplRecent[kp] = []);
+  win.push(key);
+  while (win.length > PER_TPL_WINDOW) win.shift();
+  recentProblems.push(key);
+  if (recentProblems.length > RECENT_MAX) {
+    recentProblems = recentProblems.slice(-RECENT_MAX);
+    recentSet = new Set(recentProblems);     /* 只在裁剪时重建，平时只 add */
+  } else {
+    recentSet.add(key);
   }
-  if (seenFingerprints.size > 900) seenFingerprints.clear();
-  seenFingerprints.add(key);
+  LS.set(RECENT_KEY, recentProblems);
+}
+
+function makeProblem(tpl) {
+  const win = perTplRecent[tpl.kp] || [];
+  let p = null, key = '', firstP = null, firstKey = '';
+  for (let i = 0; i < TRIES_PER_Q; i++) {
+    const cand = tpl.gen();
+    const k = problemFingerprint(tpl, cand);
+    if (!firstP) { firstP = cand; firstKey = k; }
+    if (recentSet.has(k) || win.indexOf(k) >= 0) continue;
+    p = cand; key = k;
+    break;
+  }
+  /* 变体确实用完（比如只有 8 种配数的题型）：收下这一次生成的，
+     但用最早那一个候选，而不是最后一个 —— 至少不是刚出过的那道 */
+  if (!p) { p = firstP; key = firstKey; }
+  rememberProblem(tpl.kp, key);
   return p;
 }
 
@@ -9839,7 +10184,6 @@ function startPaper(spec) {
   goalCelebrated = false;
   score = 0; combo = 0; perfectCount = 0;
   ['scoreValue', 'comboValue', 'perfectValue'].forEach(id => { const el = $(id); if (el) el.textContent = '0'; });
-  seenFingerprints.clear();
   closePaperPicker();
   $('paperResultMask').classList.remove('on');
   goPracticeTab();
